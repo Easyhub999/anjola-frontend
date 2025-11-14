@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './global.css'; // THIS FIRST!
+import './minimal-styles.css'; // THIS FIRST!
 import './index.css';
 import App from './App';
 
