@@ -1,6 +1,5 @@
 import React from 'react';
 import { ShoppingCart, User, Menu, X } from 'lucide-react';
-import './navigation.css';
 
 const Navigation = ({ 
   currentPage, 
