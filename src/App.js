@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './styles.css'; // ADD THIS LINE - Import all component styles
 import Navigation from './components/Navigation';
 import CartSidebar from './components/CartSidebar';
 import Footer from './components/Footer';
