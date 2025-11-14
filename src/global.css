@@ -1,0 +1,324 @@
+/* ============================================
+   CRITICAL: FORCE GRADIENT BACKGROUND
+   ============================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  background: linear-gradient(180deg, #fae8ff 0%, #e9d5ff 25%, #ddd6fe 50%, #c7d2fe 75%, #bfdbfe 100%) !important;
+  min-height: 100vh !important;
+}
+
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(180deg, #fae8ff 0%, #e9d5ff 25%, #ddd6fe 50%, #c7d2fe 75%, #bfdbfe 100%) !important;
+  min-height: 100vh !important;
+}
+
+#root {
+  min-height: 100vh !important;
+  background: linear-gradient(180deg, #fae8ff 0%, #e9d5ff 25%, #ddd6fe 50%, #c7d2fe 75%, #bfdbfe 100%) !important;
+}
+
+.App {
+  min-height: 100vh !important;
+  background: linear-gradient(180deg, #fae8ff 0%, #e9d5ff 25%, #ddd6fe 50%, #c7d2fe 75%, #bfdbfe 100%) !important;
+}
+
+/* Override any white backgrounds */
+.bg-white {
+  background: transparent !important;
+}
+
+.min-h-screen {
+  background: transparent !important;
+}
+
+/* ============================================
+   NAVBAR STYLES
+   ============================================ */
+
+nav, .navbar {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.navbar-brand, .brand-name {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  text-decoration: none;
+  font-family: 'Georgia', serif;
+}
+
+nav a {
+  text-decoration: none;
+  color: #4b5563;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  padding: 0.5rem 1rem;
+}
+
+nav a:hover {
+  color: #d946ef;
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+
+.hero-section, .hero {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: transparent !important;
+}
+
+h1, .hero-title, .title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ec4899 0%, #d946ef 50%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+  font-family: 'Georgia', serif;
+  line-height: 1.2;
+}
+
+.hero-subtitle, .subtitle {
+  font-size: 1.3rem;
+  color: #6b7280;
+  margin-bottom: 2rem;
+  max-width: 600px;
+}
+
+button, .button, .btn, .hero-button {
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #ec4899 0%, #d946ef 50%, #a855f7 100%);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px rgba(217, 70, 239, 0.3);
+}
+
+button:hover, .button:hover, .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(217, 70, 239, 0.4);
+}
+
+/* ============================================
+   PRODUCTS SECTION
+   ============================================ */
+
+.products-section, .products, .shop {
+  padding: 3rem 2rem;
+  background: transparent !important;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 2rem;
+}
+
+.products-grid, .product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.product-card, .product {
+  background: white !important;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.product-card:hover, .product:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.product-image, .product img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover img {
+  transform: scale(1.1);
+}
+
+.product-info, .product-details {
+  padding: 1.5rem;
+  background: white;
+}
+
+.product-name, .product h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.product-description, .product p {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.product-price, .price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ec4899 0%, #d946ef 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+}
+
+/* ============================================
+   CART STYLES
+   ============================================ */
+
+.cart-container, .cart {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.cart-item {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 15px;
+  margin-bottom: 1rem;
+}
+
+.cart-item img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* ============================================
+   FOOTER STYLES
+   ============================================ */
+
+footer, .footer {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  color: white;
+  padding: 3rem 2rem 1rem;
+  margin-top: 4rem;
+}
+
+footer a, .footer a {
+  color: #d1d5db;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+footer a:hover, .footer a:hover {
+  color: #d946ef;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #d946ef;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+  h1, .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  h1, .hero-title {
+    font-size: 2rem;
+  }
+
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+}
