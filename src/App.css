@@ -1,6 +1,6 @@
+/* Remove UI-breaking background override */
 .App {
   min-height: 100vh;
-  background: linear-gradient(180deg, #fae8ff 0%, #e9d5ff 25%, #ddd6fe 50%, #c7d2fe 75%, #bfdbfe 100%);
 }
 
 /* Global container styles */
