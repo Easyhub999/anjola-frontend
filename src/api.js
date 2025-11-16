@@ -2,7 +2,7 @@
 // API BASE URL
 // ==========================================
 
-const API_URL = process.env.REACT_APP_API_URL || "https://anjola-backend-2.onrender.com/api";
+const API_URL = process.env.REACT_APP_API_URL;
 
 
 // ==========================================
