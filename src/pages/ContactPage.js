@@ -9,24 +9,29 @@ const ContactPage = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/contact`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      // FIXED 🔥 — removed env, added real backend URL
+      const response = await fetch(
+        "https://anjola-backend-1.onrender.com/api/contact",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await response.json();
 
       if (response.ok) {
         setSubmitted(true);
         setFormData({ name: "", email: "", message: "" });
+
         setTimeout(() => setSubmitted(false), 3000);
       } else {
         alert(data.message || "Failed to send message");
       }
     } catch (error) {
-      alert("Error sending message");
-      console.log(error);
+      alert("Error sending message. Please try again later.");
+      console.log("Contact error:", error);
     }
   };
 
@@ -39,8 +44,8 @@ const ContactPage = () => {
           {/* LEFT SIDE — INFO */}
           <div>
             <h2 className="text-2xl font-semibold mb-6 text-gray-800">Contact Information</h2>
-
             <div className="space-y-4">
+
               {/* EMAIL */}
               <div className="flex items-start gap-4">
                 <Mail className="w-6 h-6 text-pink-400 mt-1" />
@@ -85,7 +90,7 @@ const ContactPage = () => {
                   <Facebook className="w-6 h-6 text-pink-400" />
                 </a>
 
-                {/* TikTok (SVG icon, no installation needed) */}
+                {/* TikTok */}
                 <a
                   href="https://www.tiktok.com/@anjola_aesthetics_ng02"
                   target="_blank"
@@ -116,15 +121,14 @@ const ContactPage = () => {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
+
                 <div>
                   <label className="block text-sm font-medium mb-2">Name</label>
                   <input
                     type="text"
                     required
                     value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
                   />
                 </div>
@@ -135,9 +139,7 @@ const ContactPage = () => {
                     type="email"
                     required
                     value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
                   />
                 </div>
@@ -148,9 +150,7 @@ const ContactPage = () => {
                     required
                     rows="4"
                     value={formData.message}
-                    onChange={(e) =>
-                      setFormData({ ...formData, message: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
                   />
                 </div>
@@ -161,6 +161,7 @@ const ContactPage = () => {
                 >
                   Send Message
                 </button>
+
               </form>
             )}
           </div>

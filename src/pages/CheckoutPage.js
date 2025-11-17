@@ -17,12 +17,15 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
     state: ''
   });
 
-  const totalAmount = getTotalPrice() + 2500; // Including shipping
+  const totalAmount = getTotalPrice() + 2500; // SHIPPING INCLUDED
 
-  // Handle order creation (without payment first)
+
+  // =============================
+  // 🔥 CREATE ORDER BEFORE PAYMENT
+  // =============================
   const handleCreateOrder = async () => {
     setCheckoutLoading(true);
-    
+
     try {
       const orderData = {
         customerInfo: formData,
@@ -46,12 +49,15 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
     }
   };
 
-  // Paystack configuration
+
+  // =============================
+  // 🔥 PAYSTACK CONFIG
+  // =============================
   const paystackConfig = {
     reference: `ANJ${Date.now()}`,
     email: formData.email,
-    amount: totalAmount * 100, // Paystack uses kobo
-    publicKey: process.env.REACT_APP_PAYSTACK_PUBLIC_KEY || 'pk_test_your_key',
+    amount: totalAmount * 100, // Paystack uses KOBO
+    publicKey: "pk_test_xxxxxxxxxxxxxxxxxxxxxx",   // <<<< PUT YOUR REAL KEY HERE
     metadata: {
       custom_fields: [
         {
@@ -68,17 +74,20 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
     }
   };
 
-  // Handle successful payment
+
+  // =============================
+  // 🔥 HANDLE PAYMENT SUCCESS
+  // =============================
   const handlePaymentSuccess = async (reference) => {
     setCheckoutLoading(true);
+
     try {
-      // Verify payment with backend
       const verification = await paymentsAPI.verifyPayment(reference.reference);
-      
+
       if (verification.success) {
         setOrderPlaced(true);
         clearCart();
-        
+
         setTimeout(() => {
           setOrderPlaced(false);
           setCurrentPage('home');
@@ -91,12 +100,18 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
     }
   };
 
-  // Handle payment close (user cancelled)
+
+  // =============================
+  // 🔥 HANDLE PAYMENT CANCEL
+  // =============================
   const handlePaymentClose = () => {
     alert('Payment cancelled. Your order is still pending payment.');
   };
 
-  // Paystack component props
+
+  // =============================
+  // 🔥 PAYSTACK BUTTON PROPS
+  // =============================
   const componentProps = {
     ...paystackConfig,
     text: (
@@ -109,26 +124,29 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
     onClose: handlePaymentClose,
   };
 
-  // Handle form submission and payment initialization
+
+  // =============================
+  // 🔥 FORM SUBMIT HANDLER
+  // =============================
   const handleCheckout = async (e) => {
     e.preventDefault();
-    
-    // Validate form
+
     if (!formData.fullName || !formData.email || !formData.phone || !formData.address) {
       alert('Please fill in all required fields');
       return;
     }
 
-    // Create order first
     try {
       await handleCreateOrder();
-      // Paystack button will handle the payment popup
     } catch (error) {
       console.error('Checkout error:', error);
     }
   };
 
-  // Order success screen
+
+  // =============================
+  // 🔥 PAYMENT SUCCESS SCREEN
+  // =============================
   if (orderPlaced) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 pt-24 flex items-center justify-center px-4">
@@ -150,16 +168,23 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
     );
   }
 
+
+  // =============================
+  // 🔥 CHECKOUT PAGE UI
+  // =============================
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 pt-24 pb-12">
       <div className="max-w-6xl mx-auto px-4">
         <h1 className="text-4xl font-serif text-center mb-12 text-gray-800">Secure Checkout</h1>
-        
+
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Checkout Form */}
+
+          {/* LEFT SIDE - FORM */}
           <div className="bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-semibold mb-6">Shipping Information</h2>
+
             <form onSubmit={handleCheckout} className="space-y-4">
+              {/* FORM FIELDS */}
               <div>
                 <label className="block text-sm font-medium mb-2">Full Name *</label>
                 <input
@@ -167,7 +192,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
                   required
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -179,7 +204,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg"
                   placeholder="your.email@example.com"
                 />
               </div>
@@ -191,7 +216,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
                   required
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg"
                   placeholder="08012345678"
                 />
               </div>
@@ -203,11 +228,12 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
                   rows="3"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg"
                   placeholder="Enter your complete delivery address"
                 />
               </div>
 
+              {/* CITY / STATE */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">City *</label>
@@ -216,7 +242,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
                     required
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg"
                     placeholder="Lagos"
                   />
                 </div>
@@ -227,59 +253,38 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
                     required
                     value={formData.state}
                     onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg"
                     placeholder="Lagos"
                   />
                 </div>
               </div>
 
+              {/* PAYMENT METHOD */}
               <div className="border-t pt-6 mt-6">
                 <h3 className="text-lg font-semibold mb-4">Payment Method</h3>
-                
-                <div className="space-y-3">
-                  <label className="flex items-center p-4 border-2 border-pink-400 bg-pink-50 rounded-lg cursor-pointer">
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="paystack"
-                      checked={paymentMethod === 'paystack'}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-5 h-5 text-pink-600"
-                    />
-                    <div className="ml-3 flex items-center gap-2">
-                      <CreditCard className="w-5 h-5 text-pink-600" />
-                      <span className="font-medium">Pay with Paystack</span>
-                      <span className="text-xs text-gray-600">(Card, Bank Transfer, USSD)</span>
-                    </div>
-                  </label>
-                </div>
+
+                <label className="flex items-center p-4 border-2 border-pink-400 bg-pink-50 rounded-lg">
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="paystack"
+                    checked={paymentMethod === 'paystack'}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="w-5 h-5 text-pink-600"
+                  />
+                  <div className="ml-3 flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-pink-600" />
+                    <span className="font-medium">Pay with Paystack</span>
+                  </div>
+                </label>
               </div>
 
-              {paymentMethod === 'paystack' ? (
-                <PaystackButton
-                  {...componentProps}
-                  className="w-full bg-gradient-to-r from-pink-400 to-purple-400 text-white py-4 rounded-lg hover:from-pink-500 hover:to-purple-500 transition text-lg font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-                  disabled={checkoutLoading}
-                />
-              ) : (
-                <button 
-                  type="submit" 
-                  disabled={checkoutLoading}
-                  className="w-full bg-gradient-to-r from-pink-400 to-purple-400 text-white py-4 rounded-lg hover:from-pink-500 hover:to-purple-500 transition text-lg font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {checkoutLoading ? (
-                    <>
-                      <Loader className="w-5 h-5 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-5 h-5" />
-                      Place Order
-                    </>
-                  )}
-                </button>
-              )}
+              {/* PAYSTACK BUTTON */}
+              <PaystackButton
+                {...componentProps}
+                className="w-full bg-gradient-to-r from-pink-400 to-purple-400 text-white py-4 rounded-lg mt-4"
+                disabled={checkoutLoading}
+              />
 
               <div className="flex items-center justify-center gap-2 text-sm text-gray-600 mt-4">
                 <Lock className="w-4 h-4" />
@@ -288,11 +293,11 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
             </form>
           </div>
 
-          {/* Order Summary */}
+          {/* RIGHT SIDE - SUMMARY */}
           <div>
             <div className="bg-white rounded-lg shadow-lg p-8 sticky top-24">
               <h2 className="text-2xl font-semibold mb-6">Order Summary</h2>
-              
+
               <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
                 {cart.map(item => (
                   <div key={item._id} className="flex gap-4 pb-4 border-b">
@@ -325,11 +330,12 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
 
               <div className="mt-6 bg-pink-50 border border-pink-200 rounded-lg p-4">
                 <p className="text-sm text-pink-800">
-                  <strong>💳 Secure Payment:</strong> Your payment information is encrypted and secure with Paystack.
+                  <strong>💳 Secure Payment:</strong> Your payment information is encrypted and secured with Paystack.
                 </p>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
