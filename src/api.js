@@ -19,6 +19,25 @@ const handleResponse = async (response) => {
   return data;
 };
 
+// Small helper: normalize user object so frontend is always consistent
+const normalizeUser = (data) => {
+  // If backend returns { token, user: {...} }
+  if (data?.user && data?.token) {
+    return {
+      ...data.user,
+      token: data.token,
+    };
+  }
+
+  // If backend already returns { token, role, ... }
+  if (data?.token) {
+    return data;
+  }
+
+  // Fallback – just return as-is
+  return data;
+};
+
 
 // ==========================================
 // AUTH API
@@ -37,11 +56,13 @@ export const authAPI = {
 
       const data = await handleResponse(response);
 
-      if (data.token) {
-        localStorage.setItem("user", JSON.stringify(data));
+      const normalizedUser = normalizeUser(data);
+
+      if (normalizedUser?.token) {
+        localStorage.setItem("user", JSON.stringify(normalizedUser));
       }
 
-      return data;
+      return normalizedUser;
     } catch (error) {
       console.error("Register error:", error);
       throw error;
@@ -59,11 +80,13 @@ export const authAPI = {
 
       const data = await handleResponse(response);
 
-      if (data.token) {
-        localStorage.setItem("user", JSON.stringify(data));
+      const normalizedUser = normalizeUser(data);
+
+      if (normalizedUser?.token) {
+        localStorage.setItem("user", JSON.stringify(normalizedUser));
       }
 
-      return data;
+      return normalizedUser;
     } catch (error) {
       console.error("Login error:", error);
       throw error;

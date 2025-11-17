@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
-import { Loader } from 'lucide-react';
-import { authAPI } from '../api';
+import React, { useState } from "react";
+import { Loader } from "lucide-react";
+import { authAPI } from "../api";
 
 const AuthPage = ({ setUser, setCurrentPage }) => {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({ email: '', password: '', name: '' });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState(null);
 
@@ -12,13 +16,16 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
     e.preventDefault();
     setAuthLoading(true);
     setAuthError(null);
-    
+
     try {
       let userData;
 
+      // LOGIN
       if (isLogin) {
         userData = await authAPI.login(formData.email, formData.password);
-      } else {
+      }
+      // REGISTER
+      else {
         userData = await authAPI.register(
           formData.name,
           formData.email,
@@ -26,10 +33,17 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
         );
       }
 
+      // Save user in global state
       setUser(userData);
-      setCurrentPage('home');
+
+      // Redirect based on role
+      if (userData?.role === "admin") {
+        setCurrentPage("admin");
+      } else {
+        setCurrentPage("home");
+      }
     } catch (error) {
-      setAuthError(error.message || 'Authentication failed');
+      setAuthError(error.message || "Authentication failed");
     } finally {
       setAuthLoading(false);
     }
@@ -37,10 +51,10 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center py-20 px-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full transform animate-fadeIn">
-        
+      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+
         <h1 className="text-3xl font-serif text-center mb-6 text-gray-800">
-          {isLogin ? 'Welcome Back' : 'Join the Anjola Family'}
+          {isLogin ? "Welcome Back" : "Join the Anjola Family"}
         </h1>
 
         {authError && (
@@ -50,6 +64,7 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
         )}
 
         <form onSubmit={handleAuth} className="space-y-4">
+          {/* NAME FIELD - only for register */}
           {!isLogin && (
             <div>
               <label className="block text-sm font-medium mb-2">Full Name</label>
@@ -60,11 +75,13 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg 
+                focus:outline-none focus:ring-2 focus:ring-pink-400"
               />
             </div>
           )}
 
+          {/* EMAIL */}
           <div>
             <label className="block text-sm font-medium mb-2">Email</label>
             <input
@@ -74,10 +91,12 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg 
+              focus:outline-none focus:ring-2 focus:ring-pink-400"
             />
           </div>
 
+          {/* PASSWORD */}
           <div>
             <label className="block text-sm font-medium mb-2">Password</label>
             <input
@@ -87,14 +106,18 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
               onChange={(e) =>
                 setFormData({ ...formData, password: e.target.value })
               }
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg 
+              focus:outline-none focus:ring-2 focus:ring-pink-400"
             />
           </div>
 
+          {/* SUBMIT BUTTON */}
           <button
             type="submit"
             disabled={authLoading}
-            className="w-full bg-gradient-to-r from-pink-400 to-purple-400 text-white py-3 rounded-lg hover:from-pink-500 hover:to-purple-500 transition disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-gradient-to-r from-pink-400 to-purple-400 
+            text-white py-3 rounded-lg hover:from-pink-500 hover:to-purple-500 
+            transition disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {authLoading ? (
               <>
@@ -102,13 +125,14 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
                 Processing...
               </>
             ) : isLogin ? (
-              'Sign In'
+              "Sign In"
             ) : (
-              'Create Account'
+              "Create Account"
             )}
           </button>
         </form>
 
+        {/* SWITCH LOGIN <-> REGISTER */}
         <div className="mt-6 text-center">
           <button
             onClick={() => setIsLogin(!isLogin)}
@@ -116,7 +140,7 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
           >
             {isLogin
               ? "Don't have an account? Create one"
-              : 'Already a member? Sign in'}
+              : "Already a member? Sign in"}
           </button>
         </div>
       </div>
