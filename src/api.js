@@ -56,12 +56,29 @@ export const authAPI = {
 
       const data = await handleResponse(response);
 
+      // Normalize first (in case backend wraps data)
       const normalizedUser = normalizeUser(data);
 
+      // If we have a token, also fetch /auth/me to be 100% sure about role
       if (normalizedUser?.token) {
-        localStorage.setItem("user", JSON.stringify(normalizedUser));
+        const meResponse = await fetch(`${API_URL}/auth/me`, {
+          headers: {
+            "Authorization": `Bearer ${normalizedUser.token}`,
+          },
+        });
+
+        const me = await handleResponse(meResponse);
+
+        const finalUser = {
+          ...normalizedUser,
+          role: me.role ?? normalizedUser.role,
+        };
+
+        localStorage.setItem("user", JSON.stringify(finalUser));
+        return finalUser;
       }
 
+      // No token? just return normalized object
       return normalizedUser;
     } catch (error) {
       console.error("Register error:", error);
@@ -80,13 +97,30 @@ export const authAPI = {
 
       const data = await handleResponse(response);
 
+      // Step 1: normalize backend shape
       const normalizedUser = normalizeUser(data);
 
-      if (normalizedUser?.token) {
-        localStorage.setItem("user", JSON.stringify(normalizedUser));
+      if (!normalizedUser?.token) {
+        throw new Error("No token returned from login");
       }
 
-      return normalizedUser;
+      // Step 2: call /auth/me to get current user with accurate role from DB
+      const meResponse = await fetch(`${API_URL}/auth/me`, {
+        headers: {
+          "Authorization": `Bearer ${normalizedUser.token}`,
+        },
+      });
+
+      const me = await handleResponse(meResponse);
+
+      // Step 3: final user object we store in localStorage
+      const finalUser = {
+        ...normalizedUser,
+        role: me.role ?? normalizedUser.role,
+      };
+
+      localStorage.setItem("user", JSON.stringify(finalUser));
+      return finalUser;
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -98,8 +132,6 @@ export const authAPI = {
     localStorage.removeItem("user");
   }
 };
-
-
 
 // ==========================================
 // PRODUCTS API
