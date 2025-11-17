@@ -46,7 +46,7 @@ const AdminPage = ({ user, products, setProducts }) => {
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await fetch('http://localhost:5000/api/products/upload-image', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/products/upload-image`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${user.token}`
