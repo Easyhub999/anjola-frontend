@@ -57,7 +57,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
     reference: `ANJ${Date.now()}`,
     email: formData.email,
     amount: totalAmount * 100, // Paystack uses KOBO
-    publicKey: "pk_test_xxxxxxxxxxxxxxxxxxxxxx",   // <<<< PUT YOUR REAL KEY HERE
+    publicKey: "pk_test_2f5d9bd0006358b6aa1010e2ec42c30f49b33a29",   // <<<< PUT YOUR REAL KEY HERE
     metadata: {
       custom_fields: [
         {
