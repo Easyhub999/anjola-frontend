@@ -28,13 +28,13 @@ const Navigation = ({
             className="w-10 h-10 rounded-xl object-cover shadow-sm"
           />
 
-          {/* BRAND NAME — FIXED FOR MOBILE */}
+          {/* BRAND NAME (2 CLEAN LINES + NG ADDED BACK) */}
           <div className="leading-tight">
             <div className="text-[20px] font-serif font-semibold text-gray-900">
-              Anjola
+              Anjola Aesthetics
             </div>
             <div className="text-[14px] font-serif text-gray-700 -mt-1">
-              Aesthetics
+              Ng
             </div>
           </div>
         </div>
@@ -106,7 +106,10 @@ const Navigation = ({
           </button>
 
           {/* MOBILE MENU BUTTON */}
-          <button className="md:hidden" onClick={() => setShowMobileMenu(!showMobileMenu)}>
+          <button
+            className="md:hidden"
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+          >
             {showMobileMenu ? (
               <X className="w-8 h-8 text-gray-700" />
             ) : (
