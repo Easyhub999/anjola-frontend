@@ -22,14 +22,13 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
             [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1),rgba(0,0,0,0.45),rgba(0,0,0,0))]"
         />
 
-        {/* Softer white / blush overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/85 to-white/95" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/70 to-white/88" />
 
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.25)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.35)_100%)]" />
 
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute w-[500px] h-[500px] bg-pink-200/60 rounded-full blur-[110px] top-0 left-0" />
-          <div className="absolute w-[580px] h-[580px] bg-pink-100/60 rounded-full blur-[120px] bottom-0 right-0" />
+          <div className="absolute w-[500px] h-[500px] bg-pink-300/50 rounded-full blur-[110px] top-0 left-0" />
+          <div className="absolute w-[580px] h-[580px] bg-purple-300/50 rounded-full blur-[120px] bottom-0 right-0" />
         </div>
 
         <div
@@ -41,7 +40,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
         />
 
         <div className="relative z-10 text-center px-4">
-          <h1 className="text-5xl md:text-7xl font-serif text-gray-900 mb-4 drop-shadow-[0_6px_12px_rgba(0,0,0,0.35)]">
+          <h1 className="text-5xl md:text-7xl font-serif text-gray-900 mb-4 drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)]">
             Elevate Your Beauty
           </h1>
 
@@ -51,10 +50,9 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
 
           <button
             onClick={() => setCurrentPage("shop")}
-            className="bg-black text-white 
-              px-12 py-4 rounded-full text-xl shadow-[0_10px_25px_rgba(0,0,0,0.35)]
-              hover:bg-pink-600 hover:shadow-[0_14px_32px_rgba(0,0,0,0.4)]
-              hover:scale-110 active:scale-95 transition-transform duration-200"
+            className="bg-gradient-to-r from-pink-400 to-purple-500 text-white 
+              px-12 py-4 rounded-full text-xl shadow-[0_10px_25px_rgba(0,0,0,0.25)]
+              hover:scale-110 active:scale-95 transition-transform"
           >
             Shop Collection
           </button>
@@ -77,7 +75,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
               return (
                 <div
                   key={product._id}
-                  className="group bg-white border border-pink-50 rounded-2xl shadow-md hover:shadow-2xl overflow-hidden 
+                  className="group bg-white rounded-2xl shadow-md hover:shadow-2xl overflow-hidden 
                     transform hover:-translate-y-2 transition-all duration-300 cursor-pointer"
                 >
                   <div className="relative">
@@ -87,8 +85,8 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
                       className="w-full h-72 object-cover group-hover:scale-105 transition-all duration-500"
                     />
 
-                    <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md 
-                      shadow-md px-4 py-1 rounded-full text-pink-600 font-bold text-lg border border-pink-100">
+                    <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md 
+                      shadow-md px-4 py-1 rounded-full text-pink-600 font-bold text-lg">
                       ₦{product.price.toLocaleString()}
                     </div>
                   </div>
@@ -105,8 +103,8 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
                     {qty === 0 ? (
                       <button
                         onClick={() => addToCart(product)}
-                        className="w-full bg-black text-white 
-                          py-3 rounded-xl font-medium hover:bg-pink-700 hover:shadow-md transition-transform hover:scale-[1.02]"
+                        className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white 
+                          py-3 rounded-xl font-medium hover:scale-[1.02] transition-transform"
                       >
                         Add to Cart
                       </button>
@@ -117,7 +115,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
                         <div className="flex items-center gap-3">
                           <button
                             onClick={() => updateQuantity(product._id, -1)}
-                            className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-gray-200"
+                            className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm"
                           >
                             -
                           </button>
@@ -142,7 +140,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
       </div>
 
       {/* ================= WHY CHOOSE US ================= */}
-      <div className="py-20 bg-gradient-to-b from-white via-pink-50/50 to-white">
+      <div className="py-20 bg-gradient-to-b from-white via-pink-50/40 to-white">
         <div className="max-w-7xl mx-auto px-4">
 
           <h2 className="text-5xl font-serif text-center mb-16 text-gray-900">
@@ -151,7 +149,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
 
-            <div className="bg-white shadow-lg rounded-2xl p-8 text-center border border-pink-50 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
+            <div className="bg-white shadow-lg rounded-2xl p-8 text-center hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
               <img src="/quality.png" alt="Quality" className="w-16 mx-auto mb-6" />
               <h3 className="text-2xl font-semibold text-gray-900 mb-3">Premium Quality</h3>
               <p className="text-gray-600">
@@ -159,7 +157,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
               </p>
             </div>
 
-            <div className="bg-white shadow-lg rounded-2xl p-8 text-center border border-pink-50 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
+            <div className="bg-white shadow-lg rounded-2xl p-8 text-center hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
               <img src="/fast.png" alt="Fast Delivery" className="w-16 mx-auto mb-6" />
               <h3 className="text-2xl font-semibold text-gray-900 mb-3">Fast Delivery</h3>
               <p className="text-gray-600">
@@ -167,7 +165,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
               </p>
             </div>
 
-            <div className="bg-white shadow-lg rounded-2xl p-8 text-center border border-pink-50 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
+            <div className="bg-white shadow-lg rounded-2xl p-8 text-center hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
               <img src="/trust.png" alt="Trusted" className="w-16 mx-auto mb-6" />
               <h3 className="text-2xl font-semibold text-gray-900 mb-3">Trusted by Women</h3>
               <p className="text-gray-600">
@@ -180,10 +178,10 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
       </div>
 
       {/* ================= TESTIMONIALS ================= */}
-      <div className="relative py-24 bg-gradient-to-br from-pink-50/50 via-white to-pink-50/70">
+      <div className="relative py-24 bg-gradient-to-br from-pink-50/40 via-white to-purple-50/40">
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute w-64 h-64 bg-pink-100/50 rounded-full blur-3xl top-10 left-10" />
-          <div className="absolute w-72 h-72 bg-pink-200/50 rounded-full blur-3xl bottom-10 right-20" />
+          <div className="absolute w-64 h-64 bg-pink-200/30 rounded-full blur-3xl top-10 left-10" />
+          <div className="absolute w-72 h-72 bg-purple-200/30 rounded-full blur-3xl bottom-10 right-20" />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4">
@@ -209,8 +207,8 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
             ].map((t, idx) => (
               <div
                 key={idx}
-                className="bg-white/85 backdrop-blur-md shadow-lg rounded-2xl p-8 
-                hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-pink-50"
+                className="bg-white/80 backdrop-blur-md shadow-lg rounded-2xl p-8 
+                hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="flex mb-6">
                   {[...Array(t.rating)].map((_, i) => (
@@ -236,7 +234,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
 
       {/* ================= NEWSLETTER ================= */}
       <div className="max-w-7xl mx-auto px-4 py-20">
-        <div className="bg-gradient-to-r from-black via-gray-900 to-pink-700 
+        <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 
           rounded-3xl p-12 text-center shadow-xl relative overflow-hidden"
         >
           <div
@@ -263,12 +261,12 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
                 type="email"
                 placeholder="Enter your email address…"
                 className="flex-1 px-5 py-4 rounded-xl text-gray-800 shadow-md 
-                focus:outline-none focus:ring-4 focus:ring-pink-200"
+                focus:outline-none focus:ring-4 focus:ring-white/40"
               />
 
               <button
-                className="bg-white text-black px-8 py-4 rounded-xl font-semibold shadow-lg 
-                hover:bg-pink-100 hover:text-gray-900 transition transform hover:scale-[1.03]"
+                className="bg-white text-pink-600 px-8 py-4 rounded-xl font-semibold shadow-lg 
+                hover:bg-gray-100 transition transform hover:scale-[1.03]"
               >
                 Subscribe
               </button>
