@@ -21,20 +21,20 @@ const Navigation = ({
           className="flex items-center gap-3 cursor-pointer"
           onClick={() => setCurrentPage("home")}
         >
-          {/* LOGO IMAGE */}
+          {/* BRAND LOGO */}
           <img
             src="/anjola-favicon-v2.png"
             alt="Anjola Logo"
             className="w-10 h-10 rounded-xl object-cover shadow-sm"
           />
 
-          {/* BRAND NAME (2 CLEAN LINES + NG ADDED BACK) */}
+          {/* BRAND NAME – 2 LINES ON MOBILE */}
           <div className="leading-tight">
             <div className="text-[20px] font-serif font-semibold text-gray-900">
-              Anjola Aesthetics
+              Anjola
             </div>
             <div className="text-[14px] font-serif text-gray-700 -mt-1">
-              Ng
+              Aesthetics Ng
             </div>
           </div>
         </div>
