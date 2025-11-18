@@ -3,7 +3,7 @@ import { Search, Heart } from 'lucide-react';
 
 const ShopPage = ({ products, cart, addToCart, updateQuantity, searchQuery, setSearchQuery }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const categories = ['all', 'bags', 'skincare items', 'jewelries', 'sunglasses', 'totes bag', 'accessories'];
+  const categories = ['all', 'bags', 'self care essentials', 'jewelries', 'curated gift package', 'sunglasses', 'totes bag', 'hair accessories'];
 
   const filteredProducts =
     selectedCategory === 'all'

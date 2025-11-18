@@ -64,7 +64,7 @@ const AdminPage = ({ user, products, setProducts }) => {
         } else {
           setNewProduct({ ...newProduct, image: data.imageUrl });
         }
-        alert('Image uploaded successfully!');
+        alert('Image uploaded successfully my wife!');
       } else {
         alert('Image upload failed');
       }
@@ -109,7 +109,7 @@ const AdminPage = ({ user, products, setProducts }) => {
       });
       setImagePreview(null);
 
-      alert("Product added successfully!");
+      alert("Product added successfully my wife!");
     } catch (err) {
       alert("Failed to add product: " + err.message);
     } finally {
@@ -127,7 +127,7 @@ const AdminPage = ({ user, products, setProducts }) => {
     try {
       await productsAPI.deleteProduct(id, user.token);
       setProducts(products.filter((p) => p._id !== id));
-      alert("Product deleted successfully!");
+      alert("Product deleted successfully my love!");
     } catch (err) {
       alert("Failed to delete product: " + err.message);
     } finally {
@@ -301,8 +301,12 @@ const AdminPage = ({ user, products, setProducts }) => {
                   className="w-full px-4 py-3 border border-gray-200 rounded-lg"
                 >
                   <option value="bags">Bags</option>
-                  <option value="skincare">Skincare</option>
-                  <option value="accessories">Accessories</option>
+                  <option value="self care essentials">Self care essentials</option>
+                  <option value="hair accessories">Hair accessories</option>
+                  <option value="jewelries">Jewelries</option>
+                  <option value="sunglasses">Sunglasses</option>
+                  <option value="totes bag">Totes bag</option>
+                  <option value="curated gift boxed package">Curated gift boxed package</option>
                 </select>
               </div>
 
