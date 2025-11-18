@@ -1,5 +1,5 @@
 {
-  "short_name": "Anjola",
+  "short_name": "Anjola store",
   "name": "Anjola Aesthetics Ng",
   "icons": [
     {
@@ -8,7 +8,7 @@
       "type": "image/png"
     },
     {
-      "src": "anjola-icon.png",
+      "src": "anjola-favicon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
