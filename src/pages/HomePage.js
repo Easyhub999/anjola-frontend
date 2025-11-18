@@ -1,79 +1,73 @@
 import React from 'react';
 import { Mail } from 'lucide-react';
 
-const HomePage = ({ products, addToCart, setCurrentPage }) => {
+const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage }) => {
   const featuredProducts = products.filter(p => p.featured).slice(0, 3);
+
+  // Get product quantity inside cart
+  const getCartItemQty = (id) => {
+    const found = cart.find(item => item._id === id);
+    return found ? found.quantity : 0;
+  };
 
   return (
     <div className="min-h-screen">
 
-{/* Hero Section */}
-<div className="relative h-[95vh] overflow-hidden flex items-center justify-center">
+      {/* ================= HERO SECTION ================= */}
+      <div className="relative h-[95vh] overflow-hidden flex items-center justify-center">
 
-  {/* Ribbon Background - STRONGER */}
-<img 
-  src="/hero-ribbon.jpg"
-  alt="Ribbon Background"
-  className="
-    absolute inset-0 w-full h-full 
-    object-cover         /* FIXES the edges */
-    object-center 
-    opacity-55 
-    scale-[1.3] 
-    blur-[1px]
-    [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1),rgba(0,0,0,0.45),rgba(0,0,0,0))]
-  "
-/>
+        {/* Ribbon Background */}
+        <img 
+          src="/hero-ribbon.jpg"
+          alt="Ribbon Background"
+          className="absolute inset-0 w-full h-full object-cover object-center opacity-55 scale-[1.3] blur-[1px]
+          [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1),rgba(0,0,0,0.45),rgba(0,0,0,0))]"
+        />
 
-  {/* Heavy Gradient Overlay */}
-  <div className="absolute inset-0 bg-gradient-to-b 
-      from-white/90 via-white/70 to-white/88">
-  </div>
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/70 to-white/88" />
 
-  {/* HEAVY VIGNETTE */}
-  <div className="absolute inset-0 
-      bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.35)_100%)]">
-  </div>
+        {/* Vignette */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.35)_100%)]" />
 
-  {/* BIGGER, STRONGER BOHO GLOW ORBS */}
-  <div className="absolute inset-0 pointer-events-none">
-    <div className="absolute w-[500px] h-[500px] bg-pink-300/50 rounded-full blur-[110px] top-0 left-0"></div>
-    <div className="absolute w-[580px] h-[580px] bg-purple-300/50 rounded-full blur-[120px] bottom-0 right-0"></div>
-  </div>
+        {/* Glow Orbs */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute w-[500px] h-[500px] bg-pink-300/50 rounded-full blur-[110px] top-0 left-0" />
+          <div className="absolute w-[580px] h-[580px] bg-purple-300/50 rounded-full blur-[120px] bottom-0 right-0" />
+        </div>
 
-  {/* Strong Texture */}
-  <div 
-    className="absolute inset-0 opacity-[0.45] mix-blend-overlay pointer-events-none"
-    style={{
-      backgroundImage:
-        "url('https://www.transparenttextures.com/patterns/fabric-of-squares.png')"
-    }}
-  />
+        {/* Texture Overlay */}
+        <div 
+          className="absolute inset-0 opacity-[0.45] mix-blend-overlay pointer-events-none"
+          style={{
+            backgroundImage:
+              "url('https://www.transparenttextures.com/patterns/fabric-of-squares.png')"
+          }}
+        />
 
-  {/* Hero Text */}
-  <div className="relative z-10 text-center px-4">
-    <h1 className="text-5xl md:text-7xl font-serif text-gray-900 
-                   drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)] mb-4">
-      Elevate Your Beauty
-    </h1>
+        {/* Hero Text */}
+        <div className="relative z-10 text-center px-4">
+          <h1 className="text-5xl md:text-7xl font-serif text-gray-900 drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)] mb-4">
+            Elevate Your Beauty
+          </h1>
 
-    <p className="text-xl md:text-2xl text-gray-700 mb-8 font-light">
-      Luxury self-care products curated with love
-    </p>
+          <p className="text-xl md:text-2xl text-gray-700 mb-8 font-light">
+            Luxury self-care products curated with love
+          </p>
 
-    <button
-      onClick={() => setCurrentPage('shop')}
-      className="bg-gradient-to-r from-pink-400 to-purple-500 text-white 
-                 px-12 py-4 rounded-full text-xl shadow-[0_10px_25px_rgba(0,0,0,0.25)] 
-                 hover:scale-110 active:scale-95 transition-transform"
-    >
-      Shop Collection
-    </button>
-  </div>
+          <button
+            onClick={() => setCurrentPage('shop')}
+            className="bg-gradient-to-r from-pink-400 to-purple-500 text-white 
+              px-12 py-4 rounded-full text-xl shadow-[0_10px_25px_rgba(0,0,0,0.25)]
+              hover:scale-110 active:scale-95 transition-transform"
+          >
+            Shop Collection
+          </button>
+        </div>
 
-</div>
+      </div>
 
-      {/* ========================= FEATURED PRODUCTS ========================= */}
+      {/* ================= FEATURED PRODUCTS ================= */}
       <div className="max-w-7xl mx-auto px-4 py-20">
         <h2 className="text-5xl font-serif text-center mb-16 text-gray-900 tracking-wide">
           Featured Products
@@ -83,55 +77,85 @@ const HomePage = ({ products, addToCart, setCurrentPage }) => {
           <p className="text-center text-gray-600">No featured products available</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {featuredProducts.map(product => (
-              <div
-                key={product._id}
-                className="group bg-white rounded-2xl shadow-md hover:shadow-2xl overflow-hidden 
-                transform hover:-translate-y-2 transition-all duration-300 cursor-pointer"
-              >
-                {/* Image */}
-                <div className="relative">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-72 object-cover group-hover:scale-105 
-                    transition-all duration-500"
-                  />
+            {featuredProducts.map(product => {
+              const qty = getCartItemQty(product._id);
 
-                  {/* Floating price */}
-                  <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md 
-                  shadow-md px-4 py-1 rounded-full text-pink-600 font-bold text-lg">
-                    ₦{product.price.toLocaleString()}
+              return (
+                <div
+                  key={product._id}
+                  className="group bg-white rounded-2xl shadow-md hover:shadow-2xl overflow-hidden 
+                    transform hover:-translate-y-2 transition-all duration-300 cursor-pointer"
+                >
+
+                  {/* Image */}
+                  <div className="relative">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-72 object-cover group-hover:scale-105 transition-all duration-500"
+                    />
+                    <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md 
+                      shadow-md px-4 py-1 rounded-full text-pink-600 font-bold text-lg">
+                      ₦{product.price.toLocaleString()}
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6">
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                      {product.name}
+                    </h3>
+
+                    <p className="text-gray-600 text-sm mb-6 line-clamp-2">
+                      {product.description}
+                    </p>
+
+                    {/* CART BUTTON + QUANTITY */}
+                    {qty === 0 ? (
+                      <button
+                        onClick={() => addToCart(product)}
+                        className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white 
+                          py-3 rounded-xl font-medium hover:scale-[1.02] transition-transform"
+                      >
+                        Add to Cart
+                      </button>
+                    ) : (
+                      <div className="flex items-center justify-between bg-pink-50 rounded-xl px-4 py-3">
+                        <span className="text-sm text-gray-700">In cart</span>
+                        <div className="flex items-center gap-3">
+
+                          <button
+                            onClick={() => updateQuantity(product._id, -1)}
+                            className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm"
+                          >
+                            -
+                          </button>
+
+                          <span className="min-w-[1.5rem] text-center font-semibold">
+                            {qty}
+                          </span>
+
+                          <button
+                            onClick={() => addToCart(product)}
+                            className="w-8 h-8 rounded-full bg-pink-500 text-white flex items-center justify-center shadow-sm"
+                          >
+                            +
+                          </button>
+
+                        </div>
+                      </div>
+                    )}
+
                   </div>
                 </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                    {product.name}
-                  </h3>
-
-                  <p className="text-gray-600 text-sm mb-6 line-clamp-2">
-                    {product.description}
-                  </p>
-
-                  <button
-                    onClick={() => addToCart(product)}
-                    className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white 
-                    py-3 rounded-xl font-medium hover:scale-[1.02] transition-transform"
-                  >
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* ========================= TESTIMONIALS ========================= */}
+      {/* ================= TESTIMONIALS ================= */}
       <div className="relative py-24 bg-gradient-to-br from-pink-50/40 via-white to-purple-50/40">
-        {/* Background glows */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute w-64 h-64 bg-pink-200/30 rounded-full blur-3xl top-10 left-10"></div>
           <div className="absolute w-72 h-72 bg-purple-200/30 rounded-full blur-3xl bottom-10 right-20"></div>
@@ -165,7 +189,6 @@ const HomePage = ({ products, addToCart, setCurrentPage }) => {
                 className="bg-white/80 backdrop-blur-md shadow-lg rounded-2xl p-8 
                 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
               >
-                {/* Stars */}
                 <div className="flex mb-6">
                   {[...Array(t.rating)].map((_, i) => (
                     <svg
@@ -178,12 +201,9 @@ const HomePage = ({ products, addToCart, setCurrentPage }) => {
                   ))}
                 </div>
 
-                {/* Text */}
                 <p className="text-gray-700 text-lg leading-relaxed mb-6 italic">
                   {t.text}
                 </p>
-
-                {/* Name */}
                 <p className="font-semibold text-gray-900 tracking-wide">
                   — {t.name}
                 </p>
@@ -193,13 +213,13 @@ const HomePage = ({ products, addToCart, setCurrentPage }) => {
         </div>
       </div>
 
-      {/* ========================= NEWSLETTER ========================= */}
+      {/* ================= NEWSLETTER ================= */}
       <div className="max-w-7xl mx-auto px-4 py-20">
         <div className="bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 
           rounded-3xl p-12 text-center shadow-xl relative overflow-hidden">
 
-          {/* Subtle texture */}
-          <div className="absolute inset-0 opacity-20 bg-cover bg-center"
+          <div 
+            className="absolute inset-0 opacity-20 bg-cover bg-center"
             style={{
               backgroundImage:
                 "url('https://i.pinimg.com/736x/4a/61/2a/4a612a4957332c87a1e64da3d57c01ad.jpg')"
@@ -231,6 +251,7 @@ const HomePage = ({ products, addToCart, setCurrentPage }) => {
               </button>
             </div>
           </div>
+
         </div>
       </div>
 

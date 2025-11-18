@@ -27,11 +27,15 @@ function App() {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Load user from localStorage on mount
+  // UI sugar
+  const [toast, setToast] = useState(null);
+  const [cartBump, setCartBump] = useState(false);
+
+  // Load user & cart from localStorage on mount
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const storedCart = localStorage.getItem('cart');
-    
+
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
@@ -39,7 +43,7 @@ function App() {
         console.error('Failed to parse user data');
       }
     }
-    
+
     if (storedCart) {
       try {
         setCart(JSON.parse(storedCart));
@@ -58,7 +62,7 @@ function App() {
         const data = await productsAPI.getAllProducts();
         setProducts(data);
       } catch (err) {
-        setError('Failed to load products. Make sure backend is running on http://localhost:5000');
+        setError('Failed to load products. Make sure backend is running.');
         console.error('Error fetching products:', err);
       } finally {
         setLoading(false);
@@ -73,22 +77,47 @@ function App() {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
+  // Helper to trigger toast + cart bump
+  const triggerCartFeedback = (productName) => {
+    setToast({
+      id: Date.now(),
+      message: `“${productName}” added to cart ✓`
+    });
+
+    setCartBump(true);
+    setTimeout(() => setCartBump(false), 300);
+
+    // hide toast after 2.5s
+    setTimeout(() => {
+      setToast((current) =>
+        current && current.id ? null : current
+      );
+    }, 2500);
+  };
+
   // Cart functions
   const addToCart = (product) => {
     const existingItem = cart.find(item => item._id === product._id);
+
     if (existingItem) {
       setCart(cart.map(item =>
-        item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
+        item._id === product._id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
       ));
     } else {
       setCart([...cart, { ...product, quantity: 1 }]);
     }
-    setShowCart(true);
+
+    // ✅ no more auto-opening sidebar
+    triggerCartFeedback(product.name);
   };
 
   const updateQuantity = (id, change) => {
     setCart(cart.map(item =>
-      item._id === id ? { ...item, quantity: Math.max(1, item.quantity + change) } : item
+      item._id === id
+        ? { ...item, quantity: Math.max(1, item.quantity + change) }
+        : item
     ));
   };
 
@@ -97,18 +126,21 @@ function App() {
   };
 
   const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cart.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
   };
 
   const clearCart = () => {
     setCart([]);
   };
 
-  // Main render with error/loading states
+  // Loading state
   if (loading) {
     return (
       <>
-        <Navigation 
+        <Navigation
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
           cart={cart}
@@ -117,16 +149,18 @@ function App() {
           showMobileMenu={showMobileMenu}
           setShowMobileMenu={setShowMobileMenu}
           user={user}
+          cartBump={cartBump}
         />
         <LoadingSpinner />
       </>
     );
   }
 
+  // Error state
   if (error && products.length === 0) {
     return (
       <>
-        <Navigation 
+        <Navigation
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
           cart={cart}
@@ -135,6 +169,7 @@ function App() {
           showMobileMenu={showMobileMenu}
           setShowMobileMenu={setShowMobileMenu}
           user={user}
+          cartBump={cartBump}
         />
         <ErrorDisplay message={error} />
       </>
@@ -143,7 +178,7 @@ function App() {
 
   return (
     <div className="App">
-      <Navigation 
+      <Navigation
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         cart={cart}
@@ -152,9 +187,10 @@ function App() {
         showMobileMenu={showMobileMenu}
         setShowMobileMenu={setShowMobileMenu}
         user={user}
+        cartBump={cartBump}
       />
-      
-      <CartSidebar 
+
+      <CartSidebar
         showCart={showCart}
         setShowCart={setShowCart}
         cart={cart}
@@ -163,45 +199,49 @@ function App() {
         getTotalPrice={getTotalPrice}
         setCurrentPage={setCurrentPage}
       />
-      
+
       {currentPage === 'home' && (
-        <HomePage 
+        <HomePage
           products={products}
+          cart={cart}
           addToCart={addToCart}
+          updateQuantity={updateQuantity}
           setCurrentPage={setCurrentPage}
         />
       )}
-      
+
       {currentPage === 'shop' && (
-        <ShopPage 
+        <ShopPage
           products={products}
+          cart={cart}
           addToCart={addToCart}
+          updateQuantity={updateQuantity}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
         />
       )}
-      
+
       {currentPage === 'blog' && <BlogPage />}
-      
+
       {currentPage === 'contact' && <ContactPage />}
-      
+
       {currentPage === 'auth' && (
-        <AuthPage 
+        <AuthPage
           setUser={setUser}
           setCurrentPage={setCurrentPage}
         />
       )}
-      
+
       {currentPage === 'profile' && user && (
-        <ProfilePage 
+        <ProfilePage
           user={user}
           setUser={setUser}
           setCurrentPage={setCurrentPage}
         />
       )}
-      
+
       {currentPage === 'checkout' && (
-        <CheckoutPage 
+        <CheckoutPage
           cart={cart}
           getTotalPrice={getTotalPrice}
           clearCart={clearCart}
@@ -209,9 +249,9 @@ function App() {
           user={user}
         />
       )}
-      
+
       {currentPage === 'admin' && (
-        <AdminPage 
+        <AdminPage
           user={user}
           products={products}
           setProducts={setProducts}
@@ -219,11 +259,23 @@ function App() {
       )}
 
       {currentPage === 'admin-orders' && (
-        <AdminOrdersPage 
-          user={user}
-        />
+        <AdminOrdersPage user={user} />
       )}
-      
+
+      {/* Toast / mini bubble near cart */}
+      {toast && (
+        <div className="
+          fixed top-20 right-4 sm:right-8 
+          bg-gray-900 text-white text-sm md:text-base
+          px-4 py-3 rounded-2xl shadow-xl
+          animate-fade-in-up
+          flex items-center gap-2 z-[60]
+        ">
+          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
+          <span>{toast.message}</span>
+        </div>
+      )}
+
       <Footer setCurrentPage={setCurrentPage} />
     </div>
   );
