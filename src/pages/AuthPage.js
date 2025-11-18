@@ -20,12 +20,9 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
     try {
       let userData;
 
-      // LOGIN
       if (isLogin) {
         userData = await authAPI.login(formData.email, formData.password);
-      }
-      // REGISTER
-      else {
+      } else {
         userData = await authAPI.register(
           formData.name,
           formData.email,
@@ -33,10 +30,8 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
         );
       }
 
-      // Save user in global state
       setUser(userData);
 
-      // Redirect based on role
       if (userData?.role === "admin") {
         setCurrentPage("admin");
       } else {
@@ -50,10 +45,10 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center py-20 px-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+    <div className="min-h-screen bg-gradient-to-br from-[#FFF5FA] to-[#E9A8C7]/40 flex items-center justify-center py-20 px-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full border border-[#E9A8C7]/30">
 
-        <h1 className="text-3xl font-serif text-center mb-6 text-gray-800">
+        <h1 className="text-3xl font-serif text-center mb-6 text-gray-900">
           {isLogin ? "Welcome Back" : "Join the Anjola Family"}
         </h1>
 
@@ -64,10 +59,12 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
         )}
 
         <form onSubmit={handleAuth} className="space-y-4">
-          {/* NAME FIELD - only for register */}
+
           {!isLogin && (
             <div>
-              <label className="block text-sm font-medium mb-2">Full Name</label>
+              <label className="block text-sm font-medium mb-2 text-gray-700">
+                Full Name
+              </label>
               <input
                 type="text"
                 required={!isLogin}
@@ -75,15 +72,14 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg 
-                focus:outline-none focus:ring-2 focus:ring-pink-400"
+                className="w-full px-4 py-3 border border-[#E9A8C7]/40 rounded-lg 
+                focus:outline-none focus:ring-2 focus:ring-[#E9A8C7]"
               />
             </div>
           )}
 
-          {/* EMAIL */}
           <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
+            <label className="block text-sm font-medium mb-2 text-gray-700">Email</label>
             <input
               type="email"
               required
@@ -91,14 +87,13 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg 
-              focus:outline-none focus:ring-2 focus:ring-pink-400"
+              className="w-full px-4 py-3 border border-[#E9A8C7]/40 rounded-lg 
+              focus:outline-none focus:ring-2 focus:ring-[#E9A8C7]"
             />
           </div>
 
-          {/* PASSWORD */}
           <div>
-            <label className="block text-sm font-medium mb-2">Password</label>
+            <label className="block text-sm font-medium mb-2 text-gray-700">Password</label>
             <input
               type="password"
               required
@@ -106,18 +101,17 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
               onChange={(e) =>
                 setFormData({ ...formData, password: e.target.value })
               }
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg 
-              focus:outline-none focus:ring-2 focus:ring-pink-400"
+              className="w-full px-4 py-3 border border-[#E9A8C7]/40 rounded-lg 
+              focus:outline-none focus:ring-2 focus:ring-[#E9A8C7]"
             />
           </div>
 
-          {/* SUBMIT BUTTON */}
           <button
             type="submit"
             disabled={authLoading}
-            className="w-full bg-gradient-to-r from-pink-400 to-purple-400 
-            text-white py-3 rounded-lg hover:from-pink-500 hover:to-purple-500 
-            transition disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-[#E9A8C7] text-white py-3 rounded-lg 
+            hover:bg-[#d88bb0] transition disabled:opacity-50 
+            flex items-center justify-center gap-2 shadow-lg"
           >
             {authLoading ? (
               <>
@@ -132,17 +126,17 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
           </button>
         </form>
 
-        {/* SWITCH LOGIN <-> REGISTER */}
         <div className="mt-6 text-center">
           <button
             onClick={() => setIsLogin(!isLogin)}
-            className="text-pink-600 hover:text-pink-700 font-medium"
+            className="text-[#E9A8C7] hover:text-[#d88bb0] font-medium"
           >
             {isLogin
               ? "Don't have an account? Create one"
               : "Already a member? Sign in"}
           </button>
         </div>
+
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+// AdminPage.js
 import React, { useState } from 'react';
 import { Edit, Trash2, Loader, AlertCircle, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { productsAPI } from '../api';
@@ -167,8 +168,8 @@ const AdminPage = ({ user, products, setProducts }) => {
   // ================================
   if (user?.role !== 'admin') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 pt-24 pb-12 flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#FFF7FB] via-[#F4E8FF] to-[#FFE9F4] pt-24 pb-12 flex items-center justify-center">
+        <div className="text-center bg-white/80 backdrop-blur-sm px-8 py-10 rounded-2xl shadow-xl border border-white/60">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
           <p className="text-gray-600">You need admin privileges to access this page.</p>
@@ -181,17 +182,19 @@ const AdminPage = ({ user, products, setProducts }) => {
   // RENDER ADMIN PAGE
   // ================================
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 pt-24 pb-12">
+    <div className="min-h-screen bg-gradient-to-br from-[#FFF7FB] via-[#F4E8FF] to-[#FFE9F4] pt-24 pb-12">
       <div className="max-w-7xl mx-auto px-4">
-        <h1 className="text-4xl font-serif text-center mb-12 text-gray-800">Admin Dashboard</h1>
+        <h1 className="text-4xl font-serif text-center mb-12 text-gray-900 tracking-wide">
+          Admin Dashboard
+        </h1>
 
         <div className="grid lg:grid-cols-2 gap-8">
 
           {/* ====================== */}
           {/* ADD / EDIT PRODUCT FORM */}
           {/* ====================== */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-semibold mb-6">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-[0_18px_45px_rgba(233,168,199,0.35)] border border-white px-8 py-8">
+            <h2 className="text-2xl font-semibold mb-6 text-gray-900">
               {editingProduct ? "Edit Product" : "Add New Product"}
             </h2>
 
@@ -199,15 +202,15 @@ const AdminPage = ({ user, products, setProducts }) => {
 
               {/* IMAGE UPLOAD */}
               <div>
-                <label className="block text-sm font-medium mb-2">Product Image</label>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Product Image</label>
 
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition">
+                <div className="border-2 border-dashed border-[#E9A8C7]/40 rounded-2xl p-6 text-center hover:border-[#E9A8C7] transition bg-[#FFF7FB]">
                   {(imagePreview || (editingProduct && editingProduct.image) || newProduct.image) ? (
-                    <div className="relative">
+                    <div className="relative inline-block">
                       <img
                         src={imagePreview || (editingProduct ? editingProduct.image : newProduct.image)}
                         alt="Preview"
-                        className="max-h-64 mx-auto rounded-lg"
+                        className="max-h-64 mx-auto rounded-2xl shadow-lg"
                       />
                       <button
                         type="button"
@@ -216,7 +219,7 @@ const AdminPage = ({ user, products, setProducts }) => {
                           if (editingProduct) setEditingProduct({ ...editingProduct, image: '' });
                           else setNewProduct({ ...newProduct, image: '' });
                         }}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full"
+                        className="absolute top-2 right-2 bg-rose-500 text-white p-2 rounded-full shadow-md hover:bg-rose-600"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -224,7 +227,7 @@ const AdminPage = ({ user, products, setProducts }) => {
                   ) : (
                     <>
                       <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-600 mb-2">Click to upload product image</p>
+                      <p className="text-gray-600 mb-1">Click to upload product image</p>
                       <p className="text-sm text-gray-500">PNG, JPG, GIF up to 5MB</p>
                     </>
                   )}
@@ -239,7 +242,7 @@ const AdminPage = ({ user, products, setProducts }) => {
 
                   <label
                     htmlFor="image-upload"
-                    className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg cursor-pointer hover:bg-purple-200"
+                    className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-[#F4E8FF] text-[#824469] rounded-full cursor-pointer hover:bg-[#E9D7FF] font-medium shadow-sm"
                   >
                     {uploadingImage ? (
                       <>
@@ -258,7 +261,7 @@ const AdminPage = ({ user, products, setProducts }) => {
 
               {/* NAME */}
               <div>
-                <label className="block text-sm font-medium mb-2">Product Name</label>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Product Name</label>
                 <input
                   type="text"
                   required
@@ -268,13 +271,13 @@ const AdminPage = ({ user, products, setProducts }) => {
                       ? setEditingProduct({ ...editingProduct, name: e.target.value })
                       : setNewProduct({ ...newProduct, name: e.target.value })
                   }
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E9A8C7]/70"
                 />
               </div>
 
               {/* PRICE */}
               <div>
-                <label className="block text-sm font-medium mb-2">Price (₦)</label>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Price (₦)</label>
                 <input
                   type="number"
                   required
@@ -284,13 +287,13 @@ const AdminPage = ({ user, products, setProducts }) => {
                       ? setEditingProduct({ ...editingProduct, price: e.target.value })
                       : setNewProduct({ ...newProduct, price: e.target.value })
                   }
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E9A8C7]/70"
                 />
               </div>
 
               {/* CATEGORY */}
               <div>
-                <label className="block text-sm font-medium mb-2">Category</label>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Category</label>
                 <select
                   value={editingProduct ? editingProduct.category : newProduct.category}
                   onChange={(e) =>
@@ -298,7 +301,7 @@ const AdminPage = ({ user, products, setProducts }) => {
                       ? setEditingProduct({ ...editingProduct, category: e.target.value })
                       : setNewProduct({ ...newProduct, category: e.target.value })
                   }
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E9A8C7]/70 bg-white"
                 >
                   <option value="bags">Bags</option>
                   <option value="self care essentials">Self care essentials</option>
@@ -312,7 +315,7 @@ const AdminPage = ({ user, products, setProducts }) => {
 
               {/* DESCRIPTION */}
               <div>
-                <label className="block text-sm font-medium mb-2">Description</label>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Description</label>
                 <textarea
                   rows="3"
                   required
@@ -322,7 +325,7 @@ const AdminPage = ({ user, products, setProducts }) => {
                       ? setEditingProduct({ ...editingProduct, description: e.target.value })
                       : setNewProduct({ ...newProduct, description: e.target.value })
                   }
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E9A8C7]/70"
                 />
               </div>
 
@@ -336,20 +339,20 @@ const AdminPage = ({ user, products, setProducts }) => {
                       ? setEditingProduct({ ...editingProduct, featured: e.target.checked })
                       : setNewProduct({ ...newProduct, featured: e.target.checked })
                   }
-                  className="w-5 h-5"
+                  className="w-5 h-5 rounded border-gray-300 text-[#E9A8C7] focus:ring-[#E9A8C7]"
                 />
-                <label>Featured Product</label>
+                <label className="text-sm text-gray-700">Featured Product</label>
               </div>
 
               {/* BUTTONS */}
-              <div className="flex gap-4">
+              <div className="flex gap-4 pt-2">
                 <button
                   type="submit"
                   disabled={adminLoading || uploadingImage}
-                  className="flex-1 bg-gradient-to-r from-purple-400 to-pink-400 text-white py-3 rounded-lg"
+                  className="flex-1 bg-gradient-to-r from-[#E9A8C7] to-[#D28BB0] text-white py-3 rounded-full font-semibold shadow-md hover:shadow-lg hover:from-[#F0B4D3] hover:to-[#D892B7] transition disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {adminLoading ? (
-                    <span className="flex items-center gap-2">
+                    <span className="flex items-center gap-2 justify-center">
                       <Loader className="w-5 h-5 animate-spin" /> Processing...
                     </span>
                   ) : editingProduct ? (
@@ -366,7 +369,7 @@ const AdminPage = ({ user, products, setProducts }) => {
                       setEditingProduct(null);
                       setImagePreview(null);
                     }}
-                    className="px-6 bg-gray-200 text-gray-700 rounded-lg"
+                    className="px-6 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200"
                   >
                     Cancel
                   </button>
@@ -378,28 +381,35 @@ const AdminPage = ({ user, products, setProducts }) => {
           {/* ====================== */}
           {/* PRODUCT LIST */}
           {/* ====================== */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-semibold mb-6">Manage Products ({products.length})</h2>
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-[0_18px_45px_rgba(233,168,199,0.35)] border border-white p-8">
+            <h2 className="text-2xl font-semibold mb-6 text-gray-900">
+              Manage Products ({products.length})
+            </h2>
 
-            <div className="space-y-4 max-h-[600px] overflow-y-auto">
+            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1 custom-scrollbar">
               {products.length === 0 ? (
                 <p className="text-center text-gray-600 py-8">No products yet.</p>
               ) : (
                 products.map((product) => (
-                  <div key={product._id} className="flex gap-4 p-4 bg-purple-50 rounded-lg">
+                  <div
+                    key={product._id}
+                    className="flex gap-4 p-4 bg-[#FFF7FB] rounded-xl border border-[#F4E8FF]"
+                  >
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-20 h-20 object-cover rounded"
+                      className="w-20 h-20 object-cover rounded-lg shadow-sm"
                     />
 
                     <div className="flex-1">
-                      <h3 className="font-semibold">{product.name}</h3>
-                      <p className="text-sm capitalize">{product.category}</p>
-                      <p className="font-bold text-purple-600">₦{product.price.toLocaleString()}</p>
+                      <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                      <p className="text-sm capitalize text-gray-600">{product.category}</p>
+                      <p className="font-bold text-[#C46A9B]">
+                        ₦{product.price.toLocaleString()}
+                      </p>
 
                       {product.featured && (
-                        <span className="inline-block mt-1 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
+                        <span className="inline-block mt-1 px-2.5 py-1 bg-yellow-50 text-yellow-800 text-xs rounded-full border border-yellow-100">
                           Featured
                         </span>
                       )}
@@ -411,14 +421,14 @@ const AdminPage = ({ user, products, setProducts }) => {
                           setEditingProduct(product);
                           setImagePreview(null);
                         }}
-                        className="p-2 bg-blue-500 text-white rounded"
+                        className="p-2 bg-[#E9A8C7] text-white rounded-lg shadow-sm hover:bg-[#D28BB0]"
                       >
                         <Edit className="w-5 h-5" />
                       </button>
 
                       <button
                         onClick={() => handleDeleteProduct(product._id)}
-                        className="p-2 bg-red-500 text-white rounded"
+                        className="p-2 bg-red-500 text-white rounded-lg shadow-sm hover:bg-red-600"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
