@@ -150,7 +150,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
 
             <div className="bg-white shadow-lg rounded-2xl p-8 text-center hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
-              <img src="/icons/quality.png" alt="Quality" className="w-16 mx-auto mb-6" />
+              <img src="/quality.png" alt="Quality" className="w-16 mx-auto mb-6" />
               <h3 className="text-2xl font-semibold text-gray-900 mb-3">Premium Quality</h3>
               <p className="text-gray-600">
                 Carefully selected items crafted for beauty, durability and long-lasting value.
@@ -158,7 +158,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
             </div>
 
             <div className="bg-white shadow-lg rounded-2xl p-8 text-center hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
-              <img src="/icons/fast.png" alt="Fast Delivery" className="w-16 mx-auto mb-6" />
+              <img src="/fast.png" alt="Fast Delivery" className="w-16 mx-auto mb-6" />
               <h3 className="text-2xl font-semibold text-gray-900 mb-3">Fast Delivery</h3>
               <p className="text-gray-600">
                 Swift nationwide delivery — beautifully packaged and right on time.
@@ -166,7 +166,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage })
             </div>
 
             <div className="bg-white shadow-lg rounded-2xl p-8 text-center hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
-              <img src="/icons/trust.png" alt="Trusted" className="w-16 mx-auto mb-6" />
+              <img src="/trust.png" alt="Trusted" className="w-16 mx-auto mb-6" />
               <h3 className="text-2xl font-semibold text-gray-900 mb-3">Trusted by Women</h3>
               <p className="text-gray-600">
                 Loved for elegance, reliability and consistent customer satisfaction.
