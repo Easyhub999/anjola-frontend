@@ -15,9 +15,13 @@ import CheckoutPage from './pages/CheckoutPage';
 import AdminPage from './pages/AdminPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
 import { productsAPI } from './api';
+import ProductDetailPage from './pages/ProductDetailPage';
 
 function App() {
+
   const [currentPage, setCurrentPage] = useState('home');
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
   const [cart, setCart] = useState([]);
   const [user, setUser] = useState(null);
   const [showCart, setShowCart] = useState(false);
@@ -27,57 +31,46 @@ function App() {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // UI sugar
   const [toast, setToast] = useState(null);
   const [cartBump, setCartBump] = useState(false);
 
-  // Load user & cart from localStorage on mount
+  // Load from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const storedCart = localStorage.getItem('cart');
 
     if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error('Failed to parse user data');
-      }
+      try { setUser(JSON.parse(storedUser)); } catch {}
     }
 
     if (storedCart) {
-      try {
-        setCart(JSON.parse(storedCart));
-      } catch (e) {
-        console.error('Failed to parse cart data');
-      }
+      try { setCart(JSON.parse(storedCart)); } catch {}
     }
   }, []);
 
-  // Fetch products from backend
+  // Fetch products
   useEffect(() => {
-    const fetchProducts = async () => {
+    const loadProducts = async () => {
       try {
         setLoading(true);
-        setError(null);
         const data = await productsAPI.getAllProducts();
         setProducts(data);
       } catch (err) {
-        setError('Failed to load products. Make sure backend is running.');
-        console.error('Error fetching products:', err);
+        setError('Failed to load products.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
+    loadProducts();
   }, []);
 
-  // Save cart to localStorage whenever it changes
+  // Save cart
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  // Helper to trigger toast + cart bump
+  // Toast animation
   const triggerCartFeedback = (productName) => {
     setToast({
       id: Date.now(),
@@ -87,56 +80,48 @@ function App() {
     setCartBump(true);
     setTimeout(() => setCartBump(false), 300);
 
-    // hide toast after 2.5s
-    setTimeout(() => {
-      setToast((current) =>
-        current && current.id ? null : current
-      );
-    }, 2500);
+    setTimeout(() => setToast(null), 2500);
   };
 
   // Cart functions
   const addToCart = (product) => {
-    const existingItem = cart.find(item => item._id === product._id);
+    const exists = cart.find(item => item._id === product._id);
 
-    if (existingItem) {
-      setCart(cart.map(item =>
-        item._id === product._id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
+    if (exists) {
+      setCart(
+        cart.map(item =>
+          item._id === product._id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      );
     } else {
       setCart([...cart, { ...product, quantity: 1 }]);
     }
 
-    // ✅ no more auto-opening sidebar
     triggerCartFeedback(product.name);
   };
 
   const updateQuantity = (id, change) => {
-    setCart(cart.map(item =>
-      item._id === id
-        ? { ...item, quantity: Math.max(1, item.quantity + change) }
-        : item
-    ));
+    setCart(
+      cart.map(item =>
+        item._id === id
+          ? { ...item, quantity: Math.max(1, item.quantity + change) }
+          : item
+      )
+    );
   };
 
   const removeFromCart = (id) => {
     setCart(cart.filter(item => item._id !== id));
   };
 
-  const getTotalPrice = () => {
-    return cart.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
-    );
-  };
+  const getTotalPrice = () =>
+    cart.reduce((t, i) => t + i.price * i.quantity, 0);
 
-  const clearCart = () => {
-    setCart([]);
-  };
+  const clearCart = () => setCart([]);
 
-  // Loading state
+  // Loading
   if (loading) {
     return (
       <>
@@ -156,7 +141,7 @@ function App() {
     );
   }
 
-  // Error state
+  // Error
   if (error && products.length === 0) {
     return (
       <>
@@ -178,6 +163,7 @@ function App() {
 
   return (
     <div className="App">
+
       <Navigation
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
@@ -200,6 +186,7 @@ function App() {
         setCurrentPage={setCurrentPage}
       />
 
+      {/* HOME */}
       {currentPage === 'home' && (
         <HomePage
           products={products}
@@ -207,9 +194,11 @@ function App() {
           addToCart={addToCart}
           updateQuantity={updateQuantity}
           setCurrentPage={setCurrentPage}
+          setSelectedProduct={setSelectedProduct}
         />
       )}
 
+      {/* SHOP — UPDATED WITH NEW PROPS */}
       {currentPage === 'shop' && (
         <ShopPage
           products={products}
@@ -218,11 +207,23 @@ function App() {
           updateQuantity={updateQuantity}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          setCurrentPage={setCurrentPage}
+          setSelectedProduct={setSelectedProduct}
+          selectedProduct={selectedProduct}
+        />
+      )}
+
+      {/* PRODUCT DETAILS PAGE */}
+      {currentPage === 'product-details' && selectedProduct && (
+        <ProductDetailPage
+          product={selectedProduct}
+          addToCart={addToCart}
+          user={user}
+          setCurrentPage={setCurrentPage}
         />
       )}
 
       {currentPage === 'blog' && <BlogPage />}
-
       {currentPage === 'contact' && <ContactPage />}
 
       {currentPage === 'auth' && (
@@ -262,21 +263,24 @@ function App() {
         <AdminOrdersPage user={user} />
       )}
 
-      {/* Toast / mini bubble near cart */}
+      {/* Toast UI */}
       {toast && (
-        <div className="
-          fixed top-20 right-4 sm:right-8 
-          bg-gray-900 text-white text-sm md:text-base
-          px-4 py-3 rounded-2xl shadow-xl
-          animate-fade-in-up
-          flex items-center gap-2 z-[60]
-        ">
+        <div
+          className="
+            fixed top-20 right-4 sm:right-8
+            bg-gray-900 text-white text-sm
+            px-4 py-3 rounded-2xl shadow-xl
+            animate-fade-in-up flex items-center
+            gap-2 z-[60]
+          "
+        >
           <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
           <span>{toast.message}</span>
         </div>
       )}
 
       <Footer setCurrentPage={setCurrentPage} />
+
     </div>
   );
 }
