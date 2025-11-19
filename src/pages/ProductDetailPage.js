@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { productsAPI } from "../api";
 import BackButton from "../components/BackButton";
+import React, { useState, useEffect } from "react";
 
 const ProductDetailsPage = ({
   selectedProduct,
@@ -8,6 +9,12 @@ const ProductDetailsPage = ({
   user,
   addToCart,
 }) => {
+
+// 🔥 Force page to scroll to top on load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   if (!selectedProduct) {
     return (
       <div className="min-h-screen flex items-center justify-center">
