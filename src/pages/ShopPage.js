@@ -16,7 +16,7 @@ const ShopPage = ({
   // ALWAYS SCROLL TO TOP WHEN PAGE LOADS
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+  }, [currentPageNumber]);
 
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [currentPageNumber, setCurrentPageNumber] = useState(1);
@@ -218,7 +218,10 @@ const ShopPage = ({
 
               {/* BACK BUTTON */}
               <button
-                onClick={() => setCurrentPage("home")}
+                onClick={() => {
+                  setCurrentPageNumber("1");  // go back to first row
+                  window.scrollTo(0, 0);  // go to top
+                }}
                 className="px-4 py-2 rounded-lg border border-gray-400 text-gray-700 hover:bg-gray-100"
               >
                 ← Back
