@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { productsAPI } from "../api";
+import BackButton from "../components/BackButton";
 
 const ProductDetailsPage = ({
   selectedProduct,
@@ -72,7 +73,12 @@ const ProductDetailsPage = ({
 
   return (
     <div className="min-h-screen bg-white pt-24 pb-12">
+
       <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12">
+
+        {/* BACK BUTTON (ALWAYS AT THE TOP) */}
+        <BackButton setCurrentPage={setCurrentPage} />
+
         {/* ===================== PRODUCT IMAGES ===================== */}
         <div>
           <img
