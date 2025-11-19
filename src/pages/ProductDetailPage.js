@@ -116,7 +116,7 @@ const ProductDetailsPage = ({
                   src={img}
                   alt="thumb"
                   onClick={() => setMainImage(img)}
-                  className={`w-20 h-20 rounded-lg object-cover cursor-pointer border 
+                  className={`w-24 h-24 object-cover rounded-1g cursor-pointer border 
                     ${mainImage === img ? "border-pink-500" : "border-gray-300"}
                   `}
                 />
