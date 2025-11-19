@@ -224,15 +224,15 @@ const ProductDetailsPage = ({ selectedProduct, setCurrentPage, user, addToCart }
               required
               value={reviewForm.rating}
               onChange={(e) =>
-                setReviewForm({ ...reviewForm, rating: e.target.value })
+                setReviewForm({ ...reviewForm, rating: Number(e.target.value) })
               }
               className="w-full border p-3 rounded-lg"
             >
-              <option value={5}>⭐⭐⭐⭐⭐</option>
-              <option value={4}>⭐⭐⭐⭐</option>
-              <option value={3}>⭐⭐⭐</option>
-              <option value={2}>⭐⭐</option>
-              <option value={1}>⭐</option>
+              <option value={5}>⭐⭐⭐⭐⭐ (5)</option>
+              <option value={4}>⭐⭐⭐⭐ (4)</option>
+              <option value={3}>⭐⭐⭐ (3)</option>
+              <option value={2}>⭐⭐ (2)</option>
+              <option value={1}>⭐ (1)</option>
             </select>
 
             <textarea
