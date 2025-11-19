@@ -2,18 +2,14 @@ import React, { useState, useEffect } from "react";
 import { productsAPI } from "../api";
 import BackButton from "../components/BackButton";
 
-const ProductDetailsPage = ({
-  selectedProduct,
-  setCurrentPage,
-  user,
-  addToCart,
-}) => {
-  // 🔥 Force page to scroll to top on load
+const ProductDetailsPage = ({ selectedProduct, setCurrentPage, user, addToCart }) => {
+
+  // 🔥 Scroll to top when page loads
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Safety: If product missing
+  // If product missing
   if (!selectedProduct) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -22,7 +18,7 @@ const ProductDetailsPage = ({
     );
   }
 
-  // ---------------- IMAGES ----------------
+  // ---------------- IMAGE LOGIC (supports single + multiple images) ----------------
   const allImages =
     selectedProduct.images?.length > 0
       ? selectedProduct.images
@@ -32,7 +28,7 @@ const ProductDetailsPage = ({
 
   const [mainImage, setMainImage] = useState(allImages[0]);
 
-  // ---------------- SIZE + COLOR ----------------
+  // ---------------- SIZE & COLOR SELECTION ----------------
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
 
@@ -56,11 +52,6 @@ const ProductDetailsPage = ({
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
 
-    if (!user) {
-      setErrorMsg("You must be logged in to submit a review.");
-      return;
-    }
-
     try {
       setLoadingReview(true);
       setErrorMsg("");
@@ -68,17 +59,18 @@ const ProductDetailsPage = ({
       const payload = {
         rating: reviewForm.rating,
         comment: reviewForm.comment,
+        userName: user ? user.name : "Guest",
       };
 
       const updated = await productsAPI.addReview(
         selectedProduct._id,
         payload,
-        user.token
+        user?.token
       );
 
       selectedProduct.reviews = updated.data.reviews;
-
       alert("Review submitted!");
+
       setReviewForm({ rating: 5, comment: "" });
     } catch (err) {
       setErrorMsg(err.message || "Failed to submit review");
@@ -87,15 +79,15 @@ const ProductDetailsPage = ({
     }
   };
 
-  // ---------------- UI ----------------
   return (
     <div className="min-h-screen bg-white pt-24 pb-12">
+
       <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12">
 
         {/* BACK BUTTON */}
         <BackButton setCurrentPage={setCurrentPage} />
 
-        {/* ----------- IMAGES ----------- */}
+        {/* ---------------- PRODUCT IMAGES ---------------- */}
         <div>
           <img
             src={mainImage}
@@ -111,17 +103,16 @@ const ProductDetailsPage = ({
                   src={img}
                   alt="thumb"
                   onClick={() => setMainImage(img)}
-                  className={`
-                    w-20 h-20 rounded-lg object-cover cursor-pointer border
-                    ${mainImage === img ? "border-pink-500" : "border-gray-300"}
-                  `}
+                  className={`w-20 h-20 rounded-lg object-cover cursor-pointer border 
+                  ${mainImage === img ? "border-pink-500" : "border-gray-300"}
+                `}
                 />
               ))}
             </div>
           )}
         </div>
 
-        {/* ----------- PRODUCT INFO ----------- */}
+        {/* ---------------- PRODUCT DETAILS ---------------- */}
         <div>
           <h1 className="text-4xl font-serif text-gray-900 mb-4">
             {selectedProduct.name}
@@ -132,15 +123,13 @@ const ProductDetailsPage = ({
           </p>
 
           <h2 className="text-3xl font-bold text-pink-600 mb-8">
-            ₦{selectedProduct.price?.toLocaleString()}
+            ₦{selectedProduct.price.toLocaleString()}
           </h2>
 
-          {/* SIZE OPTIONS */}
+          {/* ---------- SIZE PICKER ---------- */}
           {selectedProduct.sizes?.length > 0 && (
             <>
-              <h3 className="font-semibold text-gray-800 text-xl mb-3">
-                Choose Size
-              </h3>
+              <h3 className="font-semibold text-gray-800 text-xl mb-3">Choose Size</h3>
 
               <div className="flex gap-3 flex-wrap">
                 {selectedProduct.sizes.map((size, i) => (
@@ -149,10 +138,9 @@ const ProductDetailsPage = ({
                     onClick={() => setSelectedSize(size)}
                     className={`
                       px-4 py-2 border rounded-lg 
-                      ${
-                        selectedSize === size
-                          ? "bg-pink-500 text-white border-pink-500"
-                          : "bg-white text-gray-700 border-gray-300"
+                      ${selectedSize === size
+                        ? "bg-pink-500 text-white border-pink-500"
+                        : "bg-white text-gray-700 border-gray-300"
                       }
                     `}
                   >
@@ -163,12 +151,10 @@ const ProductDetailsPage = ({
             </>
           )}
 
-          {/* COLOR OPTIONS */}
+          {/* ---------- COLOR PICKER ---------- */}
           {selectedProduct.colors?.length > 0 && (
             <>
-              <h3 className="font-semibold text-gray-800 text-xl mt-8 mb-3">
-                Choose Color
-              </h3>
+              <h3 className="font-semibold text-gray-800 text-xl mt-8 mb-3">Choose Color</h3>
 
               <div className="flex gap-3 flex-wrap">
                 {selectedProduct.colors.map((color, i) => (
@@ -176,11 +162,10 @@ const ProductDetailsPage = ({
                     key={i}
                     onClick={() => setSelectedColor(color)}
                     className={`
-                      px-4 py-2 border rounded-lg 
-                      ${
-                        selectedColor === color
-                          ? "bg-purple-600 text-white border-purple-600"
-                          : "bg-white text-gray-700 border-gray-300"
+                      px-4 py-2 border rounded-lg
+                      ${selectedColor === color
+                        ? "bg-purple-600 text-white border-purple-600"
+                        : "bg-white text-gray-700 border-gray-300"
                       }
                     `}
                   >
@@ -191,18 +176,19 @@ const ProductDetailsPage = ({
             </>
           )}
 
-          {/* ADD TO CART BUTTON */}
+          {/* ---------- ADD TO CART ---------- */}
           <button
             onClick={handleAddToCart}
             className="w-full mt-10 bg-gradient-to-r from-pink-400 to-purple-500
-              text-white py-4 rounded-xl text-lg shadow hover:scale-[1.03]"
+            text-white py-4 rounded-xl text-lg shadow hover:scale-[1.03]"
           >
             Add to Cart
           </button>
+
         </div>
       </div>
 
-      {/* ----------- REVIEWS SECTION ----------- */}
+      {/* ---------------- REVIEWS SECTION ---------------- */}
       <div className="max-w-4xl mx-auto px-4 mt-20">
         <h2 className="text-3xl font-serif mb-6 text-gray-900">
           Customer Reviews
@@ -214,13 +200,9 @@ const ProductDetailsPage = ({
               <div key={i} className="bg-gray-50 p-4 rounded-xl shadow">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold text-gray-900">{rev.userName}</p>
-                  <span className="text-yellow-500">
-                    {"⭐".repeat(rev.rating)}
-                  </span>
+                  <span className="text-yellow-500">{"⭐".repeat(rev.rating)}</span>
                 </div>
-
                 <p className="text-gray-700 mt-2">{rev.comment}</p>
-
                 <p className="text-gray-400 text-sm mt-1">
                   {new Date(rev.createdAt).toLocaleString()}
                 </p>
@@ -231,54 +213,49 @@ const ProductDetailsPage = ({
           <p className="text-gray-600">No reviews yet.</p>
         )}
 
-        {/* Review Form */}
+        {/* ---------------- WRITE REVIEW FORM ---------------- */}
         <div className="mt-10 bg-white shadow p-6 rounded-xl">
           <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
 
-          {!user ? (
-            <p className="text-red-600">
-              You must be logged in to submit a review.
-            </p>
-          ) : (
-            <form onSubmit={handleReviewSubmit} className="space-y-4">
-              {errorMsg && <p className="text-red-500">{errorMsg}</p>}
+          <form onSubmit={handleReviewSubmit} className="space-y-4">
+            {errorMsg && <p className="text-red-500">{errorMsg}</p>}
 
-              <select
-                required
-                value={reviewForm.rating}
-                onChange={(e) =>
-                  setReviewForm({ ...reviewForm, rating: e.target.value })
-                }
-                className="w-full border p-3 rounded-lg"
-              >
-                <option value={5}>⭐⭐⭐⭐⭐</option>
-                <option value={4}>⭐⭐⭐⭐</option>
-                <option value={3}>⭐⭐⭐</option>
-                <option value={2}>⭐⭐</option>
-                <option value={1}>⭐</option>
-              </select>
+            <select
+              required
+              value={reviewForm.rating}
+              onChange={(e) =>
+                setReviewForm({ ...reviewForm, rating: e.target.value })
+              }
+              className="w-full border p-3 rounded-lg"
+            >
+              <option value={5}>⭐⭐⭐⭐⭐</option>
+              <option value={4}>⭐⭐⭐⭐</option>
+              <option value={3}>⭐⭐⭐</option>
+              <option value={2}>⭐⭐</option>
+              <option value={1}>⭐</option>
+            </select>
 
-              <textarea
-                required
-                placeholder="Write your review..."
-                rows={4}
-                value={reviewForm.comment}
-                onChange={(e) =>
-                  setReviewForm({ ...reviewForm, comment: e.target.value })
-                }
-                className="w-full border p-3 rounded-lg"
-              />
+            <textarea
+              required
+              placeholder="Write your review..."
+              rows={4}
+              value={reviewForm.comment}
+              onChange={(e) =>
+                setReviewForm({ ...reviewForm, comment: e.target.value })
+              }
+              className="w-full border p-3 rounded-lg"
+            />
 
-              <button
-                disabled={loadingReview}
-                className="bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600"
-              >
-                {loadingReview ? "Submitting..." : "Submit Review"}
-              </button>
-            </form>
-          )}
+            <button
+              disabled={loadingReview}
+              className="bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600"
+            >
+              {loadingReview ? "Submitting..." : "Submit Review"}
+            </button>
+          </form>
         </div>
       </div>
+
     </div>
   );
 };

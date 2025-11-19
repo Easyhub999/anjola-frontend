@@ -66,7 +66,7 @@ const AdminPage = ({ user, products, setProducts }) => {
       }
 
       setImagePreview(uploadedImages);
-      alert("Images uploaded successfully!");
+      alert("Images uploaded successfully my wife!❤️");
     } catch (err) {
       console.error(err);
       alert("Upload failed");
@@ -112,7 +112,7 @@ const AdminPage = ({ user, products, setProducts }) => {
       });
       setImagePreview([]);
 
-      alert("Product added successfully!");
+      alert("Product added successfully my wife!❤️");
     } catch (err) {
       alert("Failed to add product: " + err.message);
     }
