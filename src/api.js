@@ -147,11 +147,9 @@ export const productsAPI = {
       if (filters.category && filters.category !== "all") {
         queryParams.append("category", filters.category);
       }
-
       if (filters.search) {
         queryParams.append("search", filters.search);
       }
-
       if (filters.featured) {
         queryParams.append("featured", "true");
       }
@@ -162,14 +160,12 @@ export const productsAPI = {
 
       const response = await fetch(url);
       const data = await handleResponse(response);
-
       return data.data;
     } catch (error) {
       console.error("Get products error:", error);
       throw error;
     }
   },
-
 
   // Create product
   createProduct: async (productData, token) => {
@@ -191,7 +187,6 @@ export const productsAPI = {
     }
   },
 
-
   // Update product
   updateProduct: async (productId, productData, token) => {
     try {
@@ -212,7 +207,6 @@ export const productsAPI = {
     }
   },
 
-
   // Delete product
   deleteProduct: async (productId, token) => {
     try {
@@ -230,26 +224,27 @@ export const productsAPI = {
     }
   },
 
-  // ✅ ADD REVIEW (CORRECT POSITION)
+  // ⭐ ADD REVIEW
   addReview: async (productId, reviewData, token) => {
     try {
+      const headers = { "Content-Type": "application/json" };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${API_URL}/products/${productId}/reviews`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers,
         body: JSON.stringify(reviewData)
       });
 
       const data = await handleResponse(response);
-      return data.data;
+      return data.data; // this will be updated product
     } catch (error) {
       console.error("Add review error:", error);
       throw error;
     }
   }
-
 };
 
 // ==========================================
