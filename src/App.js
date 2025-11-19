@@ -214,9 +214,9 @@ function App() {
       )}
 
       {/* PRODUCT DETAILS PAGE */}
-      {currentPage === 'product-details' && selectedProduct && (
+      {currentPage === 'product' && selectedProduct && (
         <ProductDetailPage
-          product={selectedProduct}
+          selectedProduct={selectedProduct}
           addToCart={addToCart}
           user={user}
           setCurrentPage={setCurrentPage}

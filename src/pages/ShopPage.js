@@ -63,7 +63,7 @@ const ShopPage = ({
   // OPEN PRODUCT DETAILS PAGE
   const handleOpenProduct = (product) => {
     setSelectedProduct(product);
-    setCurrentPage("product-details");
+    setCurrentPage('product');
   };
 
   return (
