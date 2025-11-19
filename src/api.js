@@ -228,29 +228,29 @@ export const productsAPI = {
       console.error("Delete product error:", error);
       throw error;
     }
-  }
-};
+  },
 
-    // Add a review to a product
+  // ✅ ADD REVIEW (CORRECT POSITION)
   addReview: async (productId, reviewData, token) => {
     try {
       const response = await fetch(`${API_URL}/products/${productId}/reviews`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify(reviewData)
-    });
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(reviewData)
+      });
 
-    const data = await handleResponse(response);
-    return data.data;
-  } catch (error) {
-    console.error("Add review error:", error);
-    throw error;
+      const data = await handleResponse(response);
+      return data.data;
+    } catch (error) {
+      console.error("Add review error:", error);
+      throw error;
+    }
   }
-}
 
+};
 
 // ==========================================
 // ORDERS API
