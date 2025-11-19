@@ -102,7 +102,7 @@ const AdminPage = ({ user, products, setProducts }) => {
       setNewProduct({
         name: '',
         price: '',
-        category: 'bags',
+        category: '',
         description: '',
         images: [],
         sizes: [],
