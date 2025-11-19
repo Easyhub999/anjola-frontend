@@ -8,7 +8,6 @@ const ProductDetailsPage = ({
   user,
   addToCart,
 }) => {
-  // SAFETY CHECK: If product is missing, redirect back
   if (!selectedProduct) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -17,10 +16,9 @@ const ProductDetailsPage = ({
     );
   }
 
-  // 🟢 BACKWARD-COMPATIBLE IMAGE HANDLING
-  const mainImage =
-    selectedProduct.images?.[0] || selectedProduct.image || "/placeholder.png";
-
+  // ----------------------------------------------------
+  // IMAGE GALLERY LOGIC (Click small image to change big one)
+  // ----------------------------------------------------
   const allImages =
     selectedProduct.images?.length > 0
       ? selectedProduct.images
@@ -28,6 +26,25 @@ const ProductDetailsPage = ({
       ? [selectedProduct.image]
       : [];
 
+  const [mainImage, setMainImage] = useState(allImages[0]);
+
+  // ----------------------------------------------------
+  // SIZE & COLOR SELECTION
+  // ----------------------------------------------------
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null);
+
+  const handleAddToCart = () => {
+    addToCart({
+      ...selectedProduct,
+      selectedSize,
+      selectedColor,
+    });
+  };
+
+  // ----------------------------------------------------
+  // REVIEWS
+  // ----------------------------------------------------
   const [reviewForm, setReviewForm] = useState({
     rating: 5,
     comment: "",
@@ -53,17 +70,16 @@ const ProductDetailsPage = ({
         comment: reviewForm.comment,
       };
 
-      const updatedProduct = await productsAPI.addReview(
+      const updated = await productsAPI.addReview(
         selectedProduct._id,
         payload,
         user.token
       );
 
-      // update UI
-      selectedProduct.reviews = updatedProduct.data.reviews;
-
+      selectedProduct.reviews = updated.data.reviews;
       alert("Review submitted!");
       setReviewForm({ rating: 5, comment: "" });
+
     } catch (err) {
       setErrorMsg(err.message || "Failed to submit review");
     } finally {
@@ -73,20 +89,20 @@ const ProductDetailsPage = ({
 
   return (
     <div className="min-h-screen bg-white pt-24 pb-12">
-
       <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12">
 
-        {/* BACK BUTTON (ALWAYS AT THE TOP) */}
+        {/* BACK BUTTON */}
         <BackButton setCurrentPage={setCurrentPage} />
 
-        {/* ===================== PRODUCT IMAGES ===================== */}
+        {/* ------------------ IMAGES ------------------ */}
         <div>
           <img
             src={mainImage}
             alt={selectedProduct.name}
-            className="w-full rounded-xl shadow"
+            className="w-full rounded-xl shadow-lg"
           />
 
+          {/* THUMBNAILS */}
           {allImages.length > 1 && (
             <div className="flex gap-3 mt-4">
               {allImages.map((img, i) => (
@@ -94,14 +110,17 @@ const ProductDetailsPage = ({
                   key={i}
                   src={img}
                   alt="thumb"
-                  className="w-20 h-20 object-cover rounded-lg border cursor-pointer"
+                  onClick={() => setMainImage(img)}
+                  className={`w-20 h-20 rounded-lg object-cover cursor-pointer border 
+                    ${mainImage === img ? "border-pink-500" : "border-gray-300"}
+                  `}
                 />
               ))}
             </div>
           )}
         </div>
 
-        {/* ===================== PRODUCT DETAILS ===================== */}
+        {/* ------------------ PRODUCT DETAILS ------------------ */}
         <div>
           <h1 className="text-4xl font-serif text-gray-900 mb-4">
             {selectedProduct.name}
@@ -112,64 +131,78 @@ const ProductDetailsPage = ({
           </p>
 
           <h2 className="text-3xl font-bold text-pink-600 mb-8">
-            ₦{selectedProduct.price?.toLocaleString()}
+            ₦{selectedProduct.price.toLocaleString()}
           </h2>
 
+          {/* --------- SIZES --------- */}
+          {selectedProduct.sizes?.length > 0 && (
+            <>
+              <h3 className="font-semibold text-gray-800 text-xl mb-3">
+                Choose Size
+              </h3>
+
+              <div className="flex gap-3 flex-wrap">
+                {selectedProduct.sizes.map((size, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedSize(size)}
+                    className={`
+                      px-4 py-2 border rounded-lg 
+                      ${selectedSize === size 
+                        ? "bg-pink-500 text-white border-pink-500" 
+                        : "bg-white text-gray-700 border-gray-300"}
+                    `}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* --------- COLORS --------- */}
+          {selectedProduct.colors?.length > 0 && (
+            <>
+              <h3 className="font-semibold text-gray-800 text-xl mt-8 mb-3">
+                Choose Color
+              </h3>
+
+              <div className="flex gap-3 flex-wrap">
+                {selectedProduct.colors.map((color, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedColor(color)}
+                    className={`
+                      px-4 py-2 border rounded-lg 
+                      ${selectedColor === color 
+                        ? "bg-purple-600 text-white border-purple-600" 
+                        : "bg-white text-gray-700 border-gray-300"}
+                    `}
+                  >
+                    {color}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* --------- ADD TO CART (NOW BELOW OPTIONS) --------- */}
           <button
-            onClick={() => addToCart(selectedProduct)}
-            className="w-full bg-gradient-to-r from-pink-400 to-purple-500
+            onClick={handleAddToCart}
+            className="w-full mt-10 bg-gradient-to-r from-pink-400 to-purple-500
               text-white py-4 rounded-xl text-lg shadow hover:scale-[1.03]"
           >
             Add to Cart
           </button>
-
-          {/* SIZES */}
-          {selectedProduct.sizes?.length > 0 && (
-            <>
-              <h3 className="mt-10 mb-3 font-semibold text-gray-800 text-xl">
-                Available Sizes
-              </h3>
-              <div className="flex gap-3">
-                {selectedProduct.sizes.map((s, i) => (
-                  <span
-                    key={i}
-                    className="px-4 py-2 border rounded-lg text-gray-700"
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* COLORS */}
-          {selectedProduct.colors?.length > 0 && (
-            <>
-              <h3 className="mt-10 mb-3 font-semibold text-gray-800 text-xl">
-                Available Colors
-              </h3>
-              <div className="flex gap-3">
-                {selectedProduct.colors.map((c, i) => (
-                  <span
-                    key={i}
-                    className="px-4 py-2 border rounded-lg text-gray-700"
-                  >
-                    {c}
-                  </span>
-                ))}
-              </div>
-            </>
-          )}
         </div>
       </div>
 
-      {/* ========================== REVIEWS SECTION ========================== */}
+      {/* ------------------ REVIEWS SECTION ------------------ */}
       <div className="max-w-4xl mx-auto px-4 mt-20">
         <h2 className="text-3xl font-serif mb-6 text-gray-900">
           Customer Reviews
         </h2>
 
-        {/* Review List */}
         {selectedProduct.reviews?.length > 0 ? (
           <div className="space-y-6">
             {selectedProduct.reviews.map((rev, i) => (
@@ -191,14 +224,12 @@ const ProductDetailsPage = ({
           <p className="text-gray-600">No reviews yet.</p>
         )}
 
-        {/* Review Form */}
+        {/* REVIEW FORM */}
         <div className="mt-10 bg-white shadow p-6 rounded-xl">
           <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
 
           {!user ? (
-            <p className="text-red-600 font-medium">
-              You must be logged in to submit a review.
-            </p>
+            <p className="text-red-600">You must be logged in to submit a review.</p>
           ) : (
             <form onSubmit={handleReviewSubmit} className="space-y-4">
               {errorMsg && <p className="text-red-500">{errorMsg}</p>}
@@ -211,11 +242,11 @@ const ProductDetailsPage = ({
                 }
                 className="w-full border p-3 rounded-lg"
               >
-                <option value={5}>⭐⭐⭐⭐⭐ (5)</option>
-                <option value={4}>⭐⭐⭐⭐ (4)</option>
-                <option value={3}>⭐⭐⭐ (3)</option>
-                <option value={2}>⭐⭐ (2)</option>
-                <option value={1}>⭐ (1)</option>
+                <option value={5}>⭐⭐⭐⭐⭐</option>
+                <option value={4}>⭐⭐⭐⭐</option>
+                <option value={3}>⭐⭐⭐</option>
+                <option value={2}>⭐⭐</option>
+                <option value={1}>⭐</option>
               </select>
 
               <textarea
