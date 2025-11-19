@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { productsAPI } from "../api";
 import BackButton from "../components/BackButton";
-import React, { useState, useEffect } from "react";
 
 const ProductDetailsPage = ({
   selectedProduct,
@@ -9,12 +8,12 @@ const ProductDetailsPage = ({
   user,
   addToCart,
 }) => {
-
-// 🔥 Force page to scroll to top on load
+  // 🔥 Force page to scroll to top on load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Safety: If product missing
   if (!selectedProduct) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -23,9 +22,7 @@ const ProductDetailsPage = ({
     );
   }
 
-  // ----------------------------------------------------
-  // IMAGE GALLERY LOGIC (Click small image to change big one)
-  // ----------------------------------------------------
+  // ---------------- IMAGES ----------------
   const allImages =
     selectedProduct.images?.length > 0
       ? selectedProduct.images
@@ -35,9 +32,7 @@ const ProductDetailsPage = ({
 
   const [mainImage, setMainImage] = useState(allImages[0]);
 
-  // ----------------------------------------------------
-  // SIZE & COLOR SELECTION
-  // ----------------------------------------------------
+  // ---------------- SIZE + COLOR ----------------
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
 
@@ -49,9 +44,7 @@ const ProductDetailsPage = ({
     });
   };
 
-  // ----------------------------------------------------
-  // REVIEWS
-  // ----------------------------------------------------
+  // ---------------- REVIEWS ----------------
   const [reviewForm, setReviewForm] = useState({
     rating: 5,
     comment: "",
@@ -84,9 +77,9 @@ const ProductDetailsPage = ({
       );
 
       selectedProduct.reviews = updated.data.reviews;
+
       alert("Review submitted!");
       setReviewForm({ rating: 5, comment: "" });
-
     } catch (err) {
       setErrorMsg(err.message || "Failed to submit review");
     } finally {
@@ -94,6 +87,7 @@ const ProductDetailsPage = ({
     }
   };
 
+  // ---------------- UI ----------------
   return (
     <div className="min-h-screen bg-white pt-24 pb-12">
       <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12">
@@ -101,7 +95,7 @@ const ProductDetailsPage = ({
         {/* BACK BUTTON */}
         <BackButton setCurrentPage={setCurrentPage} />
 
-        {/* ------------------ IMAGES ------------------ */}
+        {/* ----------- IMAGES ----------- */}
         <div>
           <img
             src={mainImage}
@@ -109,7 +103,6 @@ const ProductDetailsPage = ({
             className="w-full rounded-xl shadow-lg"
           />
 
-          {/* THUMBNAILS */}
           {allImages.length > 1 && (
             <div className="flex gap-3 mt-4">
               {allImages.map((img, i) => (
@@ -118,7 +111,8 @@ const ProductDetailsPage = ({
                   src={img}
                   alt="thumb"
                   onClick={() => setMainImage(img)}
-                  className={`w-20 h-20 rounded-lg object-cover cursor-pointer border 
+                  className={`
+                    w-20 h-20 rounded-lg object-cover cursor-pointer border
                     ${mainImage === img ? "border-pink-500" : "border-gray-300"}
                   `}
                 />
@@ -127,7 +121,7 @@ const ProductDetailsPage = ({
           )}
         </div>
 
-        {/* ------------------ PRODUCT DETAILS ------------------ */}
+        {/* ----------- PRODUCT INFO ----------- */}
         <div>
           <h1 className="text-4xl font-serif text-gray-900 mb-4">
             {selectedProduct.name}
@@ -138,10 +132,10 @@ const ProductDetailsPage = ({
           </p>
 
           <h2 className="text-3xl font-bold text-pink-600 mb-8">
-            ₦{selectedProduct.price.toLocaleString()}
+            ₦{selectedProduct.price?.toLocaleString()}
           </h2>
 
-          {/* --------- SIZES --------- */}
+          {/* SIZE OPTIONS */}
           {selectedProduct.sizes?.length > 0 && (
             <>
               <h3 className="font-semibold text-gray-800 text-xl mb-3">
@@ -155,9 +149,11 @@ const ProductDetailsPage = ({
                     onClick={() => setSelectedSize(size)}
                     className={`
                       px-4 py-2 border rounded-lg 
-                      ${selectedSize === size 
-                        ? "bg-pink-500 text-white border-pink-500" 
-                        : "bg-white text-gray-700 border-gray-300"}
+                      ${
+                        selectedSize === size
+                          ? "bg-pink-500 text-white border-pink-500"
+                          : "bg-white text-gray-700 border-gray-300"
+                      }
                     `}
                   >
                     {size}
@@ -167,7 +163,7 @@ const ProductDetailsPage = ({
             </>
           )}
 
-          {/* --------- COLORS --------- */}
+          {/* COLOR OPTIONS */}
           {selectedProduct.colors?.length > 0 && (
             <>
               <h3 className="font-semibold text-gray-800 text-xl mt-8 mb-3">
@@ -181,9 +177,11 @@ const ProductDetailsPage = ({
                     onClick={() => setSelectedColor(color)}
                     className={`
                       px-4 py-2 border rounded-lg 
-                      ${selectedColor === color 
-                        ? "bg-purple-600 text-white border-purple-600" 
-                        : "bg-white text-gray-700 border-gray-300"}
+                      ${
+                        selectedColor === color
+                          ? "bg-purple-600 text-white border-purple-600"
+                          : "bg-white text-gray-700 border-gray-300"
+                      }
                     `}
                   >
                     {color}
@@ -193,7 +191,7 @@ const ProductDetailsPage = ({
             </>
           )}
 
-          {/* --------- ADD TO CART (NOW BELOW OPTIONS) --------- */}
+          {/* ADD TO CART BUTTON */}
           <button
             onClick={handleAddToCart}
             className="w-full mt-10 bg-gradient-to-r from-pink-400 to-purple-500
@@ -204,7 +202,7 @@ const ProductDetailsPage = ({
         </div>
       </div>
 
-      {/* ------------------ REVIEWS SECTION ------------------ */}
+      {/* ----------- REVIEWS SECTION ----------- */}
       <div className="max-w-4xl mx-auto px-4 mt-20">
         <h2 className="text-3xl font-serif mb-6 text-gray-900">
           Customer Reviews
@@ -220,7 +218,9 @@ const ProductDetailsPage = ({
                     {"⭐".repeat(rev.rating)}
                   </span>
                 </div>
+
                 <p className="text-gray-700 mt-2">{rev.comment}</p>
+
                 <p className="text-gray-400 text-sm mt-1">
                   {new Date(rev.createdAt).toLocaleString()}
                 </p>
@@ -231,12 +231,14 @@ const ProductDetailsPage = ({
           <p className="text-gray-600">No reviews yet.</p>
         )}
 
-        {/* REVIEW FORM */}
+        {/* Review Form */}
         <div className="mt-10 bg-white shadow p-6 rounded-xl">
           <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
 
           {!user ? (
-            <p className="text-red-600">You must be logged in to submit a review.</p>
+            <p className="text-red-600">
+              You must be logged in to submit a review.
+            </p>
           ) : (
             <form onSubmit={handleReviewSubmit} className="space-y-4">
               {errorMsg && <p className="text-red-500">{errorMsg}</p>}
