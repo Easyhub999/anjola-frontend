@@ -14,8 +14,8 @@ import ProfilePage from './pages/ProfilePage';
 import CheckoutPage from './pages/CheckoutPage';
 import AdminPage from './pages/AdminPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
-import { productsAPI } from './api';
 import ProductDetailPage from './pages/ProductDetailPage';
+import { productsAPI } from './api';
 
 function App() {
 
@@ -34,10 +34,14 @@ function App() {
   const [toast, setToast] = useState(null);
   const [cartBump, setCartBump] = useState(false);
 
-  // Load from localStorage
+  /* ======================================================
+     🔥 1. Load user, cart, AND last page from localStorage
+     ====================================================== */
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const storedCart = localStorage.getItem('cart');
+    const savedPage = localStorage.getItem('currentPage');
+    const savedProduct = localStorage.getItem('selectedProduct');
 
     if (storedUser) {
       try { setUser(JSON.parse(storedUser)); } catch {}
@@ -46,9 +50,31 @@ function App() {
     if (storedCart) {
       try { setCart(JSON.parse(storedCart)); } catch {}
     }
+
+    // restore page
+    if (savedPage) setCurrentPage(savedPage);
+
+    // restore selected product ONLY if user was on product page
+    if (savedPage === 'product' && savedProduct) {
+      try { setSelectedProduct(JSON.parse(savedProduct)); } catch {}
+    }
+
   }, []);
 
-  // Fetch products
+  /* ======================================================
+     🔥 2. Save currentPage + selectedProduct to localStorage
+     ====================================================== */
+  useEffect(() => {
+    localStorage.setItem('currentPage', currentPage);
+
+    if (currentPage === 'product' && selectedProduct) {
+      localStorage.setItem('selectedProduct', JSON.stringify(selectedProduct));
+    }
+  }, [currentPage, selectedProduct]);
+
+  /* ======================================================
+     LOAD PRODUCTS FROM BACKEND
+     ====================================================== */
   useEffect(() => {
     const loadProducts = async () => {
       try {
@@ -65,12 +91,16 @@ function App() {
     loadProducts();
   }, []);
 
-  // Save cart
+  /* ======================================================
+     SAVE CART
+     ====================================================== */
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  // Toast animation
+  /* ======================================================
+     TOAST & CART FEEDBACK
+     ====================================================== */
   const triggerCartFeedback = (productName) => {
     setToast({
       id: Date.now(),
@@ -83,7 +113,9 @@ function App() {
     setTimeout(() => setToast(null), 2500);
   };
 
-  // Cart functions
+  /* ======================================================
+     CART FUNCTIONS
+     ====================================================== */
   const addToCart = (product) => {
     const exists = cart.find(item => item._id === product._id);
 
@@ -121,49 +153,34 @@ function App() {
 
   const clearCart = () => setCart([]);
 
-  // Loading
+  /* ======================================================
+     LOADING + ERROR UI
+     ====================================================== */
   if (loading) {
     return (
       <>
-        <Navigation
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          cart={cart}
-          showCart={showCart}
-          setShowCart={setShowCart}
-          showMobileMenu={showMobileMenu}
-          setShowMobileMenu={setShowMobileMenu}
-          user={user}
-          cartBump={cartBump}
-        />
+        <Navigation {...{ currentPage, setCurrentPage, cart, showCart, setShowCart, showMobileMenu, setShowMobileMenu, user, cartBump }} />
         <LoadingSpinner />
       </>
     );
   }
 
-  // Error
   if (error && products.length === 0) {
     return (
       <>
-        <Navigation
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          cart={cart}
-          showCart={showCart}
-          setShowCart={setShowCart}
-          showMobileMenu={showMobileMenu}
-          setShowMobileMenu={setShowMobileMenu}
-          user={user}
-          cartBump={cartBump}
-        />
+        <Navigation {...{ currentPage, setCurrentPage, cart, showCart, setShowCart, showMobileMenu, setShowMobileMenu, user, cartBump }} />
         <ErrorDisplay message={error} />
       </>
     );
   }
 
+  /* ======================================================
+     MAIN RENDER
+     ====================================================== */
   return (
     <div className="App">
 
+      {/* TOP NAV */}
       <Navigation
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
@@ -176,6 +193,7 @@ function App() {
         cartBump={cartBump}
       />
 
+      {/* CART SIDEBAR */}
       <CartSidebar
         showCart={showCart}
         setShowCart={setShowCart}
@@ -186,7 +204,7 @@ function App() {
         setCurrentPage={setCurrentPage}
       />
 
-      {/* HOME */}
+      {/* PAGES */}
       {currentPage === 'home' && (
         <HomePage
           products={products}
@@ -198,7 +216,6 @@ function App() {
         />
       )}
 
-      {/* SHOP — UPDATED WITH NEW PROPS */}
       {currentPage === 'shop' && (
         <ShopPage
           products={products}
@@ -213,7 +230,6 @@ function App() {
         />
       )}
 
-      {/* PRODUCT DETAILS PAGE */}
       {currentPage === 'product' && selectedProduct && (
         <ProductDetailPage
           selectedProduct={selectedProduct}
@@ -227,18 +243,11 @@ function App() {
       {currentPage === 'contact' && <ContactPage />}
 
       {currentPage === 'auth' && (
-        <AuthPage
-          setUser={setUser}
-          setCurrentPage={setCurrentPage}
-        />
+        <AuthPage setUser={setUser} setCurrentPage={setCurrentPage} />
       )}
 
       {currentPage === 'profile' && user && (
-        <ProfilePage
-          user={user}
-          setUser={setUser}
-          setCurrentPage={setCurrentPage}
-        />
+        <ProfilePage user={user} setUser={setUser} setCurrentPage={setCurrentPage} />
       )}
 
       {currentPage === 'checkout' && (
@@ -252,33 +261,19 @@ function App() {
       )}
 
       {currentPage === 'admin' && (
-        <AdminPage
-          user={user}
-          products={products}
-          setProducts={setProducts}
-        />
+        <AdminPage user={user} products={products} setProducts={setProducts} />
       )}
 
-      {currentPage === 'admin-orders' && (
-        <AdminOrdersPage user={user} />
-      )}
+      {currentPage === 'admin-orders' && <AdminOrdersPage user={user} />}
 
-      {/* Toast UI */}
+      {/* TOAST */}
       {toast && (
-        <div
-          className="
-            fixed top-20 right-4 sm:right-8
-            bg-gray-900 text-white text-sm
-            px-4 py-3 rounded-2xl shadow-xl
-            animate-fade-in-up flex items-center
-            gap-2 z-[60]
-          "
-        >
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
+        <div className="fixed top-20 right-4 bg-gray-900 text-white text-sm px-4 py-3 rounded-2xl shadow-xl animate-fade-in-up z-[60]">
           <span>{toast.message}</span>
         </div>
       )}
 
+      {/* FOOTER */}
       <Footer setCurrentPage={setCurrentPage} />
 
     </div>

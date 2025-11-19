@@ -1,4 +1,4 @@
-// ================= SHOPPAGE.JS — FINAL VERSION =================
+// ================= SHOPPAGE.JS — FINAL VERSION WITH PERSISTENCE =================
 
 import React, { useState, useEffect } from 'react';
 import { Search, Heart } from 'lucide-react';
@@ -34,6 +34,34 @@ const ShopPage = ({
   ];
 
   const PRODUCTS_PER_PAGE = 20;
+
+  // =====================================================
+  // 🔥 RESTORE SAVED FILTERS (RUNS ONCE WHEN PAGE LOADS)
+  // =====================================================
+  useEffect(() => {
+    const savedSearch = localStorage.getItem("shopSearch");
+    const savedCategory = localStorage.getItem("shopCategory");
+    const savedPage = localStorage.getItem("shopPage");
+
+    if (savedSearch) setSearchQuery(savedSearch);
+    if (savedCategory) setSelectedCategory(savedCategory);
+    if (savedPage) setCurrentPageNumber(Number(savedPage));
+  }, []);
+
+  // =====================================================
+  // 🔥 SAVE FILTERS TO LOCALSTORAGE
+  // =====================================================
+  useEffect(() => {
+    localStorage.setItem("shopSearch", searchQuery);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    localStorage.setItem("shopCategory", selectedCategory);
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    localStorage.setItem("shopPage", currentPageNumber);
+  }, [currentPageNumber]);
 
   // FILTERS
   const filteredProducts =
