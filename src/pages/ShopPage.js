@@ -1,66 +1,69 @@
-// SHOPPAGE.JS (FULLY FIXED)
+// SHOPPAGE.JS — FINAL UPGRADED VERSION (FULLY SYNCED WITH BACKEND)
 
 import React, { useState, useEffect } from 'react';
 import { Search, Heart } from 'lucide-react';
 
-const ShopPage = ({ 
-  products, 
-  cart, 
-  addToCart, 
-  updateQuantity, 
-  searchQuery, 
+const ShopPage = ({
+  products,
+  cart,
+  addToCart,
+  updateQuantity,
+  searchQuery,
   setSearchQuery,
   setCurrentPage,
   setSelectedProduct
 }) => {
 
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [currentPageNumber, setCurrentPageNumber] = useState(1);
 
   const categories = [
-    'all',
-    'bags',
-    'self care essentials',
-    'jewelries',
-    'curated gift package',
-    'sunglasses',
-    'totes bag',
-    'hair accessories'
+    "all",
+    "bags",
+    "self care essentials",
+    "jewelries",
+    "curated gift package",
+    "sunglasses",
+    "totes bag",
+    "hair accessories"
   ];
 
   const PRODUCTS_PER_PAGE = 20;
 
-  // Category filter
+  // FILTER BY CATEGORY
   const filteredProducts =
-    selectedCategory === 'all'
+    selectedCategory === "all"
       ? products
       : products.filter((p) => p.category === selectedCategory);
 
-  // Search filter
+  // FILTER BY SEARCH
   const searchedProducts = filteredProducts.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Reset page on filter change
+  // Reset page when changing category/search
   useEffect(() => {
     setCurrentPageNumber(1);
   }, [selectedCategory, searchQuery]);
 
   const totalPages = Math.ceil(searchedProducts.length / PRODUCTS_PER_PAGE) || 1;
+
   const startIndex = (currentPageNumber - 1) * PRODUCTS_PER_PAGE;
   const currentProducts = searchedProducts.slice(
     startIndex,
     startIndex + PRODUCTS_PER_PAGE
   );
 
+  // CART QUANTITY
   const getCartItemQty = (id) => {
     const found = cart.find((item) => item._id === id);
     return found ? found.quantity : 0;
   };
 
+  // OPEN PRODUCT DETAILS PAGE
   const handleOpenProduct = (product) => {
     setSelectedProduct(product);
-    setCurrentPage('product-details');
+    setCurrentPage("product-details");
   };
 
   return (
@@ -71,7 +74,7 @@ const ShopPage = ({
           Our Collection
         </h1>
 
-        {/* Search */}
+        {/* ========================= SEARCH ========================= */}
         <div className="max-w-md mx-auto mb-8">
           <div className="relative">
             <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
@@ -80,29 +83,30 @@ const ShopPage = ({
               placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white"
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 
+              bg-white focus:outline-none focus:ring-2 focus:ring-pink-400"
             />
           </div>
         </div>
 
-        {/* Categories */}
+        {/* ========================= CATEGORIES ========================= */}
         <div className="flex justify-center gap-3 mb-10 flex-wrap">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-6 py-2 rounded-full capitalize text-sm md:text-base transition ${
-                selectedCategory === cat
-                  ? 'bg-pink-400 text-white shadow'
-                  : 'bg-white text-gray-700 hover:bg-pink-100'
-              }`}
+              className={`px-6 py-2 rounded-full capitalize text-sm md:text-base transition
+                ${selectedCategory === cat
+                  ? "bg-pink-400 text-white shadow"
+                  : "bg-white text-gray-700 hover:bg-pink-100"
+                }`}
             >
               {cat}
             </button>
           ))}
         </div>
 
-        {/* Products */}
+        {/* ========================= PRODUCT GRID ========================= */}
         {searchedProducts.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600 text-lg">No products found</p>
@@ -110,20 +114,25 @@ const ShopPage = ({
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+
               {currentProducts.map((product) => {
                 const qty = getCartItemQty(product._id);
 
                 return (
                   <div
                     key={product._id}
-                    className="bg-white rounded-lg shadow-lg overflow-hidden hover:scale-[1.02] hover:shadow-xl transition cursor-pointer"
+                    className="bg-white rounded-lg shadow-lg overflow-hidden 
+                    hover:scale-[1.02] hover:shadow-xl transition cursor-pointer"
                     onClick={() => handleOpenProduct(product)}
                   >
-
-                    {/* FIX: Product images now use product.images[0] */}
+                    {/* IMAGE FIX — product.images[0] */}
                     <div className="relative">
                       <img
-                        src={product.images?.[0] || "/placeholder.png"}
+                        src={
+                          product.images?.[0] ||
+                          product.image ||
+                          "/placeholder.png"
+                        }
                         alt={product.name}
                         className="w-full h-56 object-cover"
                       />
@@ -155,13 +164,15 @@ const ShopPage = ({
                           ₦{product.price.toLocaleString()}
                         </span>
 
+                        {/* CART LOGIC */}
                         {qty === 0 ? (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               addToCart(product);
                             }}
-                            className="bg-pink-400 text-white px-3 md:px-4 py-2 rounded-lg text-sm hover:bg-pink-500 transition"
+                            className="bg-pink-400 text-white px-3 md:px-4 py-2 rounded-lg 
+                            text-sm hover:bg-pink-500 transition"
                           >
                             Add
                           </button>
@@ -194,31 +205,29 @@ const ShopPage = ({
                         )}
                       </div>
                     </div>
-
                   </div>
                 );
               })}
             </div>
 
-            {/* Pagination */}
+            {/* ========================= PAGINATION ========================= */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 mt-10 flex-wrap">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <button
                     key={page}
                     onClick={() => setCurrentPageNumber(page)}
-                    className={`w-10 h-10 border rounded-md text-sm font-medium ${
-                      currentPageNumber === page
-                        ? 'bg-pink-500 text-white border-pink-500'
-                        : 'bg-white text-gray-700 border-gray-300 hover:bg-pink-100'
-                    }`}
+                    className={`w-10 h-10 border rounded-md text-sm font-medium
+                      ${currentPageNumber === page
+                        ? "bg-pink-500 text-white border-pink-500"
+                        : "bg-white text-gray-700 border-gray-300 hover:bg-pink-100"
+                      }`}
                   >
                     {page}
                   </button>
                 ))}
               </div>
             )}
-
           </>
         )}
       </div>

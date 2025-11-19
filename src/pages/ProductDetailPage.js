@@ -5,8 +5,9 @@ const ProductDetailsPage = ({
   selectedProduct,
   setCurrentPage,
   user,
-  addToCart
+  addToCart,
 }) => {
+  // SAFETY CHECK: If product is missing, redirect back
   if (!selectedProduct) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -15,9 +16,20 @@ const ProductDetailsPage = ({
     );
   }
 
+  // 🟢 BACKWARD-COMPATIBLE IMAGE HANDLING
+  const mainImage =
+    selectedProduct.images?.[0] || selectedProduct.image || "/placeholder.png";
+
+  const allImages =
+    selectedProduct.images?.length > 0
+      ? selectedProduct.images
+      : selectedProduct.image
+      ? [selectedProduct.image]
+      : [];
+
   const [reviewForm, setReviewForm] = useState({
     rating: 5,
-    comment: ""
+    comment: "",
   });
 
   const [loadingReview, setLoadingReview] = useState(false);
@@ -36,9 +48,8 @@ const ProductDetailsPage = ({
       setErrorMsg("");
 
       const payload = {
-        userName: user.name,
         rating: reviewForm.rating,
-        comment: reviewForm.comment
+        comment: reviewForm.comment,
       };
 
       const updatedProduct = await productsAPI.addReview(
@@ -47,11 +58,11 @@ const ProductDetailsPage = ({
         user.token
       );
 
-      // update UI (append review)
-      selectedProduct.reviews = updatedProduct.reviews;
+      // update UI
+      selectedProduct.reviews = updatedProduct.data.reviews;
 
-      setReviewForm({ rating: 5, comment: "" });
       alert("Review submitted!");
+      setReviewForm({ rating: 5, comment: "" });
     } catch (err) {
       setErrorMsg(err.message || "Failed to submit review");
     } finally {
@@ -62,37 +73,29 @@ const ProductDetailsPage = ({
   return (
     <div className="min-h-screen bg-white pt-24 pb-12">
       <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12">
-
-        {/* PRODUCT IMAGES */}
+        {/* ===================== PRODUCT IMAGES ===================== */}
         <div>
-          {selectedProduct.images?.length > 0 ? (
-            <img
-              src={selectedProduct.images[0]}
-              alt={selectedProduct.name}
-              className="w-full rounded-xl shadow"
-            />
-          ) : (
-            <img
-              src={selectedProduct.image}
-              alt={selectedProduct.name}
-              className="w-full rounded-xl shadow"
-            />
-          )}
+          <img
+            src={mainImage}
+            alt={selectedProduct.name}
+            className="w-full rounded-xl shadow"
+          />
 
-          {/* thumbnails */}
-          <div className="flex gap-3 mt-4">
-            {selectedProduct.images?.map((img, i) => (
-              <img
-                key={i}
-                src={img}
-                alt="thumb"
-                className="w-20 h-20 object-cover rounded-lg border cursor-pointer"
-              />
-            ))}
-          </div>
+          {allImages.length > 1 && (
+            <div className="flex gap-3 mt-4">
+              {allImages.map((img, i) => (
+                <img
+                  key={i}
+                  src={img}
+                  alt="thumb"
+                  className="w-20 h-20 object-cover rounded-lg border cursor-pointer"
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* PRODUCT INFO */}
+        {/* ===================== PRODUCT DETAILS ===================== */}
         <div>
           <h1 className="text-4xl font-serif text-gray-900 mb-4">
             {selectedProduct.name}
@@ -103,7 +106,7 @@ const ProductDetailsPage = ({
           </p>
 
           <h2 className="text-3xl font-bold text-pink-600 mb-8">
-            ₦{selectedProduct.price.toLocaleString()}
+            ₦{selectedProduct.price?.toLocaleString()}
           </h2>
 
           <button
@@ -192,9 +195,7 @@ const ProductDetailsPage = ({
             </p>
           ) : (
             <form onSubmit={handleReviewSubmit} className="space-y-4">
-              {errorMsg && (
-                <p className="text-red-500 text-sm">{errorMsg}</p>
-              )}
+              {errorMsg && <p className="text-red-500">{errorMsg}</p>}
 
               <select
                 required
