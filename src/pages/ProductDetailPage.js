@@ -59,7 +59,7 @@ const ProductDetailsPage = ({ selectedProduct, setCurrentPage, user, addToCart }
       const payload = {
         rating: reviewForm.rating,
         comment: reviewForm.comment,
-        userName: user ? user.name : "Guest",
+        userName: user ?.name || "Anonymous User",
       };
 
       const updated = await productsAPI.addReview(
