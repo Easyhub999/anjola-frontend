@@ -22,16 +22,15 @@ const ShopPage = ({
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [currentPageNumber, setCurrentPageNumber] = useState(1);
 
-  const categories = [
-    "all",
-    "bags",
-    "self care essentials",
-    "jewelries",
-    "curated gift package",
-    "sunglasses",
-    "totes bag",
-    "hair accessories"
-  ];
+  const dynamicCategories = Array.from(
+    new Set(
+      (products || [])
+        .map((p) => (p.category || "").trim())
+        .filter(Boolean)
+   )
+ );
+
+const categories = ["all", ...dynamicCategories];
 
   const PRODUCTS_PER_PAGE = 20;
 
@@ -63,15 +62,23 @@ const ShopPage = ({
     localStorage.setItem("shopPage", currentPageNumber);
   }, [currentPageNumber]);
 
-  // FILTERS
-  const filteredProducts =
-    selectedCategory === "all"
-      ? products
-      : products.filter((p) => p.category === selectedCategory);
+const filteredProducts = products.filter((p) => {
+  // 1. Only hide products admin manually marked invisible
+  if (p.visible === false) return false;
 
-  const searchedProducts = filteredProducts.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // 2. Category filter (case-insensitive)
+  if (selectedCategory !== "all") {
+    if ((p.category || "").toLowerCase().trim() !== selectedCategory.toLowerCase().trim()) {
+      return false;
+    }
+  }
+
+  return true;
+});
+// SEARCH FILTER
+const searchedProducts = filteredProducts.filter((p) =>
+  (p.name || "").toLowerCase().includes(searchQuery.toLowerCase().trim())
+);
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -166,6 +173,13 @@ const ShopPage = ({
                   >
                     {/* IMAGE FIX */}
                     <div className="relative">
+                      {/* 🔥OUT OF STOCK BADGE */}
+                      {typeof product.quantity === "number" && product.quantity <= 0 && (
+                        <div classname="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 text-xs rounded">
+                          Out of stock
+                          </div>
+                      )}
+
                       <img
                         src={
                           product.images?.[0] ||
@@ -195,8 +209,12 @@ const ShopPage = ({
                           ₦{product.price.toLocaleString()}
                         </span>
 
-                        {/* CART LOGIC */}
-                        {qty === 0 ? (
+                        {/* CART LOGIC with out of Stock */}
+                        {typeof product.quantity === "number" && product.quantity <= 0 ? (
+                          <span classname="text-xs font-semibold text-red-500">
+                            Out of Stock
+                            </span>
+                        ) : qty === 0 ? (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();

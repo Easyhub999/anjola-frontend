@@ -1,4 +1,4 @@
-// src/pages/ProductDetailPage.js
+// src/pages/ProductDetailsPage.js
 
 import React, { useState, useEffect } from "react";
 import { productsAPI } from "../api";
@@ -7,10 +7,10 @@ import BackButton from "../components/BackButton";
 const ProductDetailsPage = ({
   selectedProduct,
   setCurrentPage,
-  user,          // you can ignore user for reviews if you want
+  user,
   addToCart,
 }) => {
-  // if user somehow got here without a product
+  // If user magically arrives here without selecting a product
   if (!selectedProduct) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -19,22 +19,34 @@ const ProductDetailsPage = ({
     );
   }
 
-  // scroll to top whenever this page mounts
+  // Scroll to top when page loads
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // ---------- IMAGES ----------
+  // ============================
+  // 🔥 IMAGE HANDLING (SAFE)
+  // ============================
   const allImages =
-    selectedProduct.images?.length > 0
+    Array.isArray(selectedProduct.images) && selectedProduct.images.length > 0
       ? selectedProduct.images
       : selectedProduct.image
       ? [selectedProduct.image]
-      : [];
+      : ["/placeholder.png"];
 
-  const [mainImage, setMainImage] = useState(allImages[0] || "/placeholder.png");
+  const [mainImage, setMainImage] = useState(allImages[0]);
 
-  // ---------- SIZE & COLOR SELECTION ----------
+  // ============================
+  // 🔥 PRODUCT VISIBILITY & STOCK
+  // ============================
+  const isHidden = selectedProduct.visible === false;
+
+  const stock = Number(selectedProduct.quantity ?? 0);
+  const isOutOfStock = stock <= 0;
+
+  // ============================
+  // 🔥 SIZE & COLOR SELECTION
+  // ============================
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
 
@@ -46,13 +58,14 @@ const ProductDetailsPage = ({
     });
   };
 
-  // ---------- REVIEWS ----------
+  // ============================
+  // 🔥 REVIEWS
+  // ============================
   const [reviewForm, setReviewForm] = useState({
     name: "",
     rating: 5,
     comment: "",
   });
-
   const [loadingReview, setLoadingReview] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -77,10 +90,9 @@ const ProductDetailsPage = ({
       const updatedProduct = await productsAPI.addReview(
         selectedProduct._id,
         payload,
-        user?.token // can be undefined, it's fine
+        user?.token
       );
 
-      // update UI with latest reviews
       selectedProduct.reviews = updatedProduct.reviews;
 
       setReviewForm({ name: "", rating: 5, comment: "" });
@@ -93,6 +105,9 @@ const ProductDetailsPage = ({
     }
   };
 
+  // ============================
+  // 🔥 RENDER
+  // ============================
   return (
     <div className="min-h-screen bg-white pt-24 pb-12">
       <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12">
@@ -100,14 +115,33 @@ const ProductDetailsPage = ({
         {/* BACK BUTTON */}
         <BackButton setCurrentPage={setCurrentPage} />
 
-        {/* IMAGES */}
+        {/* ========================
+            MAIN IMAGES
+        ========================== */}
         <div>
-          <img
-            src={mainImage}
-            alt={selectedProduct.name}
-            className="w-full rounded-xl shadow-lg"
-          />
+          <div className="relative">
+            <img
+              src={mainImage}
+              alt={selectedProduct.name}
+              className="w-full rounded-xl shadow-lg"
+            />
 
+            {/* OUT OF STOCK BADGE */}
+            {isOutOfStock && (
+              <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded text-xs">
+                Out of Stock
+              </div>
+            )}
+
+            {/* HIDDEN BADGE */}
+            {isHidden && (
+              <div className="absolute top-3 right-3 bg-gray-700 text-white px-3 py-1 rounded text-xs">
+                Hidden
+              </div>
+            )}
+          </div>
+
+          {/* THUMBNAILS */}
           {allImages.length > 1 && (
             <div className="flex gap-3 mt-4">
               {allImages.map((img, i) => (
@@ -116,8 +150,12 @@ const ProductDetailsPage = ({
                   src={img}
                   alt="thumb"
                   onClick={() => setMainImage(img)}
-                  className={`w-24 h-24 object-cover rounded-1g cursor-pointer border 
-                    ${mainImage === img ? "border-pink-500" : "border-gray-300"}
+                  className={`w-24 h-24 object-cover rounded-lg cursor-pointer border 
+                    ${
+                      mainImage === img
+                        ? "border-pink-500"
+                        : "border-gray-300"
+                    }
                   `}
                 />
               ))}
@@ -125,7 +163,9 @@ const ProductDetailsPage = ({
           )}
         </div>
 
-        {/* PRODUCT INFO */}
+        {/* ========================
+            PRODUCT INFO
+        ========================== */}
         <div>
           <h1 className="text-4xl font-serif text-gray-900 mb-4">
             {selectedProduct.name}
@@ -135,9 +175,20 @@ const ProductDetailsPage = ({
             {selectedProduct.description}
           </p>
 
-          <h2 className="text-3xl font-bold text-pink-600 mb-8">
+          <h2 className="text-3xl font-bold text-pink-600 mb-4">
             ₦{selectedProduct.price.toLocaleString()}
           </h2>
+
+          {/* STOCK DISPLAY */}
+          {isOutOfStock ? (
+            <p className="text-red-600 font-semibold mb-4">
+              Currently out of stock
+            </p>
+          ) : (
+            <p className="text-green-600 font-semibold mb-4">
+              In Stock: {stock}
+            </p>
+          )}
 
           {/* SIZES */}
           {selectedProduct.sizes?.length > 0 && (
@@ -149,12 +200,13 @@ const ProductDetailsPage = ({
                 {selectedProduct.sizes.map((size, i) => (
                   <button
                     key={i}
-                    type="button"
                     onClick={() => setSelectedSize(size)}
                     className={`px-4 py-2 border rounded-lg 
-                      ${selectedSize === size
-                        ? "bg-pink-500 text-white border-pink-500"
-                        : "bg-white text-gray-700 border-gray-300"}
+                      ${
+                        selectedSize === size
+                          ? "bg-pink-500 text-white border-pink-500"
+                          : "bg-white text-gray-700 border-gray-300"
+                      }
                     `}
                   >
                     {size}
@@ -174,12 +226,13 @@ const ProductDetailsPage = ({
                 {selectedProduct.colors.map((color, i) => (
                   <button
                     key={i}
-                    type="button"
                     onClick={() => setSelectedColor(color)}
                     className={`px-4 py-2 border rounded-lg 
-                      ${selectedColor === color
-                        ? "bg-purple-600 text-white border-purple-600"
-                        : "bg-white text-gray-700 border-gray-300"}
+                      ${
+                        selectedColor === color
+                          ? "bg-purple-600 text-white border-purple-600"
+                          : "bg-white text-gray-700 border-gray-300"
+                      }
                     `}
                   >
                     {color}
@@ -189,18 +242,38 @@ const ProductDetailsPage = ({
             </>
           )}
 
-          {/* ADD TO CART */}
-          <button
-            onClick={handleAddToCart}
-            className="w-full mt-10 bg-gradient-to-r from-pink-400 to-purple-500
-              text-white py-4 rounded-xl text-lg shadow hover:scale-[1.03]"
-          >
-            Add to Cart
-          </button>
+          {/* ========================
+              ADD TO CART BUTTON
+          ========================== */}
+          {isHidden ? (
+            <button
+              disabled
+              className="w-full mt-10 bg-gray-400 text-white py-4 rounded-xl text-lg opacity-70"
+            >
+              Unavailable
+            </button>
+          ) : isOutOfStock ? (
+            <button
+              disabled
+              className="w-full mt-10 bg-gray-300 text-gray-600 py-4 rounded-xl text-lg opacity-70"
+            >
+              Out of Stock
+            </button>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              className="w-full mt-10 bg-gradient-to-r from-pink-400 to-purple-500
+                text-white py-4 rounded-xl text-lg shadow hover:scale-[1.03]"
+            >
+              Add to Cart
+            </button>
+          )}
         </div>
       </div>
 
-      {/* REVIEWS */}
+      {/* ========================
+          REVIEWS SECTION
+      ========================== */}
       <div className="max-w-4xl mx-auto px-4 mt-20">
         <h2 className="text-3xl font-serif mb-6 text-gray-900">
           Customer Reviews

@@ -18,7 +18,6 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import { productsAPI } from './api';
 
 function App() {
-
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedProduct, setSelectedProduct] = useState(null);
 
@@ -34,9 +33,9 @@ function App() {
   const [toast, setToast] = useState(null);
   const [cartBump, setCartBump] = useState(false);
 
-  /* ======================================================
-     🔥 1. Load user, cart, AND last page from localStorage
-     ====================================================== */
+  // ======================================================
+  // 🔥 1. Load user, cart, AND last page from localStorage
+  // ======================================================
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const storedCart = localStorage.getItem('cart');
@@ -44,11 +43,19 @@ function App() {
     const savedProduct = localStorage.getItem('selectedProduct');
 
     if (storedUser) {
-      try { setUser(JSON.parse(storedUser)); } catch {}
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        // ignore bad JSON
+      }
     }
 
     if (storedCart) {
-      try { setCart(JSON.parse(storedCart)); } catch {}
+      try {
+        setCart(JSON.parse(storedCart));
+      } catch {
+        // ignore bad JSON
+      }
     }
 
     // restore page
@@ -56,25 +63,31 @@ function App() {
 
     // restore selected product ONLY if user was on product page
     if (savedPage === 'product' && savedProduct) {
-      try { setSelectedProduct(JSON.parse(savedProduct)); } catch {}
+      try {
+        setSelectedProduct(JSON.parse(savedProduct));
+      } catch {
+        // ignore
+      }
     }
-
   }, []);
 
-  /* ======================================================
-     🔥 2. Save currentPage + selectedProduct to localStorage
-     ====================================================== */
+  // ======================================================
+  // 🔥 2. Save currentPage + selectedProduct to localStorage
+  // ======================================================
   useEffect(() => {
     localStorage.setItem('currentPage', currentPage);
 
     if (currentPage === 'product' && selectedProduct) {
-      localStorage.setItem('selectedProduct', JSON.stringify(selectedProduct));
+      localStorage.setItem(
+        'selectedProduct',
+        JSON.stringify(selectedProduct)
+      );
     }
   }, [currentPage, selectedProduct]);
 
-  /* ======================================================
-     LOAD PRODUCTS FROM BACKEND
-     ====================================================== */
+  // ======================================================
+  // LOAD PRODUCTS FROM BACKEND
+  // ======================================================
   useEffect(() => {
     const loadProducts = async () => {
       try {
@@ -82,6 +95,7 @@ function App() {
         const data = await productsAPI.getAllProducts();
         setProducts(data);
       } catch (err) {
+        console.error(err);
         setError('Failed to load products.');
       } finally {
         setLoading(false);
@@ -91,37 +105,48 @@ function App() {
     loadProducts();
   }, []);
 
-  /* ======================================================
-     SAVE CART
-     ====================================================== */
+  // ======================================================
+  // SAVE CART
+  // ======================================================
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  /* ======================================================
-     TOAST & CART FEEDBACK
-     ====================================================== */
-  const triggerCartFeedback = (productName) => {
-    setToast({
-      id: Date.now(),
-      message: `“${productName}” added to cart ✓`
-    });
+  // ======================================================
+  // TOAST & CART FEEDBACK
+  // ======================================================
+  const triggerCartFeedback = (message) => {
+    const id = Date.now();
+    setToast({ id, message });
 
     setCartBump(true);
     setTimeout(() => setCartBump(false), 300);
-
     setTimeout(() => setToast(null), 2500);
   };
 
-  /* ======================================================
-     CART FUNCTIONS
-     ====================================================== */
+  // ======================================================
+  // CART FUNCTIONS
+  // ======================================================
   const addToCart = (product) => {
-    const exists = cart.find(item => item._id === product._id);
+    // Extra safety: respect visibility + stock
+    if (product.visible === false) {
+      triggerCartFeedback('This product is currently unavailable.');
+      return;
+    }
+
+    if (
+      typeof product.quantity === 'number' &&
+      product.quantity <= 0
+    ) {
+      triggerCartFeedback('This product is out of stock.');
+      return;
+    }
+
+    const exists = cart.find((item) => item._id === product._id);
 
     if (exists) {
       setCart(
-        cart.map(item =>
+        cart.map((item) =>
           item._id === product._id
             ? { ...item, quantity: item.quantity + 1 }
             : item
@@ -131,12 +156,12 @@ function App() {
       setCart([...cart, { ...product, quantity: 1 }]);
     }
 
-    triggerCartFeedback(product.name);
+    triggerCartFeedback(`“${product.name}” added to cart ✓`);
   };
 
   const updateQuantity = (id, change) => {
     setCart(
-      cart.map(item =>
+      cart.map((item) =>
         item._id === id
           ? { ...item, quantity: Math.max(1, item.quantity + change) }
           : item
@@ -145,7 +170,7 @@ function App() {
   };
 
   const removeFromCart = (id) => {
-    setCart(cart.filter(item => item._id !== id));
+    setCart(cart.filter((item) => item._id !== id));
   };
 
   const getTotalPrice = () =>
@@ -153,13 +178,23 @@ function App() {
 
   const clearCart = () => setCart([]);
 
-  /* ======================================================
-     LOADING + ERROR UI
-     ====================================================== */
+  // ======================================================
+  // LOADING + ERROR UI
+  // ======================================================
   if (loading) {
     return (
       <>
-        <Navigation {...{ currentPage, setCurrentPage, cart, showCart, setShowCart, showMobileMenu, setShowMobileMenu, user, cartBump }} />
+        <Navigation
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          cart={cart}
+          showCart={showCart}
+          setShowCart={setShowCart}
+          showMobileMenu={showMobileMenu}
+          setShowMobileMenu={setShowMobileMenu}
+          user={user}
+          cartBump={cartBump}
+        />
         <LoadingSpinner />
       </>
     );
@@ -168,18 +203,27 @@ function App() {
   if (error && products.length === 0) {
     return (
       <>
-        <Navigation {...{ currentPage, setCurrentPage, cart, showCart, setShowCart, showMobileMenu, setShowMobileMenu, user, cartBump }} />
+        <Navigation
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          cart={cart}
+          showCart={showCart}
+          setShowCart={setShowCart}
+          showMobileMenu={showMobileMenu}
+          setShowMobileMenu={setShowMobileMenu}
+          user={user}
+          cartBump={cartBump}
+        />
         <ErrorDisplay message={error} />
       </>
     );
   }
 
-  /* ======================================================
-     MAIN RENDER
-     ====================================================== */
+  // ======================================================
+  // MAIN RENDER
+  // ======================================================
   return (
     <div className="App">
-
       {/* TOP NAV */}
       <Navigation
         currentPage={currentPage}
@@ -247,7 +291,11 @@ function App() {
       )}
 
       {currentPage === 'profile' && user && (
-        <ProfilePage user={user} setUser={setUser} setCurrentPage={setCurrentPage} />
+        <ProfilePage
+          user={user}
+          setUser={setUser}
+          setCurrentPage={setCurrentPage}
+        />
       )}
 
       {currentPage === 'checkout' && (
@@ -261,10 +309,16 @@ function App() {
       )}
 
       {currentPage === 'admin' && (
-        <AdminPage user={user} products={products} setProducts={setProducts} />
+        <AdminPage
+          user={user}
+          products={products}
+          setProducts={setProducts}
+        />
       )}
 
-      {currentPage === 'admin-orders' && <AdminOrdersPage user={user} />}
+      {currentPage === 'admin-orders' && (
+        <AdminOrdersPage user={user} />
+      )}
 
       {/* TOAST */}
       {toast && (
@@ -275,7 +329,6 @@ function App() {
 
       {/* FOOTER */}
       <Footer setCurrentPage={setCurrentPage} />
-
     </div>
   );
 }

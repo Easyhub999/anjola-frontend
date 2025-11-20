@@ -1,5 +1,5 @@
 import React from "react";
-import { ShoppingCart, User, Menu, X } from "lucide-react";
+import { ShoppingCart, User, Menu, X, AlertCircle } from "lucide-react";
 
 const Navigation = ({
   currentPage,
@@ -12,11 +12,26 @@ const Navigation = ({
   user,
   cartBump,
 }) => {
+
+  // CART COUNT BASED ON QUANTITY (not just number of items)
+  const cartTotalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  // CHECK IF CART HAS ANY OUT-OF-STOCK ITEMS
+  const cartHasOutOfStock = cart.some((item) => item.quantity > (item.stock || 999999));
+
+  // NAV ITEMS
+  const navItems = [
+    { label: "Home", page: "home" },
+    { label: "Shop", page: "shop" },
+    { label: "Blog", page: "blog" },
+    { label: "Contact", page: "contact" },
+  ];
+
   return (
     <nav className="bg-white/80 backdrop-blur-xl fixed top-0 left-0 w-full z-50 shadow-[0_2px_20px_rgba(0,0,0,0.05)]">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 
-        {/* ====================== LOGO + BRAND ====================== */}
+        {/* ====================== LOGO ====================== */}
         <div
           className="flex items-center gap-3 cursor-pointer"
           onClick={() => setCurrentPage("home")}
@@ -39,34 +54,40 @@ const Navigation = ({
 
         {/* ====================== DESKTOP MENU ====================== */}
         <div className="hidden md:flex items-center gap-10">
-          {[
-            { label: "Home", page: "home" },
-            { label: "Shop", page: "shop" },
-            { label: "Blog", page: "blog" },
-            { label: "Contact", page: "contact" },
-          ].map((item, idx) => (
+          {navItems.map((item) => (
             <button
-              key={idx}
+              key={item.page}
               onClick={() => setCurrentPage(item.page)}
-              className="text-gray-700 text-lg font-medium hover:text-pink-500 transition relative group"
+              className={`relative text-lg font-medium transition 
+                ${currentPage === item.page
+                  ? "text-pink-600"
+                  : "text-gray-700 hover:text-pink-500"
+                }`}
             >
               {item.label}
-              <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-pink-500 transition-all group-hover:w-full"></span>
+              {currentPage === item.page && (
+                <span className="absolute left-0 -bottom-1 w-full h-[2px] bg-pink-600"></span>
+              )}
             </button>
           ))}
 
+          {/* ADMIN LINKS */}
           {user?.role === "admin" && (
             <>
               <button
                 onClick={() => setCurrentPage("admin")}
-                className="text-red-600 font-medium hover:text-red-700 text-lg"
+                className={`text-lg font-medium transition ${
+                  currentPage === "admin" ? "text-red-600" : "text-red-500 hover:text-red-700"
+                }`}
               >
                 Products
               </button>
 
               <button
                 onClick={() => setCurrentPage("admin-orders")}
-                className="text-red-600 font-medium hover:text-red-700 text-lg"
+                className={`text-lg font-medium transition ${
+                  currentPage === "admin-orders" ? "text-red-600" : "text-red-500 hover:text-red-700"
+                }`}
               >
                 Orders
               </button>
@@ -77,29 +98,36 @@ const Navigation = ({
         {/* ====================== RIGHT ICONS ====================== */}
         <div className="flex items-center gap-6">
 
+          {/* CART BUTTON */}
           <button
             className="relative hover:scale-110 transition"
             onClick={() => setShowCart(!showCart)}
           >
             <ShoppingCart className="w-7 h-7 text-gray-700 hover:text-pink-500" />
 
-            {cart.length > 0 && (
+            {/* CART COUNT BUBBLE */}
+            {cartTotalQty > 0 && (
               <span
-                className={`
-                  absolute -top-2 -right-2 bg-pink-500 text-white text-xs 
-                  px-2 py-0.5 rounded-full shadow 
-                  ${cartBump ? "cart-bump" : ""}
-                `}
+                className={`absolute -top-2 -right-2 bg-pink-500 text-white text-xs 
+                px-2 py-0.5 rounded-full shadow font-semibold
+                ${cartBump ? "cart-bump" : ""}`}
               >
-                {cart.length}
+                {cartTotalQty}
               </span>
+            )}
+
+            {/* OUT-OF-STOCK WARNING DOT */}
+            {cartHasOutOfStock && (
+              <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-red-500 border border-white rounded-full"></span>
             )}
           </button>
 
+          {/* PROFILE */}
           <button onClick={() => setCurrentPage(user ? "profile" : "auth")}>
             <User className="w-7 h-7 text-gray-700 hover:text-pink-500 transition" />
           </button>
 
+          {/* MOBILE MENU BUTTON */}
           <button
             className="md:hidden"
             onClick={() => setShowMobileMenu(!showMobileMenu)}
@@ -116,23 +144,31 @@ const Navigation = ({
 
       {/* ====================== MOBILE MENU ====================== */}
       {showMobileMenu && (
-        <div className="md:hidden bg-white shadow-lg px-6 py-6 space-y-5">
-          {["home", "shop", "blog", "contact"].map((page, i) => (
+        <div className="md:hidden bg-white shadow-lg px-6 py-6 space-y-5 border-t">
+          
+          {navItems.map((item) => (
             <button
-              key={i}
+              key={item.page}
               onClick={() => {
-                setCurrentPage(page);
+                setCurrentPage(item.page);
                 setShowMobileMenu(false);
               }}
-              className="block w-full text-left text-gray-800 text-lg font-medium py-1"
+              className={`block w-full text-left text-lg py-2 font-medium ${
+                currentPage === item.page
+                  ? "text-pink-600"
+                  : "text-gray-800"
+              }`}
             >
-              {page.charAt(0).toUpperCase() + page.slice(1)}
+              {item.label}
             </button>
           ))}
 
+          {/* ADMIN MOBILE */}
           {user?.role === "admin" && (
             <>
-              <div className="border-t pt-4 text-gray-500 text-sm">Admin Panel</div>
+              <div className="border-t pt-4 text-gray-500 text-sm">
+                Admin Panel
+              </div>
 
               <button
                 onClick={() => {
