@@ -160,16 +160,15 @@ const ProductDetailPage = ({
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-pink-400 to-purple-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-500"></div>
               
-              <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden">
+              <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden aspect-square max-w-lg mx-auto md:max-w-none">
                 <img
                   src={mainImage}
                   alt={selectedProduct.name}
                   onLoad={() => setImageLoaded(true)}
                   onClick={() => setIsZoomed(!isZoomed)}
-                  className={`w-full h-auto object-cover transition-all duration-700 cursor-zoom-in ${
+                  className={`w-full h-full object-cover transition-all duration-700 cursor-zoom-in ${
                     imageLoaded ? 'opacity-100' : 'opacity-0'
                   } ${isZoomed ? 'scale-150' : 'scale-100'}`}
-                  style={{ minHeight: '400px' }}
                 />
 
                 {/* Image Loading Skeleton */}
@@ -335,7 +334,7 @@ const ProductDetailPage = ({
                     <button
                       key={i}
                       type="button"
-                      onClick={() => setSelectedSize(size)}
+                      onClick={() => setSelectedSize(selectedSize === size ? null : size)}
                       className={`relative px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
                         selectedSize === size
                           ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-lg shadow-pink-500/50 scale-105'
@@ -371,7 +370,7 @@ const ProductDetailPage = ({
                     <button
                       key={i}
                       type="button"
-                      onClick={() => setSelectedColor(color)}
+                      onClick={() => setSelectedColor(selectedColor === color ? null : color)}
                       className={`relative px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
                         selectedColor === color
                           ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/50 scale-105'
