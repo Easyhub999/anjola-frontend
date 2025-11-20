@@ -284,11 +284,6 @@ const ProductDetailPage = ({
               )}
             </div>
 
-            {/* Description */}
-            <p className="text-lg text-gray-600 leading-relaxed font-light">
-              {selectedProduct.description}
-            </p>
-
             {/* Price - Compact Luxurious Display */}
             <div className="relative inline-block">
               <div className="absolute -inset-1 bg-gradient-to-r from-pink-300 to-purple-300 rounded-xl opacity-30 blur-lg"></div>
