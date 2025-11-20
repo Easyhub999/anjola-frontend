@@ -30,21 +30,26 @@ body {
   min-height: 100vh !important;
 }
 
-/* Scrollbar styling */
+/* Enhanced scrollbar styling */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 12px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: linear-gradient(180deg, #fce7f3 0%, #e9d5ff 100%);
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #d946ef 0%, #a855f7 100%);
-  border-radius: 5px;
+  background: linear-gradient(180deg, #ec4899 0%, #a855f7 100%);
+  border-radius: 10px;
+  border: 2px solid #fce7f3;
+  transition: all 0.3s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #c026d3 0%, #9333ea 100%);
+  background: linear-gradient(180deg, #db2777 0%, #9333ea 100%);
+  border-color: #fbcfe8;
 }
 
+/* Existing animations */
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -72,7 +77,7 @@ body {
   animation: float-slow 8s ease-in-out infinite;
 }
 
-/* 🔔 Cart badge bump animation */
+/* Cart badge bump animation */
 @keyframes cart-bump {
   0% { transform: scale(1); }
   10% { transform: scale(1.25); }
@@ -83,4 +88,350 @@ body {
 
 .cart-bump {
   animation: cart-bump 0.35s ease-out;
+}
+
+/* ============================================
+   NEW LUXURY ENHANCEMENTS FOR PRODUCT PAGES
+   ============================================ */
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Image loading shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e0e0e0 20%,
+    #f0f0f0 40%,
+    #f0f0f0 100%
+  );
+  background-size: 2000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* Gradient animation for buttons */
+@keyframes gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+}
+
+/* Slide in animations */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.8s ease-out;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.8s ease-out;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Hide scrollbar for horizontal thumbnail galleries */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Glassmorphism backdrop support */
+@supports (backdrop-filter: blur(10px)) {
+  .backdrop-blur-custom {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+/* Smooth focus states for form inputs */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+/* Custom selection color */
+::selection {
+  background-color: #ec4899;
+  color: white;
+}
+
+::-moz-selection {
+  background-color: #ec4899;
+  color: white;
+}
+
+/* Luxury button hover effect */
+button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Image zoom cursor */
+.cursor-zoom-in {
+  cursor: zoom-in;
+}
+
+.cursor-zoom-out {
+  cursor: zoom-out;
+}
+
+/* Smooth image transitions */
+img {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Custom luxury shadows */
+.shadow-luxury {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-luxury-lg {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* Glow effects */
+.glow-pink {
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+}
+
+.glow-purple {
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+}
+
+/* Product card hover effects */
+.product-card {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 60px rgba(236, 72, 153, 0.2);
+}
+
+/* Review card animation on hover */
+.review-card {
+  transition: all 0.3s ease;
+}
+
+.review-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(168, 85, 247, 0.15);
+}
+
+/* Pulse animation for badges */
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Star rating hover effect */
+.star-rating svg {
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.star-rating svg:hover {
+  transform: scale(1.2);
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Thumbnail selection ring animation */
+.thumbnail-ring {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth color transitions for buttons */
+.color-selector,
+.size-selector {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Text gradient for headings */
+.text-gradient {
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Floating decorative elements */
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  33% {
+    transform: translateY(-10px) translateX(5px);
+  }
+  66% {
+    transform: translateY(-5px) translateX(-5px);
+  }
+}
+
+.animate-float-gentle {
+  animation: float-gentle 8s ease-in-out infinite;
+}
+
+/* Badge bounce animation */
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+/* Success checkmark animation */
+@keyframes checkmark {
+  0% {
+    transform: scale(0) rotate(45deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(45deg);
+  }
+  100% {
+    transform: scale(1) rotate(45deg);
+  }
+}
+
+.animate-checkmark {
+  animation: checkmark 0.5s ease-out;
+}
+
+/* Form input glow on focus */
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.1);
+}
+
+/* Responsive typography improvements */
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Dark mode support (future-proofing) */
+@media (prefers-color-scheme: dark) {
+  /* Uncomment when implementing dark mode */
+  /* body {
+    background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%) !important;
+  } */
+}
+
+/* Accessibility: Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  button {
+    border: 2px solid currentColor;
+  }
 }
