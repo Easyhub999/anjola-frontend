@@ -11,7 +11,7 @@ const AdminPage = ({ user, products, setProducts }) => {
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: '',
-    category: 'bags',
+    category: '',
     description: '',
     images: [],            // 🔥 MULTIPLE IMAGES
     sizes: [],             // 🔥 SIZE OPTIONS
