@@ -156,7 +156,7 @@ function App() {
       setCart([...cart, { ...product, quantity: 1 }]);
     }
 
-    triggerCartFeedback(`“${product.name}” added to cart ✓`);
+    triggerCartFeedback(`"${product.name}" added to cart ✓`);
   };
 
   const updateQuantity = (id, change) => {
@@ -248,82 +248,84 @@ function App() {
         setCurrentPage={setCurrentPage}
       />
 
-      {/* PAGES */}
-      {currentPage === 'home' && (
-        <HomePage
-          products={products}
-          cart={cart}
-          addToCart={addToCart}
-          updateQuantity={updateQuantity}
-          setCurrentPage={setCurrentPage}
-          setSelectedProduct={setSelectedProduct}
-        />
-      )}
+      {/* PAGES - All pages except HomePage need top padding */}
+      <div className={currentPage !== 'home' ? 'pt-32' : ''}>
+        {currentPage === 'home' && (
+          <HomePage
+            products={products}
+            cart={cart}
+            addToCart={addToCart}
+            updateQuantity={updateQuantity}
+            setCurrentPage={setCurrentPage}
+            setSelectedProduct={setSelectedProduct}
+          />
+        )}
 
-      {currentPage === 'shop' && (
-        <ShopPage
-          products={products}
-          cart={cart}
-          addToCart={addToCart}
-          updateQuantity={updateQuantity}
-          removeFromCart={removeFromCart}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          setCurrentPage={setCurrentPage}
-          setSelectedProduct={setSelectedProduct}
-          selectedProduct={selectedProduct}
-        />
-      )}
+        {currentPage === 'shop' && (
+          <ShopPage
+            products={products}
+            cart={cart}
+            addToCart={addToCart}
+            updateQuantity={updateQuantity}
+            removeFromCart={removeFromCart}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            setCurrentPage={setCurrentPage}
+            setSelectedProduct={setSelectedProduct}
+            selectedProduct={selectedProduct}
+          />
+        )}
 
-      {currentPage === 'product' && selectedProduct && (
-        <ProductDetailPage
-          selectedProduct={selectedProduct}
-          addToCart={addToCart}
-          user={user}
-          setCurrentPage={setCurrentPage}
-        />
-      )}
+        {currentPage === 'product' && selectedProduct && (
+          <ProductDetailPage
+            selectedProduct={selectedProduct}
+            addToCart={addToCart}
+            user={user}
+            setCurrentPage={setCurrentPage}
+          />
+        )}
 
-      {currentPage === 'blog' && <BlogPage />}
-      {currentPage === 'contact' && <ContactPage />}
+        {currentPage === 'blog' && <BlogPage />}
+        {currentPage === 'contact' && <ContactPage />}
 
-      {currentPage === 'auth' && (
-        <AuthPage setUser={setUser} setCurrentPage={setCurrentPage} />
-      )}
+        {currentPage === 'auth' && (
+          <AuthPage setUser={setUser} setCurrentPage={setCurrentPage} />
+        )}
 
-      {currentPage === 'profile' && user && (
-        <ProfilePage
-          user={user}
-          setUser={setUser}
-          setCurrentPage={setCurrentPage}
-        />
-      )}
+        {currentPage === 'profile' && user && (
+          <ProfilePage
+            user={user}
+            setUser={setUser}
+            setCurrentPage={setCurrentPage}
+          />
+        )}
 
-      {currentPage === 'checkout' && (
-        <CheckoutPage
-          cart={cart}
-          getTotalPrice={getTotalPrice}
-          clearCart={clearCart}
-          setCurrentPage={setCurrentPage}
-          user={user}
-        />
-      )}
+        {currentPage === 'checkout' && (
+          <CheckoutPage
+            cart={cart}
+            getTotalPrice={getTotalPrice}
+            clearCart={clearCart}
+            setCurrentPage={setCurrentPage}
+            user={user}
+          />
+        )}
 
-      {currentPage === 'admin' && (
-        <AdminPage
-          user={user}
-          products={products}
-          setProducts={setProducts}
-        />
-      )}
+        {currentPage === 'admin' && (
+          <AdminPage
+            user={user}
+            products={products}
+            setProducts={setProducts}
+          />
+        )}
 
-      {currentPage === 'admin-orders' && (
-        <AdminOrdersPage user={user} />
-      )}
+        {currentPage === 'admin-orders' && (
+          <AdminOrdersPage user={user} />
+        )}
+      </div>
 
-      {/* TOAST */}
+      {/* TOAST - Now above everything */}
       {toast && (
-        <div className="fixed top-20 right-4 bg-gray-900 text-white text-sm px-4 py-3 rounded-2xl shadow-xl animate-fade-in-up z-[60]">
+        <div className="fixed top-20 right-4 bg-gray-900 text-white text-sm px-4 py-3 rounded-2xl shadow-xl animate-fade-in-up z-[1000]">
           <span>{toast.message}</span>
         </div>
       )}

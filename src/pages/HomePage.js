@@ -18,20 +18,25 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
     <div className="min-h-screen">
 
       {/* ================= ANIMATED MARQUEE BANNER ================= */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-3 overflow-hidden shadow-lg">
-        <div className="animate-marquee whitespace-nowrap flex items-center gap-8">
-          {[...Array(10)].map((_, i) => (
-            <span key={i} className="inline-flex items-center gap-3 text-sm font-semibold tracking-wide">
-              <Sparkles className="w-4 h-4" />
-              New stock arrived my girly, start shopping 🛍️
-              <Heart className="w-4 h-4 fill-current" />
-            </span>
+      <div className="fixed top-0 left-0 right-0 z-[999] bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-3 overflow-hidden shadow-lg">
+        <div className="flex animate-marquee whitespace-nowrap">
+          {/* Duplicate content twice for seamless loop */}
+          {[...Array(2)].map((_, setIndex) => (
+            <div key={setIndex} className="flex items-center">
+              {[...Array(10)].map((_, i) => (
+                <span key={i} className="inline-flex items-center gap-3 text-sm font-semibold tracking-wide mx-8">
+                  <Sparkles className="w-4 h-4" />
+                  New stock arrived my girly, start shopping 🛍️
+                  <Heart className="w-4 h-4 fill-current" />
+                </span>
+              ))}
+            </div>
           ))}
         </div>
       </div>
 
       {/* ================= HERO SECTION (KEEP RIBBON) ================= */}
-      <div className="relative h-[95vh] overflow-hidden flex items-center justify-center mt-12">
+      <div className="relative h-[95vh] overflow-hidden flex items-center justify-center" style={{ marginTop: '48px' }}>
 
         {/* Client's Ribbon Logo Background */}
         <img
