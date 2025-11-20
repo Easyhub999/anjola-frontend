@@ -1,32 +1,30 @@
-// src/pages/ProductDetailsPage.js
+// src/pages/ProductDetailPage.js
 
 import React, { useState, useEffect } from "react";
 import { productsAPI } from "../api";
 import BackButton from "../components/BackButton";
 
-const ProductDetailsPage = ({
+const ProductDetailPage = ({
   selectedProduct,
   setCurrentPage,
   user,
   addToCart,
 }) => {
-  // If user magically arrives here without selecting a product
+  // 1️⃣ Guard: if no product, bail out early (this is safe for Hooks)
   if (!selectedProduct) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>No product selected</p>
+        <p className="text-gray-600">No product selected.</p>
       </div>
     );
   }
 
-  // Scroll to top when page loads
+  // 2️⃣ Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // ============================
-  // 🔥 IMAGE HANDLING (SAFE)
-  // ============================
+  // 3️⃣ IMAGE HANDLING (never empty)
   const allImages =
     Array.isArray(selectedProduct.images) && selectedProduct.images.length > 0
       ? selectedProduct.images
@@ -36,21 +34,32 @@ const ProductDetailsPage = ({
 
   const [mainImage, setMainImage] = useState(allImages[0]);
 
-  // ============================
-  // 🔥 PRODUCT VISIBILITY & STOCK
-  // ============================
+  // 4️⃣ VISIBILITY + STOCK
   const isHidden = selectedProduct.visible === false;
 
-  const stock = Number(selectedProduct.quantity ?? 0);
+  const stock = Number(
+    selectedProduct.quantity !== undefined ? selectedProduct.quantity : 0
+  );
   const isOutOfStock = stock <= 0;
 
-  // ============================
-  // 🔥 SIZE & COLOR SELECTION
-  // ============================
+  // 5️⃣ OPTIONS: SIZE & COLOR
+  const hasSizes = Array.isArray(selectedProduct.sizes) && selectedProduct.sizes.length > 0;
+  const hasColors =
+    Array.isArray(selectedProduct.colors) && selectedProduct.colors.length > 0;
+
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
 
+  const requiresOptionSelection = hasSizes || hasColors;
+  const missingSize = hasSizes && !selectedSize;
+  const missingColor = hasColors && !selectedColor;
+
+  const canAddToCart =
+    !isHidden && !isOutOfStock && (!requiresOptionSelection || (!missingSize && !missingColor));
+
   const handleAddToCart = () => {
+    if (!canAddToCart) return;
+
     addToCart({
       ...selectedProduct,
       selectedSize,
@@ -58,9 +67,13 @@ const ProductDetailsPage = ({
     });
   };
 
-  // ============================
-  // 🔥 REVIEWS
-  // ============================
+  // 6️⃣ REVIEWS (local state so we don't mutate props)
+  const [reviews, setReviews] = useState(selectedProduct.reviews || []);
+
+  useEffect(() => {
+    setReviews(selectedProduct.reviews || []);
+  }, [selectedProduct]);
+
   const [reviewForm, setReviewForm] = useState({
     name: "",
     rating: 5,
@@ -93,7 +106,8 @@ const ProductDetailsPage = ({
         user?.token
       );
 
-      selectedProduct.reviews = updatedProduct.reviews;
+      // Update local reviews (avoid mutating selectedProduct directly)
+      setReviews(updatedProduct.reviews || []);
 
       setReviewForm({ name: "", rating: 5, comment: "" });
       alert("Review submitted!");
@@ -105,9 +119,7 @@ const ProductDetailsPage = ({
     }
   };
 
-  // ============================
-  // 🔥 RENDER
-  // ============================
+  // 7️⃣ RENDER
   return (
     <div className="min-h-screen bg-white pt-24 pb-12">
       <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12">
@@ -115,99 +127,106 @@ const ProductDetailsPage = ({
         {/* BACK BUTTON */}
         <BackButton setCurrentPage={setCurrentPage} />
 
-        {/* ========================
-            MAIN IMAGES
-        ========================== */}
+        {/* ==========================
+            IMAGE GALLERY
+        =========================== */}
         <div>
           <div className="relative">
             <img
               src={mainImage}
               alt={selectedProduct.name}
-              className="w-full rounded-xl shadow-lg"
+              className="w-full rounded-xl shadow-lg object-cover max-h-[480px]"
             />
 
             {/* OUT OF STOCK BADGE */}
             {isOutOfStock && (
-              <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded text-xs">
+              <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded text-xs uppercase tracking-wide">
                 Out of Stock
               </div>
             )}
 
-            {/* HIDDEN BADGE */}
+            {/* HIDDEN BADGE (for admin preview situations) */}
             {isHidden && (
-              <div className="absolute top-3 right-3 bg-gray-700 text-white px-3 py-1 rounded text-xs">
+              <div className="absolute top-3 right-3 bg-gray-800 text-white px-3 py-1 rounded text-xs uppercase tracking-wide">
                 Hidden
               </div>
             )}
           </div>
 
-          {/* THUMBNAILS */}
           {allImages.length > 1 && (
-            <div className="flex gap-3 mt-4">
+            <div className="flex gap-3 mt-4 overflow-x-auto">
               {allImages.map((img, i) => (
-                <img
+                <button
                   key={i}
-                  src={img}
-                  alt="thumb"
+                  type="button"
                   onClick={() => setMainImage(img)}
-                  className={`w-24 h-24 object-cover rounded-lg cursor-pointer border 
-                    ${
-                      mainImage === img
-                        ? "border-pink-500"
-                        : "border-gray-300"
-                    }
-                  `}
-                />
+                  className={`border rounded-lg overflow-hidden min-w-[5.5rem] h-24 ${
+                    mainImage === img
+                      ? "border-pink-500 ring-2 ring-pink-300"
+                      : "border-gray-200"
+                  }`}
+                >
+                  <img
+                    src={img}
+                    alt={`thumb-${i}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* ========================
+        {/* ==========================
             PRODUCT INFO
-        ========================== */}
+        =========================== */}
         <div>
-          <h1 className="text-4xl font-serif text-gray-900 mb-4">
+          <h1 className="text-4xl font-serif text-gray-900 mb-3">
             {selectedProduct.name}
           </h1>
+
+          <p className="text-sm uppercase tracking-wide text-purple-500 mb-2">
+            {selectedProduct.category}
+          </p>
 
           <p className="text-lg text-gray-600 mb-6">
             {selectedProduct.description}
           </p>
 
-          <h2 className="text-3xl font-bold text-pink-600 mb-4">
-            ₦{selectedProduct.price.toLocaleString()}
-          </h2>
+          <div className="flex items-baseline gap-3 mb-4">
+            <span className="text-3xl font-bold text-pink-600">
+              ₦{selectedProduct.price.toLocaleString()}
+            </span>
+          </div>
 
-          {/* STOCK DISPLAY */}
+          {/* STOCK STATUS */}
           {isOutOfStock ? (
             <p className="text-red-600 font-semibold mb-4">
               Currently out of stock
             </p>
           ) : (
             <p className="text-green-600 font-semibold mb-4">
-              In Stock: {stock}
+              In stock: {stock}
             </p>
           )}
 
-          {/* SIZES */}
-          {selectedProduct.sizes?.length > 0 && (
+          {/* SIZE OPTIONS */}
+          {hasSizes && (
             <>
-              <h3 className="font-semibold text-gray-800 text-xl mb-3">
+              <h3 className="font-semibold text-gray-800 text-lg mb-2">
                 Choose Size
               </h3>
-              <div className="flex gap-3 flex-wrap">
+              <div className="flex gap-2 flex-wrap mb-4">
                 {selectedProduct.sizes.map((size, i) => (
                   <button
                     key={i}
+                    type="button"
                     onClick={() => setSelectedSize(size)}
-                    className={`px-4 py-2 border rounded-lg 
-                      ${
-                        selectedSize === size
-                          ? "bg-pink-500 text-white border-pink-500"
-                          : "bg-white text-gray-700 border-gray-300"
-                      }
-                    `}
+                    className={`px-4 py-2 border rounded-lg text-sm ${
+                      selectedSize === size
+                        ? "bg-pink-500 text-white border-pink-500"
+                        : "bg-white text-gray-700 border-gray-300"
+                    }`}
                   >
                     {size}
                   </button>
@@ -216,24 +235,23 @@ const ProductDetailsPage = ({
             </>
           )}
 
-          {/* COLORS */}
-          {selectedProduct.colors?.length > 0 && (
+          {/* COLOR OPTIONS */}
+          {hasColors && (
             <>
-              <h3 className="font-semibold text-gray-800 text-xl mt-8 mb-3">
+              <h3 className="font-semibold text-gray-800 text-lg mb-2">
                 Choose Color
               </h3>
-              <div className="flex gap-3 flex-wrap">
+              <div className="flex gap-2 flex-wrap mb-4">
                 {selectedProduct.colors.map((color, i) => (
                   <button
                     key={i}
+                    type="button"
                     onClick={() => setSelectedColor(color)}
-                    className={`px-4 py-2 border rounded-lg 
-                      ${
-                        selectedColor === color
-                          ? "bg-purple-600 text-white border-purple-600"
-                          : "bg-white text-gray-700 border-gray-300"
-                      }
-                    `}
+                    className={`px-4 py-2 border rounded-lg text-sm ${
+                      selectedColor === color
+                        ? "bg-purple-600 text-white border-purple-600"
+                        : "bg-white text-gray-700 border-gray-300"
+                    }`}
                   >
                     {color}
                   </button>
@@ -242,46 +260,46 @@ const ProductDetailsPage = ({
             </>
           )}
 
-          {/* ========================
-              ADD TO CART BUTTON
-          ========================== */}
-          {isHidden ? (
-            <button
-              disabled
-              className="w-full mt-10 bg-gray-400 text-white py-4 rounded-xl text-lg opacity-70"
-            >
-              Unavailable
-            </button>
-          ) : isOutOfStock ? (
-            <button
-              disabled
-              className="w-full mt-10 bg-gray-300 text-gray-600 py-4 rounded-xl text-lg opacity-70"
-            >
-              Out of Stock
-            </button>
-          ) : (
-            <button
-              onClick={handleAddToCart}
-              className="w-full mt-10 bg-gradient-to-r from-pink-400 to-purple-500
-                text-white py-4 rounded-xl text-lg shadow hover:scale-[1.03]"
-            >
-              Add to Cart
-            </button>
+          {/* OPTION WARNING */}
+          {requiresOptionSelection && !isOutOfStock && !isHidden && (
+            <p className="text-xs text-gray-500 mb-2">
+              Please select {missingSize ? "a size" : ""}{" "}
+              {missingSize && missingColor ? "and " : ""}
+              {missingColor ? "a color" : ""}
+              {missingSize || missingColor ? " before adding to cart." : ""}
+            </p>
           )}
+
+          {/* ADD TO CART BUTTON */}
+          <button
+            onClick={handleAddToCart}
+            disabled={!canAddToCart}
+            className={`w-full mt-6 py-4 rounded-xl text-lg font-medium shadow transition-transform ${
+              !canAddToCart
+                ? "bg-gray-300 text-gray-600 opacity-70 cursor-not-allowed"
+                : "bg-gradient-to-r from-pink-400 to-purple-500 text-white hover:scale-[1.03]"
+            }`}
+          >
+            {isHidden
+              ? "Unavailable"
+              : isOutOfStock
+              ? "Out of Stock"
+              : "Add to Cart"}
+          </button>
         </div>
       </div>
 
-      {/* ========================
+      {/* ==========================
           REVIEWS SECTION
-      ========================== */}
+      =========================== */}
       <div className="max-w-4xl mx-auto px-4 mt-20">
         <h2 className="text-3xl font-serif mb-6 text-gray-900">
           Customer Reviews
         </h2>
 
-        {selectedProduct.reviews?.length > 0 ? (
+        {reviews.length > 0 ? (
           <div className="space-y-6">
-            {selectedProduct.reviews.map((rev, i) => (
+            {reviews.map((rev, i) => (
               <div key={i} className="bg-gray-50 p-4 rounded-xl shadow">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold text-gray-900">{rev.name}</p>
@@ -291,7 +309,7 @@ const ProductDetailsPage = ({
                 </div>
                 <p className="text-gray-700 mt-2">{rev.comment}</p>
                 <p className="text-gray-400 text-sm mt-1">
-                  {new Date(rev.date).toLocaleString()}
+                  {rev.date ? new Date(rev.date).toLocaleString() : ""}
                 </p>
               </div>
             ))}
@@ -347,7 +365,7 @@ const ProductDetailsPage = ({
             <button
               type="submit"
               disabled={loadingReview}
-              className="bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600"
+              className="bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600 disabled:opacity-60"
             >
               {loadingReview ? "Submitting..." : "Submit Review"}
             </button>
@@ -358,4 +376,4 @@ const ProductDetailsPage = ({
   );
 };
 
-export default ProductDetailsPage;
+export default ProductDetailPage;
