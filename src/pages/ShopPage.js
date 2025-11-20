@@ -296,12 +296,12 @@ const ShopPage = ({
                     style={{ animationDelay: `${index * 0.05}s` }}
                     onClick={() => handleOpenProduct(product)}
                   >
-                    {/* IMAGE */}
-                    <div className="relative overflow-hidden bg-gray-100" style={{ paddingBottom: '100%' }}>
+                    {/* IMAGE - COMPACT SIZE */}
+                    <div className="relative overflow-hidden bg-gray-100 h-48 sm:h-56">
                       <img
                         src={product.images?.[0] || product.image || "/placeholder.png"}
                         alt={product.name}
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
 
                       {isOutOfStock && (
@@ -327,20 +327,20 @@ const ShopPage = ({
                       </div>
                     </div>
 
-                    {/* CONTENT - COMPACT */}
-                    <div className="p-4 flex flex-col flex-1">
-                      <span className="inline-block text-xs text-purple-600 font-semibold uppercase tracking-wider mb-2">
+                    {/* CONTENT - TRULY COMPACT */}
+                    <div className="p-3 flex flex-col flex-1">
+                      <span className="inline-block text-xs text-purple-600 font-semibold uppercase tracking-wider mb-1.5">
                         {product.category}
                       </span>
 
-                      <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-3 line-clamp-2 
-                        group-hover:text-pink-600 transition-colors min-h-[2.5rem]">
+                      <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 line-clamp-2 
+                        group-hover:text-pink-600 transition-colors">
                         {product.name}
                       </h3>
 
-                      <div className="mt-auto space-y-3">
+                      <div className="mt-auto space-y-2.5">
                         <div className="flex items-baseline gap-2">
-                          <span className="text-xl sm:text-2xl font-bold text-pink-600">
+                          <span className="text-lg sm:text-xl font-bold text-pink-600">
                             ₦{product.price.toLocaleString()}
                           </span>
                         </div>
@@ -350,8 +350,8 @@ const ShopPage = ({
                             type="button"
                             onClick={(e) => e.stopPropagation()}
                             disabled
-                            className="w-full bg-gray-100 text-gray-400 px-4 py-2.5 rounded-xl 
-                              text-sm font-semibold cursor-not-allowed"
+                            className="w-full bg-gray-100 text-gray-400 px-4 py-2 rounded-xl 
+                              text-xs font-semibold cursor-not-allowed"
                           >
                             Unavailable
                           </button>
@@ -362,8 +362,8 @@ const ShopPage = ({
                               e.stopPropagation();
                               handleOpenProduct(product);
                             }}
-                            className="w-full bg-pink-400 text-white px-4 py-2.5 rounded-full 
-                              text-sm font-semibold hover:bg-pink-500 hover:shadow-lg
+                            className="w-full bg-pink-400 text-white px-4 py-2 rounded-full 
+                              text-xs font-semibold hover:bg-pink-500 hover:shadow-lg
                               transition-all duration-300 flex items-center justify-center gap-2"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -374,8 +374,8 @@ const ShopPage = ({
                         ) : inCart ? (
                           <button
                             onClick={(e) => handleRemoveFromCart(product._id, e)}
-                            className="w-full bg-red-400 text-white px-4 py-2.5 rounded-xl 
-                              text-sm font-semibold hover:bg-red-500 hover:shadow-lg
+                            className="w-full bg-red-400 text-white px-4 py-2 rounded-xl 
+                              text-xs font-semibold hover:bg-red-500 hover:shadow-lg
                               transition-all duration-300 flex items-center justify-center gap-2"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -386,8 +386,8 @@ const ShopPage = ({
                         ) : (
                           <button
                             onClick={(e) => handleAddToCart(product, e)}
-                            className={`w-full bg-pink-400 text-white px-4 py-2.5 rounded-xl 
-                              text-sm font-semibold hover:bg-pink-500 hover:shadow-lg
+                            className={`w-full bg-pink-400 text-white px-4 py-2 rounded-xl 
+                              text-xs font-semibold hover:bg-pink-500 hover:shadow-lg
                               transition-all duration-300 flex items-center justify-center gap-2
                               ${isAnimating ? 'animate-bounce' : ''}`}
                           >
