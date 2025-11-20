@@ -44,9 +44,12 @@ const CartSidebar = ({
                   item?.image ||
                   "/placeholder.png";
 
-                // ====== INVENTORY ======
-                const stock = Number(item.quantity ?? 0);
-                const isOutOfStock = stock <= 0;
+                // ====== FIX: Use item.quantity (not cartQuantity) ======
+                const itemQty = item.quantity || 1;
+
+                // ====== INVENTORY (product stock) ======
+                const productStock = Number(item.stock ?? item.inStock ?? 999999);
+                const isOutOfStock = productStock <= 0;
 
                 // ====== VISIBILITY ======
                 const isHidden = item.visible === false;
@@ -80,7 +83,7 @@ const CartSidebar = ({
 
                       {/* PRICE */}
                       <p className="text-pink-600 font-semibold mt-1">
-                        ₦{item.price.toLocaleString()}
+                        ₦{(item.price || 0).toLocaleString()}
                       </p>
 
                       {/* OUT OF STOCK LABEL */}
@@ -100,43 +103,42 @@ const CartSidebar = ({
                       {/* QUANTITY CONTROLS */}
                       <div className="flex items-center gap-2 mt-3">
 
-                        {/* MINUS */}
+                        {/* MINUS BUTTON */}
                         <button
-                          onClick={() => updateQuantity(item._id, item.selectedSize, item.selectedColor, -1)}
-                          disabled={item.cartQuantity <= 1}
-                          className={`w-7 h-7 rounded flex items-center justify-center 
-                            ${item.cartQuantity <= 1 ? 'bg-gray-200' : 'bg-white'}
+                          onClick={() => updateQuantity(item._id, -1)}
+                          disabled={itemQty <= 1}
+                          className={`w-7 h-7 rounded flex items-center justify-center transition
+                            ${itemQty <= 1 
+                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                              : 'bg-white text-gray-700 hover:bg-gray-100'}
                           `}
                         >
                           <Minus className="w-4 h-4" />
                         </button>
 
                         {/* SHOW QUANTITY */}
-                        <span className="w-8 text-center font-medium">
-                          {item.cartQuantity}
+                        <span className="w-8 text-center font-medium text-gray-800">
+                          {itemQty}
                         </span>
 
-                        {/* PLUS BUTTON (Disabled if already at stock limit) */}
+                        {/* PLUS BUTTON */}
                         <button
-                          onClick={() =>
-                            updateQuantity(item._id, item.selectedSize, item.selectedColor, 1)
-                          }
-                          disabled={isOutOfStock || item.cartQuantity >= stock}
-                          className={`w-7 h-7 rounded flex items-center justify-center 
-                            ${isOutOfStock || item.cartQuantity >= stock
-                              ? 'bg-gray-200 text-gray-500'
-                              : 'bg-pink-500 text-white'}
+                          onClick={() => updateQuantity(item._id, 1)}
+                          disabled={isOutOfStock || itemQty >= productStock}
+                          className={`w-7 h-7 rounded flex items-center justify-center transition
+                            ${isOutOfStock || itemQty >= productStock
+                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                              : 'bg-pink-500 text-white hover:bg-pink-600'}
                           `}
                         >
                           <Plus className="w-4 h-4" />
                         </button>
 
-                        {/* REMOVE */}
+                        {/* REMOVE BUTTON */}
                         <button
-                          onClick={() =>
-                            removeFromCart(item._id, item.selectedSize, item.selectedColor)
-                          }
-                          className="ml-auto text-red-500"
+                          onClick={() => removeFromCart(item._id)}
+                          className="ml-auto text-red-500 hover:text-red-700 transition"
+                          title="Remove from cart"
                         >
                           <Trash2 className="w-5 h-5" />
                         </button>

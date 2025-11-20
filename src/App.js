@@ -266,6 +266,7 @@ function App() {
           cart={cart}
           addToCart={addToCart}
           updateQuantity={updateQuantity}
+          removeFromCart={removeFromCart}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           setCurrentPage={setCurrentPage}
