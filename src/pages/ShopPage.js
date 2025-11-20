@@ -1,7 +1,7 @@
-// ================= SHOPPAGE.JS — ORIGINAL COLORS + LUXURY FEATURES =================
+// ================= SHOPPAGE.JS — THE PERFECT VERSION 🔥 =================
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Search, X } from "lucide-react";
+import { Search, ShoppingCart, X } from "lucide-react";
 
 const PRODUCTS_PER_PAGE = 20;
 
@@ -16,7 +16,6 @@ const ShopPage = ({
   setCurrentPage,
   setSelectedProduct,
 }) => {
-  // Scroll to top on first load
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
@@ -26,9 +25,7 @@ const ShopPage = ({
   const [sortOption, setSortOption] = useState("latest");
   const [addedToCartAnimation, setAddedToCartAnimation] = useState(null);
 
-  // =====================================================
-  // 🔥 RESTORE SAVED FILTERS (RUNS ONCE)
-  // =====================================================
+  // Restore saved filters
   useEffect(() => {
     const savedSearch = localStorage.getItem("shopSearch");
     const savedCategory = localStorage.getItem("shopCategory");
@@ -42,9 +39,7 @@ const ShopPage = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // =====================================================
-  // 🔥 SAVE FILTERS TO LOCALSTORAGE
-  // =====================================================
+  // Save filters
   useEffect(() => {
     localStorage.setItem("shopSearch", searchQuery);
   }, [searchQuery]);
@@ -61,17 +56,11 @@ const ShopPage = ({
     localStorage.setItem("shopSort", sortOption);
   }, [sortOption]);
 
-  // =====================================================
-  // BASE PRODUCTS: only visible ones
-  // =====================================================
   const visibleProducts = useMemo(
     () => products.filter((p) => p.visible !== false),
     [products]
   );
 
-  // =====================================================
-  // DYNAMIC CATEGORIES (AUTO-SORTED)
-  // =====================================================
   const dynamicCategories = useMemo(() => {
     const set = new Set();
     visibleProducts.forEach((p) => {
@@ -84,13 +73,9 @@ const ShopPage = ({
     return ["all", ...arr];
   }, [visibleProducts]);
 
-  // =====================================================
-  // FILTER + SEARCH + SORT
-  // =====================================================
   const processedProducts = useMemo(() => {
     let list = [...visibleProducts];
 
-    // CATEGORY FILTER
     if (selectedCategory !== "all") {
       list = list.filter(
         (p) =>
@@ -99,7 +84,6 @@ const ShopPage = ({
       );
     }
 
-    // SEARCH FILTER
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       list = list.filter((p) =>
@@ -107,7 +91,6 @@ const ShopPage = ({
       );
     }
 
-    // SORT
     list.sort((a, b) => {
       if (sortOption === "price-asc") {
         return (a.price || 0) - (b.price || 0);
@@ -123,38 +106,29 @@ const ShopPage = ({
     return list;
   }, [visibleProducts, selectedCategory, searchQuery, sortOption]);
 
-  // Reset to page 1 when filters/sort change
   useEffect(() => {
     setCurrentPageNumber(1);
   }, [selectedCategory, searchQuery, sortOption]);
 
-  const totalPages =
-    Math.ceil(processedProducts.length / PRODUCTS_PER_PAGE) || 1;
-
+  const totalPages = Math.ceil(processedProducts.length / PRODUCTS_PER_PAGE) || 1;
   const startIndex = (currentPageNumber - 1) * PRODUCTS_PER_PAGE;
   const currentProducts = processedProducts.slice(
     startIndex,
     startIndex + PRODUCTS_PER_PAGE
   );
 
-  // Check if item is in cart
-  const isInCart = (id) => {
-    return cart.some((item) => item._id === id);
-  };
+  const isInCart = (id) => cart.some((item) => item._id === id);
 
-  // OPEN PRODUCT PAGE
   const handleOpenProduct = (product) => {
     setSelectedProduct(product);
     setCurrentPage("product");
   };
 
-  // PAGINATION CLICK → scroll back to top
   const handlePageChange = (page) => {
     setCurrentPageNumber(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // CLEAR FILTERS
   const hasActiveFilter =
     selectedCategory !== "all" ||
     searchQuery.trim() !== "" ||
@@ -167,7 +141,6 @@ const ShopPage = ({
     setCurrentPageNumber(1);
   };
 
-  // Add to cart with animation
   const handleAddToCart = (product, e) => {
     e.stopPropagation();
     addToCart(product);
@@ -175,7 +148,6 @@ const ShopPage = ({
     setTimeout(() => setAddedToCartAnimation(null), 1000);
   };
 
-  // Remove from cart
   const handleRemoveFromCart = (productId, e) => {
     e.stopPropagation();
     removeFromCart(productId);
@@ -183,12 +155,12 @@ const ShopPage = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 pt-20 pb-16">
-      {/* Decorative Background Elements */}
-      <div className="fixed top-20 right-10 w-72 h-72 bg-pink-200/20 rounded-full blur-3xl pointer-events-none animate-float-gentle"></div>
-      <div className="fixed bottom-20 left-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl pointer-events-none animate-float-gentle" style={{ animationDelay: '2s' }}></div>
+      {/* Decorative Elements */}
+      <div className="fixed top-20 right-10 w-72 h-72 bg-pink-200/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="fixed bottom-20 left-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        {/* HEADER - Enhanced */}
+        {/* HEADER */}
         <div className="text-center mb-12 animate-fadeIn">
           <h1 className="text-5xl sm:text-6xl font-serif text-gray-900 mb-4 tracking-tight">
             Our Collection
@@ -196,40 +168,41 @@ const ShopPage = ({
           <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto font-light">
             Curated luxury self-care and aesthetic pieces, selected with love
           </p>
-          
-          {/* Results count */}
           <p className="text-sm text-gray-500 mt-3">
             {processedProducts.length} {processedProducts.length === 1 ? 'product' : 'products'} available
           </p>
         </div>
 
-        {/* SEARCH + SORT + CLEAR - Enhanced */}
+        {/* SEARCH + SORT */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 animate-slideInUp">
-          {/* SEARCH - NO ZOOM FIX */}
+          {/* SEARCH - NO ZOOM */}
           <div className="w-full md:max-w-md">
             <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-pink-500 transition pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search luxury products..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSelectedCategory("all");
-                  setSearchQuery(e.target.value);
-                }}
-                className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-gray-200 
-                  bg-white focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100
-                  transition-all duration-300 text-gray-700 placeholder-gray-400 text-base"
-                style={{ fontSize: '16px' }}
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              )}
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-400 to-purple-500 rounded-xl blur opacity-20 group-hover:opacity-30 transition duration-300"></div>
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-pink-500 transition pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search luxury products..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSelectedCategory("all");
+                    setSearchQuery(e.target.value);
+                  }}
+                  className="w-full pl-12 pr-10 py-3.5 rounded-xl border-2 border-gray-200 
+                    bg-white focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100
+                    transition-all duration-300 text-gray-700 placeholder-gray-400"
+                  style={{ fontSize: '16px' }}
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -241,12 +214,11 @@ const ShopPage = ({
                 onChange={(e) => setSortOption(e.target.value)}
                 className="appearance-none border-2 border-gray-200 bg-white text-gray-700 
                   rounded-xl px-4 py-3 pr-10 focus:outline-none focus:border-pink-400 
-                  focus:ring-4 focus:ring-pink-100 transition-all duration-300 cursor-pointer
-                  text-sm font-medium"
+                  focus:ring-4 focus:ring-pink-100 transition-all duration-300 cursor-pointer text-sm font-medium"
               >
-                <option value="latest">✨ Latest Arrivals</option>
-                <option value="price-asc">💰 Price: Low → High</option>
-                <option value="price-desc">💎 Price: High → Low</option>
+                <option value="latest">✨ Latest</option>
+                <option value="price-asc">💰 Low → High</option>
+                <option value="price-desc">💎 High → Low</option>
               </select>
               <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -256,8 +228,7 @@ const ShopPage = ({
             {hasActiveFilter && (
               <button
                 onClick={handleClearFilters}
-                className="flex items-center gap-2 text-sm text-gray-600 hover:text-pink-600 
-                  transition-colors duration-300 font-medium"
+                className="flex items-center gap-2 text-sm text-gray-600 hover:text-pink-600 transition font-medium"
               >
                 <X className="w-4 h-4" />
                 Clear
@@ -266,7 +237,7 @@ const ShopPage = ({
           </div>
         </div>
 
-        {/* CATEGORIES - Enhanced Scrollable Pills */}
+        {/* CATEGORIES */}
         <div className="relative mb-12 animate-slideInUp" style={{ animationDelay: '0.1s' }}>
           <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
             {dynamicCategories.map((cat) => (
@@ -286,7 +257,7 @@ const ShopPage = ({
           </div>
         </div>
 
-        {/* PRODUCT GRID */}
+        {/* PRODUCTS */}
         {processedProducts.length === 0 ? (
           <div className="text-center py-20 animate-fadeIn">
             <div className="w-24 h-24 bg-gradient-to-br from-pink-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -308,55 +279,41 @@ const ShopPage = ({
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
               {currentProducts.map((product, index) => {
                 const inCart = isInCart(product._id);
-
-                const stock =
-                  typeof product.quantity === "number"
-                    ? product.quantity
-                    : product.inStock === false
-                    ? 0
-                    : 999999;
-
+                const stock = typeof product.quantity === "number" ? product.quantity : product.inStock === false ? 0 : 999999;
                 const isOutOfStock = stock <= 0;
                 const hasOptions =
                   (Array.isArray(product.sizes) && product.sizes.length > 0) ||
                   (Array.isArray(product.colors) && product.colors.length > 0);
-
                 const isAnimating = addedToCartAnimation === product._id;
 
                 return (
                   <div
                     key={product._id}
-                    className="group bg-white rounded-xl shadow-md overflow-hidden 
-                      hover:shadow-2xl hover:scale-[1.03] transition-all duration-300 
+                    className="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden 
+                      hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 
                       cursor-pointer flex flex-col h-full border border-gray-100 hover:border-pink-200
                       animate-fadeIn"
                     style={{ animationDelay: `${index * 0.05}s` }}
                     onClick={() => handleOpenProduct(product)}
                   >
-                    {/* IMAGE CONTAINER */}
-                    <div className="relative overflow-hidden aspect-square bg-gray-50">
+                    {/* IMAGE */}
+                    <div className="relative overflow-hidden bg-gray-100" style={{ paddingBottom: '100%' }}>
                       <img
-                        src={
-                          product.images?.[0] ||
-                          product.image ||
-                          "/placeholder.png"
-                        }
+                        src={product.images?.[0] || product.image || "/placeholder.png"}
                         alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
 
-                      {/* OUT OF STOCK BADGE */}
                       {isOutOfStock && (
-                        <div className="absolute top-3 left-3 bg-pink-200/90 backdrop-blur-sm text-pink-700 
+                        <div className="absolute top-3 left-3 backdrop-blur-md bg-red-600/90 text-white 
                           px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg">
                           Out of Stock
                         </div>
                       )}
 
-                      {/* IN CART INDICATOR */}
                       {inCart && !isOutOfStock && (
-                        <div className="absolute top-3 right-3 bg-green-100/90 backdrop-blur-sm text-green-700 
-                          px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1.5">
+                        <div className="absolute top-3 right-3 backdrop-blur-md bg-green-600/90 text-white 
+                          px-2.5 py-1.5 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1.5">
                           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
@@ -364,98 +321,91 @@ const ShopPage = ({
                         </div>
                       )}
 
-                      {/* Quick View Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent 
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent 
                         opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
-                        <span className="text-white text-xs font-medium">Click to view details</span>
+                        <span className="text-white text-sm font-medium">Click to view details</span>
                       </div>
                     </div>
 
                     {/* CONTENT - COMPACT */}
-                    <div className="p-3 flex flex-col flex-1">
-                      {/* Category Badge */}
-                      <span className="inline-block text-xs text-purple-600 font-semibold uppercase tracking-wider mb-1.5">
+                    <div className="p-4 flex flex-col flex-1">
+                      <span className="inline-block text-xs text-purple-600 font-semibold uppercase tracking-wider mb-2">
                         {product.category}
                       </span>
 
-                      {/* Product Name */}
                       <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-3 line-clamp-2 
                         group-hover:text-pink-600 transition-colors min-h-[2.5rem]">
                         {product.name}
                       </h3>
 
-                      {/* PRICE + ACTION BUTTONS */}
-                      <div className="mt-auto space-y-2.5">
-                        {/* Price */}
+                      <div className="mt-auto space-y-3">
                         <div className="flex items-baseline gap-2">
-                          <span className="text-lg sm:text-xl font-bold text-pink-600">
+                          <span className="text-xl sm:text-2xl font-bold text-pink-600">
                             ₦{product.price.toLocaleString()}
                           </span>
                         </div>
 
-                        {/* ACTION BUTTONS */}
-                        <div className="w-full">
-                          {isOutOfStock ? (
-                            <button
-                              type="button"
-                              onClick={(e) => e.stopPropagation()}
-                              disabled
-                              className="w-full bg-gray-100 text-gray-400 px-4 py-2 rounded-lg 
-                                text-xs font-semibold cursor-not-allowed"
-                            >
-                              Unavailable
-                            </button>
-                          ) : hasOptions ? (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleOpenProduct(product);
-                              }}
-                              className="w-full bg-pink-400 text-white px-4 py-2 rounded-full 
-                                text-xs font-semibold hover:bg-pink-500 hover:shadow-lg
-                                transition-all duration-300"
-                            >
-                              Select Options
-                            </button>
-                          ) : inCart ? (
-                            <button
-                              onClick={(e) => handleRemoveFromCart(product._id, e)}
-                              className="w-full bg-red-400 text-white px-4 py-2 rounded-lg 
-                                text-xs font-semibold hover:bg-red-500 hover:shadow-lg
-                                transition-all duration-300 flex items-center justify-center gap-2"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                              Remove
-                            </button>
-                          ) : (
-                            <button
-                              onClick={(e) => handleAddToCart(product, e)}
-                              className={`w-full bg-pink-400 text-white px-4 py-2 rounded-lg 
-                                text-xs font-semibold hover:bg-pink-500 hover:shadow-lg
-                                transition-all duration-300 flex items-center justify-center gap-2
-                                ${isAnimating ? 'animate-pulse' : ''}`}
-                            >
-                              {isAnimating ? (
-                                <>
-                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                  </svg>
-                                  Added!
-                                </>
-                              ) : (
-                                <>
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                  </svg>
-                                  Add to Cart
-                                </>
-                              )}
-                            </button>
-                          )}
-                        </div>
+                        {isOutOfStock ? (
+                          <button
+                            type="button"
+                            onClick={(e) => e.stopPropagation()}
+                            disabled
+                            className="w-full bg-gray-100 text-gray-400 px-4 py-2.5 rounded-xl 
+                              text-sm font-semibold cursor-not-allowed"
+                          >
+                            Unavailable
+                          </button>
+                        ) : hasOptions ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenProduct(product);
+                            }}
+                            className="w-full bg-pink-400 text-white px-4 py-2.5 rounded-full 
+                              text-sm font-semibold hover:bg-pink-500 hover:shadow-lg
+                              transition-all duration-300 flex items-center justify-center gap-2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            Select Options
+                          </button>
+                        ) : inCart ? (
+                          <button
+                            onClick={(e) => handleRemoveFromCart(product._id, e)}
+                            className="w-full bg-red-400 text-white px-4 py-2.5 rounded-xl 
+                              text-sm font-semibold hover:bg-red-500 hover:shadow-lg
+                              transition-all duration-300 flex items-center justify-center gap-2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Remove
+                          </button>
+                        ) : (
+                          <button
+                            onClick={(e) => handleAddToCart(product, e)}
+                            className={`w-full bg-pink-400 text-white px-4 py-2.5 rounded-xl 
+                              text-sm font-semibold hover:bg-pink-500 hover:shadow-lg
+                              transition-all duration-300 flex items-center justify-center gap-2
+                              ${isAnimating ? 'animate-bounce' : ''}`}
+                          >
+                            {isAnimating ? (
+                              <>
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                                Added!
+                              </>
+                            ) : (
+                              <>
+                                <ShoppingCart className="w-4 h-4" />
+                                Add to Cart
+                              </>
+                            )}
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -463,22 +413,19 @@ const ShopPage = ({
               })}
             </div>
 
-            {/* PAGINATION - Enhanced */}
+            {/* PAGINATION */}
             {totalPages > 1 && (
               <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-12 animate-fadeIn">
-                {/* Back to First */}
                 {currentPageNumber > 1 && (
                   <button
                     onClick={() => handlePageChange(1)}
                     className="px-5 py-2.5 rounded-xl border-2 border-gray-300 text-gray-700 
-                      hover:border-pink-400 hover:bg-pink-50 transition-all duration-300 
-                      font-medium text-sm"
+                      hover:border-pink-400 hover:bg-pink-50 transition font-medium text-sm"
                   >
                     ← First
                   </button>
                 )}
 
-                {/* Page Numbers */}
                 <div className="flex items-center gap-2 flex-wrap justify-center">
                   {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                     let page;
@@ -509,13 +456,11 @@ const ShopPage = ({
                   })}
                 </div>
 
-                {/* Next */}
                 {currentPageNumber < totalPages && (
                   <button
                     onClick={() => handlePageChange(currentPageNumber + 1)}
                     className="px-5 py-2.5 rounded-xl border-2 border-gray-300 text-gray-700 
-                      hover:border-pink-400 hover:bg-pink-50 transition-all duration-300 
-                      font-medium text-sm"
+                      hover:border-pink-400 hover:bg-pink-50 transition font-medium text-sm"
                   >
                     Next →
                   </button>
@@ -526,7 +471,6 @@ const ShopPage = ({
         )}
       </div>
 
-      {/* ANIMATIONS */}
       <style jsx>{`
         @keyframes fadeIn {
           from { opacity: 0; }
@@ -544,28 +488,12 @@ const ShopPage = ({
           }
         }
         
-        @keyframes float-gentle {
-          0%, 100% {
-            transform: translateY(0px) translateX(0px);
-          }
-          33% {
-            transform: translateY(-10px) translateX(5px);
-          }
-          66% {
-            transform: translateY(-5px) translateX(-5px);
-          }
-        }
-        
         .animate-fadeIn {
           animation: fadeIn 0.6s ease-out forwards;
         }
         
         .animate-slideInUp {
           animation: slideInUp 0.6s ease-out forwards;
-        }
-        
-        .animate-float-gentle {
-          animation: float-gentle 10s ease-in-out infinite;
         }
         
         .scrollbar-hide::-webkit-scrollbar {
