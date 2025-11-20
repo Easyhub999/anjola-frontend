@@ -18,7 +18,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
     <div className="min-h-screen">
 
       {/* ================= ANIMATED MARQUEE BANNER ================= */}
-      <div className="fixed top-0 left-0 right-0 z-[999] bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-3 overflow-hidden shadow-lg">
+      <div className="absolute top-0 left-0 right-0 z-[999] bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-3 overflow-hidden shadow-lg">
         <div className="flex animate-marquee whitespace-nowrap">
           {/* Duplicate content twice for seamless loop */}
           {[...Array(2)].map((_, setIndex) => (
@@ -36,7 +36,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
       </div>
 
       {/* ================= HERO SECTION (KEEP RIBBON) ================= */}
-      <div className="relative h-[95vh] overflow-hidden flex items-center justify-center" style={{ marginTop: '48px' }}>
+      <div className="relative h-[95vh] overflow-hidden flex items-center justify-center">
 
         {/* Client's Ribbon Logo Background */}
         <img
@@ -470,7 +470,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
       {/* ================= ANIMATIONS CSS ================= */}
       <style jsx>{`
         @keyframes marquee {
-          0% { transform: translateX(0); }
+          0% { transform: translateX(0%); }
           100% { transform: translateX(-50%); }
         }
         
@@ -532,7 +532,9 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
         }
         
         .animate-marquee {
-          animation: marquee 30s linear infinite;
+          display: inline-flex;
+          animation: marquee 20s linear infinite;
+          width: max-content;
         }
         
         .animate-fadeIn {

@@ -1,7 +1,7 @@
 // ================= SHOPPAGE.JS — THE PERFECT VERSION 🔥 =================
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Search, ShoppingCart, X } from "lucide-react";
+import { Search, ShoppingCart, X, ArrowLeft } from "lucide-react";
 
 const PRODUCTS_PER_PAGE = 20;
 
@@ -160,6 +160,15 @@ const ShopPage = ({
       <div className="fixed bottom-20 left-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        {/* BACK BUTTON */}
+        <button
+          onClick={() => setCurrentPage("home")}
+          className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors mb-6 group animate-fadeIn"
+        >
+          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" />
+          <span className="font-medium">Back to Home</span>
+        </button>
+
         {/* HEADER */}
         <div className="text-center mb-12 animate-fadeIn">
           <h1 className="text-5xl sm:text-6xl font-serif text-gray-900 mb-4 tracking-tight">
