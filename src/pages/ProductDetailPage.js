@@ -289,15 +289,23 @@ const ProductDetailPage = ({
               {selectedProduct.description}
             </p>
 
-            {/* Price - Luxurious Display */}
+            {/* Price - Compact Luxurious Display */}
             <div className="relative inline-block">
-              <div className="absolute -inset-2 bg-gradient-to-r from-pink-300 to-purple-300 rounded-2xl opacity-30 blur-xl"></div>
-              <div className="relative bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl px-8 py-6 border border-pink-200/50">
-                <p className="text-sm text-gray-500 font-medium uppercase tracking-wider mb-1">Price</p>
-                <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+              <div className="absolute -inset-1 bg-gradient-to-r from-pink-300 to-purple-300 rounded-xl opacity-30 blur-lg"></div>
+              <div className="relative bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl px-6 py-4 border border-pink-200/50">
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">Price</p>
+                <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
                   ₦{selectedProduct.price.toLocaleString()}
                 </h2>
               </div>
+            </div>
+
+            {/* Description Section */}
+            <div className="py-4 border-t border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
+              <p className="text-base text-gray-600 leading-relaxed">
+                {selectedProduct.description}
+              </p>
             </div>
 
             {/* STOCK DISPLAY - Enhanced */}
