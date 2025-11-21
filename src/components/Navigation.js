@@ -1,5 +1,5 @@
 // src/components/Navigation.js
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { ShoppingCart, User, Menu, X, Sparkles, Heart } from "lucide-react";
 
 const Navigation = ({
@@ -14,42 +14,49 @@ const Navigation = ({
   cartBump,
 }) => {
   const cartTotalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const marqueeRef = useRef(null);
+
+  useEffect(() => {
+    const marquee = marqueeRef.current;
+    if (!marquee) return;
+
+    let scrollAmount = 0;
+    const scrollSpeed = 0.5; // Adjust speed here
+
+    const animate = () => {
+      scrollAmount += scrollSpeed;
+      
+      // Reset when scrolled one-third (since we have 3 copies)
+      if (scrollAmount >= marquee.scrollWidth / 3) {
+        scrollAmount = 0;
+      }
+      
+      marquee.style.transform = `translateX(-${scrollAmount}px)`;
+      requestAnimationFrame(animate);
+    };
+
+    const animationId = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(animationId);
+  }, []);
 
   return (
     <nav className="fixed top-0 left-0 w-full z-[999] shadow-sm bg-white/80 backdrop-blur-lg">
-      {/* 🔥 ANIMATED MARQUEE BANNER - iOS FIXED */}
-      <div className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white overflow-hidden py-3 relative">
-        <div className="flex animate-marquee-ios whitespace-nowrap">
-          <div className="flex-shrink-0 flex items-center gap-3 text-sm font-semibold mx-8">
-            <Sparkles className="w-4 h-4" />
-            Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
-            <Heart className="w-4 h-4 fill-current" />
-            <span className="mx-4">•</span>
-            Follow us on TikTok & Instagram for daily updates! ✨
-            <span className="mx-4">•</span>
-            New stock arrived! Start shopping 🛍️
-            <span className="mx-4">•</span>
-          </div>
-          <div className="flex-shrink-0 flex items-center gap-3 text-sm font-semibold mx-8">
-            <Sparkles className="w-4 h-4" />
-            Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
-            <Heart className="w-4 h-4 fill-current" />
-            <span className="mx-4">•</span>
-            Follow us on TikTok & Instagram for daily updates! ✨
-            <span className="mx-4">•</span>
-            New stock arrived! Start shopping 🛍️
-            <span className="mx-4">•</span>
-          </div>
-          <div className="flex-shrink-0 flex items-center gap-3 text-sm font-semibold mx-8">
-            <Sparkles className="w-4 h-4" />
-            Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
-            <Heart className="w-4 h-4 fill-current" />
-            <span className="mx-4">•</span>
-            Follow us on TikTok & Instagram for daily updates! ✨
-            <span className="mx-4">•</span>
-            New stock arrived! Start shopping 🛍️
-            <span className="mx-4">•</span>
-          </div>
+      {/* 🔥 ANIMATED MARQUEE BANNER - JavaScript Animation for iOS */}
+      <div className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white overflow-hidden py-3">
+        <div ref={marqueeRef} className="flex whitespace-nowrap" style={{ willChange: 'transform' }}>
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex-shrink-0 flex items-center gap-3 text-sm font-semibold mx-8">
+              <Sparkles className="w-4 h-4" />
+              Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
+              <Heart className="w-4 h-4 fill-current" />
+              <span className="mx-4">•</span>
+              Follow us on TikTok & Instagram for daily updates! ✨
+              <span className="mx-4">•</span>
+              New stock arrived! Start shopping 🛍️
+              <span className="mx-4">•</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -241,6 +248,17 @@ const Navigation = ({
           </div>
         </>
       )}
+
+      {/* SLIDE IN ANIMATION */}
+      <style jsx>{`
+        @keyframes slideInRight {
+          from { transform: translateX(100%); }
+          to { transform: translateX(0); }
+        }
+        .animate-slideInRight {
+          animation: slideInRight 0.3s ease-out;
+        }
+      `}</style>
     </nav>
   );
 };
