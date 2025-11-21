@@ -19,7 +19,7 @@ const Navigation = ({
   const cartTotalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-[9999]">
+    <nav className="fixed top-[48px] left-0 w-full z-[9999]">
 
       {/* ============================
           🔥 MAIN NAVIGATION BAR

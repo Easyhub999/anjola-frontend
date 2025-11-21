@@ -18,7 +18,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
     <div className="min-h-screen">
 
       {/* ================= ANIMATED MARQUEE BANNER ================= */}
-      <div className="fixed top-[72px] left-0 right-0 z-[9000] bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-3 overflow-hidden">
+      <div className="fixed top-0 left-0 right-0 z-[10000] bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-3 overflow-hidden">
         <div className="animate-marquee flex whitespace-nowrap">
           {[...Array(2)].map((_, i) => (
             <div key={i} className="flex items-center">
