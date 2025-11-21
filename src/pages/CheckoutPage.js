@@ -301,7 +301,10 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
               <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
                 {cart.map(item => (
                   <div key={item._id} className="flex gap-4 pb-4 border-b">
-                    <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
+                    <img src={item.images?. [0] || item.image || "/placeholder.png"}
+                     alt={item.name} 
+                     className="w-16 h-16 object-cover rounded"
+                    />
                     <div className="flex-1">
                       <h3 className="font-medium text-gray-800">{item.name}</h3>
                       <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
