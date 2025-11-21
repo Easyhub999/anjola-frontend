@@ -20,22 +20,6 @@ const Navigation = ({
 
   return (
     <nav className="fixed top-0 left-0 w-full z-[9999]">
-      {/* ============================
-          🔥 MARQUEE ANNOUNCEMENT BAR
-      ============================ */}
-      <div className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-2 overflow-hidden shadow-md">
-        <div className="flex animate-marquee whitespace-nowrap">
-
-          <span className="mx-8 text-sm font-semibold flex items-center gap-2">
-            ✨ Hi Girlies💕🎀, welcome 🤗🌸 — Anjola Aesthetics is LIVE! 🎉 Shop now for the cutest luxury pieces 💕
-          </span>
-
-          <span className="mx-8 text-sm font-semibold flex items-center gap-2">
-            ✨ New arrivals available 💖 Tap any product to view details 💕
-          </span>
-
-        </div>
-      </div>
 
       {/* ============================
           🔥 MAIN NAVIGATION BAR

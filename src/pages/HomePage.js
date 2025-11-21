@@ -18,18 +18,15 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
     <div className="min-h-screen">
 
       {/* ================= ANIMATED MARQUEE BANNER ================= */}
-      <div className="fixed top-0 left-0 right-0 z-[1000] bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-3 overflow-hidden shadow-lg">
-        <div className="flex animate-marquee whitespace-nowrap min-w-max">
-          {/* Duplicate content twice for seamless loop */}
-          {[...Array(2)].map((_, setIndex) => (
-            <div key={setIndex} className="flex items-center">
-              {[...Array(20)].map((_, i) => (
-                <span key={i} className="inline-flex items-center gap-3 text-sm font-semibold tracking-wide mx-8">
+      <div className="fixed top-0 left-0 right-0 z-[1000] bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-3 overflow-hidden">
+        <div className="animate-marquee flex whitespace-nowrap">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="flex items-center">
+                <span className="flex items-center gap-3 text-sm font-semibold tracking-wide mx-8">
                   <Sparkles className="w-4 h-4" />
                   Hi Girlies💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is  live! 🎉 Follow us on TikTok & Instagram for daily updates!
                   <Heart className="w-4 h-4 fill-current" />
                 </span>
-              ))}
             </div>
           ))}
         </div>
@@ -466,106 +463,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
           </div>
         </div>
       </div>
-
-      {/* ================= ANIMATIONS CSS ================= */}
-      <style jsx>{`
-        @keyframes marquee {
-          0% { transform: translateX(0%); }
-          100% { transform: translateX(-50%); }
-        }
-        
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes slideInDown {
-          from {
-            opacity: 0;
-            transform: translateY(-30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes float-slow {
-          0%, 100% {
-            transform: translateY(0px) translateX(0px);
-          }
-          25% {
-            transform: translateY(-20px) translateX(10px);
-          }
-          50% {
-            transform: translateY(-10px) translateX(-10px);
-          }
-          75% {
-            transform: translateY(-15px) translateX(5px);
-          }
-        }
-        
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.2); }
-        }
-        
-        @keyframes pulse-slow {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.6; }
-        }
-        
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        .animate-marquee {
-          display: inline-flex;
-          animation: marquee 20s linear infinite;
-          width: max-content;
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 1s ease-out forwards;
-        }
-        
-        .animate-fadeInUp {
-          animation: fadeInUp 0.8s ease-out forwards;
-        }
-        
-        .animate-slideInDown {
-          animation: slideInDown 0.8s ease-out forwards;
-        }
-        
-        .animate-float-slow {
-          animation: float-slow 10s ease-in-out infinite;
-        }
-        
-        .animate-twinkle {
-          animation: twinkle 3s ease-in-out infinite;
-        }
-        
-        .animate-pulse-slow {
-          animation: pulse-slow 4s ease-in-out infinite;
-        }
-        
-        .animate-spin-slow {
-          animation: spin-slow 8s linear infinite;
-        }
-      `}</style>
-
+      
     </div>
   );
 };
