@@ -163,7 +163,7 @@ const ShopPage = ({
         {/* COMPACT BACK BUTTON */}
         <button
           onClick={() => setCurrentPage("home")}
-          className="flex items-center gap-1.5 text-gray-600 hover:text-pink-600 transition-colors mb-4 text-sm group"
+          className="flex items-center gap-1.5 text-gray-600 hover:text-pink-600 transition-colors mb-4 text-sm group -mt-8"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" />
           <span>Back to Home</span>
