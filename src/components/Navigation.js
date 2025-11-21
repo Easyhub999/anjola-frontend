@@ -17,18 +17,18 @@ const Navigation = ({
   const cartTotalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <nav className="w-full z-[9999] shadow-sm bg-white/80 backdrop-blur-lg">
+    <nav className="w-full z-[9999] shadow-sm bg-white/80 backdrop-blur-lg overflow-hidden">
 
       {/* 🔥 Marquee INSIDE NavBar (Smooth + No overlap) */}
       <div className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white overflow-hidden py-2">
-        <div className="animate-marquee flex whitespace-nowrap">
+        <div className="animate-marquee whitespace-nowrap inline-block px-[200%]">
           {[...Array(2)].map((_, i) => (
             <span
               key={i}
               className="mx-8 flex items-center gap-2 text-sm font-semibold"
             >
               <Sparkles className="w-4 h-4" />
-              Hi Girlies💕🎀, welcome 💖 — Follow @Anjola_aesthetics_ng for updates!
+              Hi Girlies💕🎀, welcome. 🤗🌸  Anjola_aesthetics_ng is  live! 🎉 Follow us on TikTok & Instagram for daily updates!
               <Heart className="w-4 h-4 fill-current" />
             </span>
           ))}
