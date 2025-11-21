@@ -124,20 +124,16 @@ const ShopPage = ({
     setCurrentPage("product");
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPageNumber(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const scrollToShopTop = () => {
-    const el = document.getElementById("shop-top");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
-
+const handlePageChange = (page) => {
+  setCurrentPageNumber(page);
+  // Scroll to top of page content (below the fixed nav)
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  
+  // Also try scrolling to the actual shop content
+  setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, 100);
+};
   const hasActiveFilter =
     selectedCategory !== "all" ||
     searchQuery.trim() !== "" ||
@@ -163,10 +159,7 @@ const ShopPage = ({
   };
 
   return (
-    <div 
-    id="shop-top"
-    className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 pt-0 pb-16"
-    >
+    <div id="shop-top" className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 pt-0 pb-16">
       {/* Decorative Elements */}
       <div className="fixed top-20 right-10 w-72 h-72 bg-pink-200/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
       <div className="fixed bottom-20 left-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
