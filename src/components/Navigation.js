@@ -216,13 +216,23 @@ const Navigation = ({
         </>
       )}
 
-      {/* ANIMATION STYLES */}
+      {/* ANIMATION STYLES - iOS COMPATIBLE */}
       <style jsx>{`
         @keyframes marquee-scroll {
           0% {
             transform: translateX(0);
           }
           100% {
+            transform: translateX(-50%);
+          }
+        }
+        @-webkit-keyframes marquee-scroll {
+          0% {
+            -webkit-transform: translateX(0);
+            transform: translateX(0);
+          }
+          100% {
+            -webkit-transform: translateX(-50%);
             transform: translateX(-50%);
           }
         }
@@ -234,11 +244,26 @@ const Navigation = ({
             transform: translateX(0);
           }
         }
+        @-webkit-keyframes slideInRight {
+          from {
+            -webkit-transform: translateX(100%);
+            transform: translateX(100%);
+          }
+          to {
+            -webkit-transform: translateX(0);
+            transform: translateX(0);
+          }
+        }
         .animate-marquee-scroll {
           animation: marquee-scroll 25s linear infinite;
+          -webkit-animation: marquee-scroll 25s linear infinite;
+          will-change: transform;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
         }
         .animate-slideInRight {
           animation: slideInRight 0.3s ease-out;
+          -webkit-animation: slideInRight 0.3s ease-out;
         }
       `}</style>
     </nav>
