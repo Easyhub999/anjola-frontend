@@ -249,7 +249,7 @@ function App() {
       />
 
       {/* PAGES - All pages except HomePage need top padding */}
-      <div className={currentPage !== 'home' ? 'pt-[72px]' : ''}>
+      <div className={currentPage !== 'home' ? 'pt-[140px]' : ''}>
         {currentPage === 'home' && (
           <HomePage
             products={products}
