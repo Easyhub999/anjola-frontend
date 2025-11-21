@@ -464,6 +464,94 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
         </div>
       </div>
       
+       {/* ================= ANIMATIONS CSS ================= */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes slideInDown {
+          from {
+            opacity: 0;
+            transform: translateY(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes float-slow {
+          0%, 100% {
+            transform: translateY(0px) translateX(0px);
+          }
+          25% {
+            transform: translateY(-20px) translateX(10px);
+          }
+          50% {
+            transform: translateY(-10px) translateX(-10px);
+          }
+          75% {
+            transform: translateY(-15px) translateX(5px);
+          }
+        }
+        
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.6; }
+        }
+        
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 1s ease-out forwards;
+        }
+        
+        .animate-fadeInUp {
+          animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        .animate-slideInDown {
+          animation: slideInDown 0.8s ease-out forwards;
+        }
+        
+        .animate-float-slow {
+          animation: float-slow 10s ease-in-out infinite;
+        }
+        
+        .animate-twinkle {
+          animation: twinkle 3s ease-in-out infinite;
+        }
+        
+        .animate-pulse-slow {
+          animation: pulse-slow 4s ease-in-out infinite;
+        }
+        
+        .animate-spin-slow {
+          animation: spin-slow 8s linear infinite;
+        }
+      `}</style>
+
     </div>
   );
 };
