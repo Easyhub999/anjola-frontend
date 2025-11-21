@@ -168,7 +168,7 @@ const Navigation = ({
           {/* MENU PANEL */}
           <div
             className="
-              fixed top-0 right-0 h-full w-[80%] max-w-[320px]
+              fixed top-0 right-0 h-screen w-[80%] max-w-[320px]
               bg-white shadow-2xl px-6 py-6 space-y-5 
               z-[1001] md:hidden overflow-y-auto
               animate-slideInRight
