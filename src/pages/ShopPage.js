@@ -1,4 +1,4 @@
-// ================= SHOPPAGE.JS — THE PERFECT VERSION 🔥 =================
+// ================= SHOPPAGE.JS — CLEAN LUXURY VERSION =================
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Search, ShoppingCart, X, ArrowLeft } from "lucide-react";
@@ -16,8 +16,9 @@ const ShopPage = ({
   setCurrentPage,
   setSelectedProduct,
 }) => {
+  
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -36,7 +37,6 @@ const ShopPage = ({
     if (savedCategory) setSelectedCategory(savedCategory);
     if (savedPage) setCurrentPageNumber(Number(savedPage));
     if (savedSort) setSortOption(savedSort);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Save filters
@@ -92,12 +92,9 @@ const ShopPage = ({
     }
 
     list.sort((a, b) => {
-      if (sortOption === "price-asc") {
-        return (a.price || 0) - (b.price || 0);
-      }
-      if (sortOption === "price-desc") {
-        return (b.price || 0) - (a.price || 0);
-      }
+      if (sortOption === "price-asc") return a.price - b.price;
+      if (sortOption === "price-desc") return b.price - a.price;
+
       const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return bDate - aDate;
@@ -110,7 +107,9 @@ const ShopPage = ({
     setCurrentPageNumber(1);
   }, [selectedCategory, searchQuery, sortOption]);
 
-  const totalPages = Math.ceil(processedProducts.length / PRODUCTS_PER_PAGE) || 1;
+  const totalPages =
+    Math.ceil(processedProducts.length / PRODUCTS_PER_PAGE) || 1;
+
   const startIndex = (currentPageNumber - 1) * PRODUCTS_PER_PAGE;
   const currentProducts = processedProducts.slice(
     startIndex,
@@ -126,7 +125,7 @@ const ShopPage = ({
 
   const handlePageChange = (page) => {
     setCurrentPageNumber(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const hasActiveFilter =
@@ -154,90 +153,72 @@ const ShopPage = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 pt-0 pb-4">
-      {/* Decorative Elements */}
-      <div className="fixed top-20 right-10 w-72 h-72 bg-pink-200/20 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="fixed bottom-20 left-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 pb-8">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        {/* BACK BUTTON */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative pt-6">
+
+        {/* BACK BTN */}
         <button
           onClick={() => setCurrentPage("home")}
-          className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors mb-6 group animate-fadeIn"
+          className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition mb-6"
         >
-          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" />
+          <ArrowLeft className="w-5 h-5" />
           <span className="font-medium">Back to Home</span>
         </button>
 
-        {/* HEADER */}
-        <div className="text-center mb-12 animate-fadeIn">
-          <h1 className="text-5xl sm:text-6xl font-serif text-gray-900 mb-4 tracking-tight">
-            Our Collection
-          </h1>
-          <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto font-light">
-            Curated luxury self-care and aesthetic pieces, selected with love
-          </p>
-          <p className="text-sm text-gray-500 mt-3">
-            {processedProducts.length} {processedProducts.length === 1 ? 'product' : 'products'} available
-          </p>
-        </div>
+        {/* —— Clean feminine text —— */}
+        <h2 className="text-center text-4xl sm:text-5xl font-serif text-gray-900 mb-3 tracking-tight">
+          Curated Luxury
+        </h2>
+        <p className="text-center text-gray-600 text-base sm:text-lg max-w-xl mx-auto font-light mb-10">
+          Beautifully selected essentials for everyday elegance ✨
+        </p>
 
         {/* SEARCH + SORT */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 animate-slideInUp">
-          {/* SEARCH - NO ZOOM */}
-          <div className="w-full md:max-w-md">
-            <div className="relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-400 to-purple-500 rounded-xl blur opacity-20 group-hover:opacity-30 transition duration-300"></div>
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-pink-500 transition pointer-events-none" />
-                <input
-                  type="text"
-                  placeholder="Search luxury products..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSelectedCategory("all");
-                    setSearchQuery(e.target.value);
-                  }}
-                  className="w-full pl-12 pr-10 py-3.5 rounded-xl border-2 border-gray-200 
-                    bg-white focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100
-                    transition-all duration-300 text-gray-700 placeholder-gray-400"
-                  style={{ fontSize: '16px' }}
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                )}
-              </div>
-            </div>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+
+          {/* SEARCH */}
+          <div className="w-full md:max-w-md relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search for something beautiful..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSelectedCategory("all");
+                setSearchQuery(e.target.value);
+              }}
+              className="w-full pl-12 pr-10 py-3.5 rounded-xl border-2 border-gray-200 bg-white
+              focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition text-gray-700 placeholder-gray-400"
+            />
+
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
-          {/* SORT + CLEAR */}
-          <div className="flex items-center gap-3 justify-between md:justify-end">
-            <div className="relative">
-              <select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-                className="appearance-none border-2 border-gray-200 bg-white text-gray-700 
-                  rounded-xl px-4 py-3 pr-10 focus:outline-none focus:border-pink-400 
-                  focus:ring-4 focus:ring-pink-100 transition-all duration-300 cursor-pointer text-sm font-medium"
-              >
-                <option value="latest">✨ Latest</option>
-                <option value="price-asc">💰 Low → High</option>
-                <option value="price-desc">💎 High → Low</option>
-              </select>
-              <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
+          {/* SORT */}
+          <div className="flex items-center gap-3">
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="border-2 border-gray-200 bg-white text-gray-700 rounded-xl px-4 py-3 pr-10
+              focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition text-sm font-medium"
+            >
+              <option value="latest">✨ Latest</option>
+              <option value="price-asc">💰 Low → High</option>
+              <option value="price-desc">💎 High → Low</option>
+            </select>
 
             {hasActiveFilter && (
               <button
                 onClick={handleClearFilters}
-                className="flex items-center gap-2 text-sm text-gray-600 hover:text-pink-600 transition font-medium"
+                className="text-sm flex items-center gap-1 text-gray-600 hover:text-pink-600"
               >
                 <X className="w-4 h-4" />
                 Clear
@@ -247,48 +228,45 @@ const ShopPage = ({
         </div>
 
         {/* CATEGORIES */}
-        <div className="relative mb-12 animate-slideInUp" style={{ animationDelay: '0.1s' }}>
-          <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
+        <div className="mb-10">
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {dynamicCategories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`relative px-6 py-3 rounded-full capitalize text-sm font-semibold 
-                  whitespace-nowrap transition-all duration-300 ${
+                className={`px-6 py-3 rounded-full capitalize text-sm font-semibold whitespace-nowrap transition 
+                ${
                   selectedCategory === cat
-                    ? "bg-pink-400 text-white shadow-lg scale-105"
-                    : "bg-white text-gray-700 hover:bg-pink-50 hover:shadow-md border-2 border-gray-200 hover:border-pink-300"
+                    ? "bg-pink-500 text-white shadow-lg"
+                    : "bg-white border-2 border-gray-200 text-gray-700 hover:bg-pink-50 hover:border-pink-300"
                 }`}
               >
-                {cat === "all" ? "All Products" : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                {cat === "all" ? "All Products" : cat}
               </button>
             ))}
           </div>
         </div>
 
-        {/* PRODUCTS */}
+        {/* ============================
+              PRODUCTS GRID
+        ============================ */}
         {processedProducts.length === 0 ? (
-          <div className="text-center py-20 animate-fadeIn">
-            <div className="w-24 h-24 bg-gradient-to-br from-pink-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Search className="w-12 h-12 text-pink-400" />
-            </div>
-            <h3 className="text-2xl font-serif text-gray-800 mb-2">No products found</h3>
-            <p className="text-gray-600 mb-6">Try adjusting your search or filters</p>
-            {hasActiveFilter && (
-              <button
-                onClick={handleClearFilters}
-                className="px-6 py-3 bg-pink-400 text-white rounded-xl hover:bg-pink-500 transition"
-              >
-                Clear all filters
-              </button>
-            )}
+          <div className="text-center py-20">
+            <Search className="w-14 h-14 text-pink-400 mx-auto mb-4" />
+            <p className="text-gray-600">No matching products found</p>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12">
               {currentProducts.map((product, index) => {
                 const inCart = isInCart(product._id);
-                const stock = typeof product.quantity === "number" ? product.quantity : product.inStock === false ? 0 : 999999;
+                const stock =
+                  typeof product.quantity === "number"
+                    ? product.quantity
+                    : product.inStock === false
+                    ? 0
+                    : 999999;
+
                 const isOutOfStock = stock <= 0;
                 const hasOptions =
                   (Array.isArray(product.sizes) && product.sizes.length > 0) ||
@@ -298,121 +276,84 @@ const ShopPage = ({
                 return (
                   <div
                     key={product._id}
-                    className="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden 
-                      hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 
-                      cursor-pointer flex flex-col h-full border border-gray-100 hover:border-pink-200
-                      animate-fadeIn"
+                    className="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-[1.02] 
+                    transition-all duration-300 cursor-pointer border border-gray-100 hover:border-pink-200"
                     style={{ animationDelay: `${index * 0.05}s` }}
                     onClick={() => handleOpenProduct(product)}
                   >
-                    {/* IMAGE - COMPACT SIZE */}
                     <div className="relative overflow-hidden bg-gray-100 h-48 sm:h-56">
                       <img
-                        src={product.images?.[0] || product.image || "/placeholder.png"}
+                        src={product.images?.[0] || product.image}
                         alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
                       />
 
                       {isOutOfStock && (
-                        <div className="absolute top-3 left-3 backdrop-blur-md bg-red-600/90 text-white 
-                          px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg">
+                        <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow">
                           Out of Stock
                         </div>
                       )}
 
                       {inCart && !isOutOfStock && (
-                        <div className="absolute top-3 right-3 backdrop-blur-md bg-green-600/90 text-white 
-                          px-2.5 py-1.5 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1.5">
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                          In Cart
+                        <div className="absolute top-3 right-3 bg-green-600 text-white px-2 py-1.5 rounded-full text-xs font-semibold shadow flex items-center gap-1">
+                          ✓ In Cart
                         </div>
                       )}
 
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent 
-                        opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
-                        <span className="text-white text-sm font-medium">Click to view details</span>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 
+                      transition flex items-end justify-center pb-4">
+                        <span className="text-white text-sm font-medium">
+                          View Details
+                        </span>
                       </div>
                     </div>
 
-                    {/* CONTENT - TRULY COMPACT */}
                     <div className="p-3 flex flex-col flex-1">
-                      <span className="inline-block text-xs text-purple-600 font-semibold uppercase tracking-wider mb-1.5">
+                      <span className="text-xs text-purple-600 font-semibold uppercase tracking-wider mb-1">
                         {product.category}
                       </span>
 
-                      <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 line-clamp-2 
-                        group-hover:text-pink-600 transition-colors">
+                      <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-pink-600">
                         {product.name}
                       </h3>
 
-                      <div className="mt-auto space-y-2.5">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-lg sm:text-xl font-bold text-pink-600">
-                            ₦{product.price.toLocaleString()}
-                          </span>
-                        </div>
+                      <div className="mt-auto space-y-2">
+                        <span className="text-lg sm:text-xl font-bold text-pink-600">
+                          ₦{product.price.toLocaleString()}
+                        </span>
 
                         {isOutOfStock ? (
                           <button
-                            type="button"
-                            onClick={(e) => e.stopPropagation()}
                             disabled
-                            className="w-full bg-gray-100 text-gray-400 px-4 py-2 rounded-xl 
-                              text-xs font-semibold cursor-not-allowed"
+                            className="w-full bg-gray-100 text-gray-400 px-4 py-2 rounded-xl text-xs font-semibold cursor-not-allowed"
                           >
                             Unavailable
                           </button>
                         ) : hasOptions ? (
                           <button
-                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleOpenProduct(product);
                             }}
-                            className="w-full bg-pink-400 text-white px-4 py-2 rounded-full 
-                              text-xs font-semibold hover:bg-pink-500 hover:shadow-lg
-                              transition-all duration-300 flex items-center justify-center gap-2"
+                            className="w-full bg-pink-400 text-white px-4 py-2 rounded-full text-xs font-semibold hover:bg-pink-500 hover:shadow-lg transition flex justify-center items-center gap-2"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
                             Select Options
                           </button>
                         ) : inCart ? (
                           <button
                             onClick={(e) => handleRemoveFromCart(product._id, e)}
-                            className="w-full bg-red-400 text-white px-4 py-2 rounded-xl 
-                              text-xs font-semibold hover:bg-red-500 hover:shadow-lg
-                              transition-all duration-300 flex items-center justify-center gap-2"
+                            className="w-full bg-red-400 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-red-500 hover:shadow-lg transition flex justify-center items-center gap-2"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
                             Remove
                           </button>
                         ) : (
                           <button
                             onClick={(e) => handleAddToCart(product, e)}
-                            className={`w-full bg-pink-400 text-white px-4 py-2 rounded-xl 
-                              text-xs font-semibold hover:bg-pink-500 hover:shadow-lg
-                              transition-all duration-300 flex items-center justify-center gap-2
-                              ${isAnimating ? 'animate-bounce' : ''}`}
+                            className={`w-full bg-pink-400 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-pink-500 hover:shadow-lg transition flex justify-center items-center gap-2 
+                            ${isAnimating ? "animate-bounce" : ""}`}
                           >
-                            {isAnimating ? (
-                              <>
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                                Added!
-                              </>
-                            ) : (
-                              <>
-                                <ShoppingCart className="w-4 h-4" />
-                                Add to Cart
-                              </>
-                            )}
+                            <ShoppingCart className="w-4 h-4" />
+                            Add to Cart
                           </button>
                         )}
                       </div>
@@ -422,54 +363,57 @@ const ShopPage = ({
               })}
             </div>
 
-            {/* PAGINATION */}
+            {/* ============================
+                PAGINATION
+            ============================ */}
             {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-12 animate-fadeIn">
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-10">
                 {currentPageNumber > 1 && (
                   <button
                     onClick={() => handlePageChange(1)}
-                    className="px-5 py-2.5 rounded-xl border-2 border-gray-300 text-gray-700 
-                      hover:border-pink-400 hover:bg-pink-50 transition font-medium text-sm"
+                    className="px-5 py-2.5 rounded-xl border-2 border-gray-300 text-gray-700 hover:border-pink-400 hover:bg-pink-50 transition text-sm"
                   >
                     ← First
                   </button>
                 )}
 
                 <div className="flex items-center gap-2 flex-wrap justify-center">
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                    let page;
-                    if (totalPages <= 5) {
-                      page = i + 1;
-                    } else if (currentPageNumber <= 3) {
-                      page = i + 1;
-                    } else if (currentPageNumber >= totalPages - 2) {
-                      page = totalPages - 4 + i;
-                    } else {
-                      page = currentPageNumber - 2 + i;
-                    }
+                  {Array.from(
+                    { length: Math.min(totalPages, 5) },
+                    (_, i) => {
+                      let page;
+                      if (totalPages <= 5) {
+                        page = i + 1;
+                      } else if (currentPageNumber <= 3) {
+                        page = i + 1;
+                      } else if (currentPageNumber >= totalPages - 2) {
+                        page = totalPages - 4 + i;
+                      } else {
+                        page = currentPageNumber - 2 + i;
+                      }
 
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        className={`min-w-[40px] px-4 py-2.5 rounded-xl font-semibold text-sm 
-                          transition-all duration-300 ${
-                          page === currentPageNumber
-                            ? "bg-pink-400 text-white shadow-lg scale-110"
-                            : "bg-white text-gray-700 border-2 border-gray-300 hover:border-pink-400 hover:bg-pink-50"
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`min-w-[40px] px-4 py-2.5 rounded-xl font-semibold text-sm transition 
+                          ${
+                            page === currentPageNumber
+                              ? "bg-pink-400 text-white shadow-lg scale-110"
+                              : "bg-white border-2 border-gray-300 text-gray-700 hover:border-pink-400 hover:bg-pink-50"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    }
+                  )}
                 </div>
 
                 {currentPageNumber < totalPages && (
                   <button
                     onClick={() => handlePageChange(currentPageNumber + 1)}
-                    className="px-5 py-2.5 rounded-xl border-2 border-gray-300 text-gray-700 
-                      hover:border-pink-400 hover:bg-pink-50 transition font-medium text-sm"
+                    className="px-5 py-2.5 rounded-xl border-2 border-gray-300 text-gray-700 hover:border-pink-400 hover:bg-pink-50 transition text-sm"
                   >
                     Next →
                   </button>
@@ -479,41 +423,6 @@ const ShopPage = ({
           </>
         )}
       </div>
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes slideInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.6s ease-out forwards;
-        }
-        
-        .animate-slideInUp {
-          animation: slideInUp 0.6s ease-out forwards;
-        }
-        
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
     </div>
   );
 };
