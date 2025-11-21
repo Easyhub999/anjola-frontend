@@ -18,46 +18,42 @@ const Navigation = ({
   return (
     <nav className="fixed top-0 left-0 w-full z-[999] shadow-sm bg-white/80 backdrop-blur-lg">
       {/* 🔥 ANIMATED MARQUEE BANNER - iOS FIXED */}
-      <div className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white overflow-hidden py-3">
-        <div className="marquee-container">
-          <div className="marquee-content">
-            <span className="inline-flex items-center gap-3 text-sm font-semibold mx-8">
-              <Sparkles className="w-4 h-4" />
-              Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
-              <Heart className="w-4 h-4 fill-current" />
-              <span className="mx-4">•</span>
-              Follow us on TikTok & Instagram for daily updates! ✨
-              <span className="mx-4">•</span>
-              New stock arrived! Start shopping 🛍️
-              <span className="mx-4">•</span>
-            </span>
-            <span className="inline-flex items-center gap-3 text-sm font-semibold mx-8">
-              <Sparkles className="w-4 h-4" />
-              Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
-              <Heart className="w-4 h-4 fill-current" />
-              <span className="mx-4">•</span>
-              Follow us on TikTok & Instagram for daily updates! ✨
-              <span className="mx-4">•</span>
-              New stock arrived! Start shopping 🛍️
-              <span className="mx-4">•</span>
-            </span>
-            <span className="inline-flex items-center gap-3 text-sm font-semibold mx-8">
-              <Sparkles className="w-4 h-4" />
-              Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
-              <Heart className="w-4 h-4 fill-current" />
-              <span className="mx-4">•</span>
-              Follow us on TikTok & Instagram for daily updates! ✨
-              <span className="mx-4">•</span>
-              New stock arrived! Start shopping 🛍️
-              <span className="mx-4">•</span>
-            </span>
+      <div className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white overflow-hidden py-3 relative">
+        <div className="flex animate-marquee-ios whitespace-nowrap">
+          <div className="flex-shrink-0 flex items-center gap-3 text-sm font-semibold mx-8">
+            <Sparkles className="w-4 h-4" />
+            Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
+            <Heart className="w-4 h-4 fill-current" />
+            <span className="mx-4">•</span>
+            Follow us on TikTok & Instagram for daily updates! ✨
+            <span className="mx-4">•</span>
+            New stock arrived! Start shopping 🛍️
+            <span className="mx-4">•</span>
+          </div>
+          <div className="flex-shrink-0 flex items-center gap-3 text-sm font-semibold mx-8">
+            <Sparkles className="w-4 h-4" />
+            Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
+            <Heart className="w-4 h-4 fill-current" />
+            <span className="mx-4">•</span>
+            Follow us on TikTok & Instagram for daily updates! ✨
+            <span className="mx-4">•</span>
+            New stock arrived! Start shopping 🛍️
+            <span className="mx-4">•</span>
+          </div>
+          <div className="flex-shrink-0 flex items-center gap-3 text-sm font-semibold mx-8">
+            <Sparkles className="w-4 h-4" />
+            Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
+            <Heart className="w-4 h-4 fill-current" />
+            <span className="mx-4">•</span>
+            Follow us on TikTok & Instagram for daily updates! ✨
+            <span className="mx-4">•</span>
+            New stock arrived! Start shopping 🛍️
+            <span className="mx-4">•</span>
           </div>
         </div>
       </div>
 
-      {/* ============================
-          MAIN NAVIGATION BAR
-      ============================ */}
+      {/* MAIN NAVIGATION BAR */}
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* LOGO */}
         <div
@@ -171,9 +167,7 @@ const Navigation = ({
         </div>
       </div>
 
-      {/* ============================
-          MOBILE RIGHT-SIDE DRAWER
-      ============================ */}
+      {/* MOBILE RIGHT-SIDE DRAWER */}
       {showMobileMenu && (
         <>
           {/* BACKDROP */}
@@ -247,74 +241,6 @@ const Navigation = ({
           </div>
         </>
       )}
-
-      {/* ANIMATION STYLES - iOS OPTIMIZED */}
-      <style jsx>{`
-        /* Marquee Container */
-        .marquee-container {
-          width: 100%;
-          overflow: hidden;
-          position: relative;
-        }
-        
-        /* Marquee Content - iOS Compatible */
-        .marquee-content {
-          display: inline-block;
-          white-space: nowrap;
-          animation: marquee-scroll 30s linear infinite;
-          -webkit-animation: marquee-scroll 30s linear infinite;
-          will-change: transform;
-          -webkit-transform: translate3d(0, 0, 0);
-          transform: translate3d(0, 0, 0);
-        }
-        
-        /* Keyframes for Marquee - iOS Compatible */
-        @keyframes marquee-scroll {
-          0% {
-            transform: translate3d(0, 0, 0);
-          }
-          100% {
-            transform: translate3d(-33.333%, 0, 0);
-          }
-        }
-        
-        @-webkit-keyframes marquee-scroll {
-          0% {
-            -webkit-transform: translate3d(0, 0, 0);
-            transform: translate3d(0, 0, 0);
-          }
-          100% {
-            -webkit-transform: translate3d(-33.333%, 0, 0);
-            transform: translate3d(-33.333%, 0, 0);
-          }
-        }
-        
-        /* Slide In Animation */
-        @keyframes slideInRight {
-          from {
-            transform: translateX(100%);
-          }
-          to {
-            transform: translateX(0);
-          }
-        }
-        
-        @-webkit-keyframes slideInRight {
-          from {
-            -webkit-transform: translateX(100%);
-            transform: translateX(100%);
-          }
-          to {
-            -webkit-transform: translateX(0);
-            transform: translateX(0);
-          }
-        }
-        
-        .animate-slideInRight {
-          animation: slideInRight 0.3s ease-out;
-          -webkit-animation: slideInRight 0.3s ease-out;
-        }
-      `}</style>
     </nav>
   );
 };
