@@ -155,12 +155,22 @@ const Navigation = ({
         <>
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-black/50 z-[998] md:hidden"
+            className="fixed inset-0 bg-black/50 z-[1000] md:hidden"
             onClick={() => setShowMobileMenu(false)}
           />
           
           {/* Menu Panel */}
-          <div className="fixed top-[112px] right-0 h-[calc(100vh-112px)] w-[80%] max-w-[320px] bg-white shadow-2xl px-6 py-6 space-y-5 z-[999] md:hidden overflow-y-auto animate-slideInRight">
+          <div className="fixed top-0 right-0 h-full w-[80%] max-w-[320px] bg-white shadow-2xl px-6 py-6 space-y-5 z-[1001] md:hidden overflow-y-auto animate-slideInRight">
+            {/* Close button */}
+            <div className="flex justify-end mb-4">
+              <button 
+                onClick={() => setShowMobileMenu(false)}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
             {["home", "shop", "blog", "contact"].map((page) => (
               <button
                 key={page}
