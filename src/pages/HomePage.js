@@ -15,7 +15,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
   };
 
   return (
-    <div className="pt-[120px] min-h-screen">
+    <div className="min-h-screen">
 
       {/* ================= ANIMATED MARQUEE BANNER ================= */}
       <div className="fixed top-0 left-0 right-0 z-[1000] bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-3 overflow-hidden shadow-lg">

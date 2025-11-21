@@ -435,7 +435,12 @@ select:focus {
 }
 
 .animate-marquee {
-  animation: marquee 18s linear infinite;
+  animation: marquee 20s linear infinite;
+}
+
+/* GLOBAL NAV FIX */
+.page-container {
+  padding-top: 100px; /* adjust to your navbar height */
 }
 
 /* High contrast mode support */

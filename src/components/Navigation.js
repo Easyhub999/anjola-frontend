@@ -1,5 +1,7 @@
+// src/components/Navigation.js
+
 import React from "react";
-import { ShoppingCart, User, Menu, X, AlertCircle } from "lucide-react";
+import { ShoppingCart, User, Menu, X } from "lucide-react";
 
 const Navigation = ({
   currentPage,
@@ -13,186 +15,199 @@ const Navigation = ({
   cartBump,
 }) => {
 
-  // CART COUNT BASED ON QUANTITY (not just number of items)
+  // Total quantity in cart
   const cartTotalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // CHECK IF CART HAS ANY OUT-OF-STOCK ITEMS
-  const cartHasOutOfStock = cart.some((item) => item.quantity > (item.stock || 999999));
-
-  // NAV ITEMS
-  const navItems = [
-    { label: "Home", page: "home" },
-    { label: "Shop", page: "shop" },
-    { label: "Blog", page: "blog" },
-    { label: "Contact", page: "contact" },
-  ];
-
   return (
-    <nav className="bg-white/80 backdrop-blur-xl fixed top-[48px] left-0 w-full z-40 shadow-[0_2px_20px_rgba(0,0,0,0.05)]">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <nav className="fixed top-0 left-0 w-full z-[9999]">
+      {/* ============================
+          🔥 MARQUEE ANNOUNCEMENT BAR
+      ============================ */}
+      <div className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-2 overflow-hidden shadow-md">
+        <div className="flex animate-marquee whitespace-nowrap">
 
-        {/* ====================== LOGO ====================== */}
-        <div
-          className="flex items-center gap-3 cursor-pointer"
-          onClick={() => setCurrentPage("home")}
-        >
-          <img
-            src="/anjola-favicon-v2.png"
-            alt="Anjola Logo"
-            className="w-10 h-10 rounded-xl object-cover shadow-sm"
-          />
+          <span className="mx-8 text-sm font-semibold flex items-center gap-2">
+            ✨ Hi Girlies💕🎀, welcome 🤗🌸 — Anjola Aesthetics is LIVE! 🎉 Shop now for the cutest luxury pieces 💕
+          </span>
 
-          <div className="leading-tight">
-            <div className="text-[20px] font-serif font-semibold text-gray-900">
-              Anjola
-            </div>
-            <div className="text-[14px] font-serif text-gray-700 -mt-1">
-              Aesthetics Ng
-            </div>
-          </div>
-        </div>
-
-        {/* ====================== DESKTOP MENU ====================== */}
-        <div className="hidden md:flex items-center gap-10">
-          {navItems.map((item) => (
-            <button
-              key={item.page}
-              onClick={() => setCurrentPage(item.page)}
-              className={`relative text-lg font-medium transition 
-                ${currentPage === item.page
-                  ? "text-pink-600"
-                  : "text-gray-700 hover:text-pink-500"
-                }`}
-            >
-              {item.label}
-              {currentPage === item.page && (
-                <span className="absolute left-0 -bottom-1 w-full h-[2px] bg-pink-600"></span>
-              )}
-            </button>
-          ))}
-
-          {/* ADMIN LINKS */}
-          {user?.role === "admin" && (
-            <>
-              <button
-                onClick={() => setCurrentPage("admin")}
-                className={`text-lg font-medium transition ${
-                  currentPage === "admin" ? "text-red-600" : "text-red-500 hover:text-red-700"
-                }`}
-              >
-                Products
-              </button>
-
-              <button
-                onClick={() => setCurrentPage("admin-orders")}
-                className={`text-lg font-medium transition ${
-                  currentPage === "admin-orders" ? "text-red-600" : "text-red-500 hover:text-red-700"
-                }`}
-              >
-                Orders
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* ====================== RIGHT ICONS ====================== */}
-        <div className="flex items-center gap-6">
-
-          {/* CART BUTTON */}
-          <button
-            className="relative hover:scale-110 transition"
-            onClick={() => setShowCart(!showCart)}
-          >
-            <ShoppingCart className="w-7 h-7 text-gray-700 hover:text-pink-500" />
-
-            {/* CART COUNT BUBBLE */}
-            {cartTotalQty > 0 && (
-              <span
-                className={`absolute -top-2 -right-2 bg-pink-500 text-white text-xs 
-                px-2 py-0.5 rounded-full shadow font-semibold
-                ${cartBump ? "cart-bump" : ""}`}
-              >
-                {cartTotalQty}
-              </span>
-            )}
-
-            {/* OUT-OF-STOCK WARNING DOT */}
-            {cartHasOutOfStock && (
-              <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-red-500 border border-white rounded-full"></span>
-            )}
-          </button>
-
-          {/* PROFILE */}
-          <button onClick={() => setCurrentPage(user ? "profile" : "auth")}>
-            <User className="w-7 h-7 text-gray-700 hover:text-pink-500 transition" />
-          </button>
-
-          {/* MOBILE MENU BUTTON */}
-          <button
-            className="md:hidden"
-            onClick={() => setShowMobileMenu(!showMobileMenu)}
-          >
-            {showMobileMenu ? (
-              <X className="w-8 h-8 text-gray-700" />
-            ) : (
-              <Menu className="w-8 h-8 text-gray-700" />
-            )}
-          </button>
+          <span className="mx-8 text-sm font-semibold flex items-center gap-2">
+            ✨ New arrivals available 💖 Tap any product to view details 💕
+          </span>
 
         </div>
       </div>
 
-      {/* ====================== MOBILE MENU ====================== */}
-      {showMobileMenu && (
-        <div className="md:hidden bg-white shadow-lg px-6 py-6 space-y-5 border-t">
-          
-          {navItems.map((item) => (
-            <button
-              key={item.page}
-              onClick={() => {
-                setCurrentPage(item.page);
-                setShowMobileMenu(false);
-              }}
-              className={`block w-full text-left text-lg py-2 font-medium ${
-                currentPage === item.page
-                  ? "text-pink-600"
-                  : "text-gray-800"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
+      {/* ============================
+          🔥 MAIN NAVIGATION BAR
+      ============================ */}
+      <div className="bg-white/80 backdrop-blur-xl shadow-[0_2px_20px_rgba(0,0,0,0.05)]">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 
-          {/* ADMIN MOBILE */}
-          {user?.role === "admin" && (
-            <>
-              <div className="border-t pt-4 text-gray-500 text-sm">
-                Admin Panel
+          {/* LOGO */}
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => setCurrentPage("home")}
+          >
+            <img
+              src="/anjola-favicon-v2.png"
+              alt="Anjola Logo"
+              className="w-10 h-10 rounded-xl object-cover shadow-sm"
+            />
+
+            <div className="leading-tight">
+              <div className="text-[20px] font-serif font-semibold text-gray-900">
+                Anjola
               </div>
+              <div className="text-[14px] font-serif text-gray-700 -mt-1">
+                Aesthetics Ng
+              </div>
+            </div>
+          </div>
 
+          {/* DESKTOP MENU */}
+          <div className="hidden md:flex items-center gap-10">
+            {[
+              { label: "Home", page: "home" },
+              { label: "Shop", page: "shop" },
+              { label: "Blog", page: "blog" },
+              { label: "Contact", page: "contact" },
+            ].map((item) => (
               <button
-                onClick={() => {
-                  setCurrentPage("admin");
-                  setShowMobileMenu(false);
-                }}
-                className="block w-full text-left text-red-600 font-medium text-lg"
+                key={item.page}
+                onClick={() => setCurrentPage(item.page)}
+                className={`relative text-lg font-medium transition 
+                  ${
+                    currentPage === item.page
+                      ? "text-pink-600"
+                      : "text-gray-700 hover:text-pink-500"
+                  }`}
               >
-                📦 Products
-              </button>
+                {item.label}
 
-              <button
-                onClick={() => {
-                  setCurrentPage("admin-orders");
-                  setShowMobileMenu(false);
-                }}
-                className="block w-full text-left text-red-600 font-medium text-lg"
-              >
-                📋 Orders
+                {currentPage === item.page && (
+                  <span className="absolute left-0 -bottom-1 w-full h-[2px] bg-pink-600"></span>
+                )}
               </button>
-            </>
-          )}
+            ))}
+
+            {/* ADMIN LINKS */}
+            {user?.role === "admin" && (
+              <>
+                <button
+                  onClick={() => setCurrentPage("admin")}
+                  className={`text-lg font-medium transition ${
+                    currentPage === "admin"
+                      ? "text-red-600"
+                      : "text-red-500 hover:text-red-700"
+                  }`}
+                >
+                  Products
+                </button>
+
+                <button
+                  onClick={() => setCurrentPage("admin-orders")}
+                  className={`text-lg font-medium transition ${
+                    currentPage === "admin-orders"
+                      ? "text-red-600"
+                      : "text-red-500 hover:text-red-700"
+                  }`}
+                >
+                  Orders
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* RIGHT ICONS */}
+          <div className="flex items-center gap-6">
+
+            {/* CART */}
+            <button
+              className="relative hover:scale-110 transition"
+              onClick={() => setShowCart(!showCart)}
+            >
+              <ShoppingCart className="w-7 h-7 text-gray-700 hover:text-pink-500" />
+
+              {cartTotalQty > 0 && (
+                <span
+                  className={`absolute -top-2 -right-2 bg-pink-500 text-white text-xs 
+                  px-2 py-0.5 rounded-full shadow font-semibold
+                  ${cartBump ? "cart-bump" : ""}`}
+                >
+                  {cartTotalQty}
+                </span>
+              )}
+            </button>
+
+            {/* PROFILE */}
+            <button onClick={() => setCurrentPage(user ? "profile" : "auth")}>
+              <User className="w-7 h-7 text-gray-700 hover:text-pink-500 transition" />
+            </button>
+
+            {/* MOBILE MENU */}
+            <button
+              className="md:hidden"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+            >
+              {showMobileMenu ? (
+                <X className="w-8 h-8 text-gray-700" />
+              ) : (
+                <Menu className="w-8 h-8 text-gray-700" />
+              )}
+            </button>
+
+          </div>
         </div>
-      )}
+
+        {/* MOBILE MENU */}
+        {showMobileMenu && (
+          <div className="md:hidden bg-white shadow-lg px-6 py-6 space-y-5 border-t">
+            {["home", "shop", "blog", "contact"].map((page) => (
+              <button
+                key={page}
+                onClick={() => {
+                  setCurrentPage(page);
+                  setShowMobileMenu(false);
+                }}
+                className={`block w-full text-left text-lg py-2 font-medium ${
+                  currentPage === page ? "text-pink-600" : "text-gray-800"
+                }`}
+              >
+                {page.charAt(0).toUpperCase() + page.slice(1)}
+              </button>
+            ))}
+
+            {/* ADMIN MOBILE */}
+            {user?.role === "admin" && (
+              <>
+                <div className="border-t pt-4 text-gray-500 text-sm">
+                  Admin Panel
+                </div>
+
+                <button
+                  onClick={() => {
+                    setCurrentPage("admin");
+                    setShowMobileMenu(false);
+                  }}
+                  className="block w-full text-left text-red-600 font-medium text-lg"
+                >
+                  📦 Products
+                </button>
+
+                <button
+                  onClick={() => {
+                    setCurrentPage("admin-orders");
+                    setShowMobileMenu(false);
+                  }}
+                  className="block w-full text-left text-red-600 font-medium text-lg"
+                >
+                  📋 Orders
+                </button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
     </nav>
   );
 };
