@@ -13,12 +13,10 @@ const Navigation = ({
   user,
   cartBump,
 }) => {
-
   const cartTotalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <nav className="fixed top-0 left-0 w-full z-[999] shadow-sm bg-white/80 backdrop-blur-lg overflow-hidden">
-
       {/* 🔥 ANIMATED MARQUEE BANNER */}
       <div className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white overflow-hidden py-3">
         <div className="animate-marquee-scroll whitespace-nowrap inline-flex">
@@ -44,7 +42,6 @@ const Navigation = ({
           MAIN NAVIGATION BAR
       ============================ */}
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-
         {/* LOGO */}
         <div
           className="flex items-center gap-3 cursor-pointer"
@@ -57,8 +54,12 @@ const Navigation = ({
           />
 
           <div className="leading-tight">
-            <div className="text-[20px] font-serif font-semibold text-gray-900">Anjola</div>
-            <div className="text-[14px] font-serif text-gray-700 -mt-1">Aesthetics Ng</div>
+            <div className="text-[20px] font-serif font-semibold text-gray-900">
+              Anjola
+            </div>
+            <div className="text-[14px] font-serif text-gray-700 -mt-1">
+              Aesthetics Ng
+            </div>
           </div>
         </div>
 
@@ -92,7 +93,9 @@ const Navigation = ({
               <button
                 onClick={() => setCurrentPage("admin")}
                 className={`text-lg font-medium transition ${
-                  currentPage === "admin" ? "text-red-600" : "text-red-500 hover:text-red-700"
+                  currentPage === "admin"
+                    ? "text-red-600"
+                    : "text-red-500 hover:text-red-700"
                 }`}
               >
                 Products
@@ -101,7 +104,9 @@ const Navigation = ({
               <button
                 onClick={() => setCurrentPage("admin-orders")}
                 className={`text-lg font-medium transition ${
-                  currentPage === "admin-orders" ? "text-red-600" : "text-red-500 hover:text-red-700"
+                  currentPage === "admin-orders"
+                    ? "text-red-600"
+                    : "text-red-500 hover:text-red-700"
                 }`}
               >
                 Orders
@@ -112,7 +117,6 @@ const Navigation = ({
 
         {/* RIGHT ICONS */}
         <div className="flex items-center gap-6">
-
           {/* CART */}
           <button
             className="relative hover:scale-110 transition"
@@ -122,9 +126,9 @@ const Navigation = ({
 
             {cartTotalQty > 0 && (
               <span
-                className={`absolute -top-2 -right-2 bg-pink-500 text-white text-xs px-2 py-0.5 rounded-full shadow font-semibold ${
-                  cartBump ? "cart-bump" : ""
-                }`}
+                className={`absolute -top-2 -right-2 bg-pink-500 text-white text-xs 
+                  px-2 py-0.5 rounded-full shadow font-semibold
+                  ${cartBump ? "cart-bump" : ""}`}
               >
                 {cartTotalQty}
               </span>
@@ -136,7 +140,7 @@ const Navigation = ({
             <User className="w-7 h-7 text-gray-700 hover:text-pink-500 transition" />
           </button>
 
-          {/* MOBILE MENU */}
+          {/* MOBILE MENU BUTTON */}
           <button
             className="md:hidden"
             onClick={() => setShowMobileMenu(!showMobileMenu)}
@@ -150,20 +154,29 @@ const Navigation = ({
         </div>
       </div>
 
-      {/* MOBILE DROPDOWN - Proper Width */}
+      {/* ============================
+          MOBILE RIGHT-SIDE DRAWER
+      ============================ */}
       {showMobileMenu && (
         <>
-          {/* Backdrop */}
-          <div 
+          {/* BACKDROP */}
+          <div
             className="fixed inset-0 bg-black/50 z-[1000] md:hidden"
             onClick={() => setShowMobileMenu(false)}
           />
-          
-          {/* Menu Panel */}
-          <div className="fixed top-0 right-0 h-full w-[80%] max-w-[320px] bg-white shadow-2xl px-6 py-6 space-y-5 z-[1001] md:hidden overflow-y-auto animate-slideInRight">
+
+          {/* MENU PANEL */}
+          <div
+            className="
+              fixed top-0 right-0 h-full w-[80%] max-w-[320px]
+              bg-white shadow-2xl px-6 py-6 space-y-5 
+              z-[1001] md:hidden overflow-y-auto
+              animate-slideInRight
+            "
+          >
             {/* Close button */}
             <div className="flex justify-end mb-4">
-              <button 
+              <button
                 onClick={() => setShowMobileMenu(false)}
                 className="text-gray-600 hover:text-gray-900"
               >
@@ -189,7 +202,9 @@ const Navigation = ({
             {/* ADMIN MOBILE */}
             {user?.role === "admin" && (
               <>
-                <div className="border-t pt-4 text-gray-500 text-sm">Admin Panel</div>
+                <div className="border-t pt-4 text-gray-500 text-sm">
+                  Admin Panel
+                </div>
 
                 <button
                   onClick={() => {
@@ -216,7 +231,7 @@ const Navigation = ({
         </>
       )}
 
-      {/* ANIMATION STYLES - iOS COMPATIBLE */}
+      {/* ANIMATION STYLES - iOS FRIENDLY */}
       <style jsx>{`
         @keyframes marquee-scroll {
           0% {
