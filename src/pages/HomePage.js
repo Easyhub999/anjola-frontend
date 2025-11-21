@@ -19,11 +19,11 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
 
       {/* ================= ANIMATED MARQUEE BANNER ================= */}
       <div className="fixed top-0 left-0 right-0 z-[1000] bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-3 overflow-hidden shadow-lg">
-        <div className="flex animate-marquee whitespace-nowrap">
+        <div className="flex animate-marquee whitespace-nowrap min-w-max">
           {/* Duplicate content twice for seamless loop */}
           {[...Array(2)].map((_, setIndex) => (
             <div key={setIndex} className="flex items-center">
-              {[...Array(10)].map((_, i) => (
+              {[...Array(20)].map((_, i) => (
                 <span key={i} className="inline-flex items-center gap-3 text-sm font-semibold tracking-wide mx-8">
                   <Sparkles className="w-4 h-4" />
                   Hi Girlies💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is  live! 🎉 Follow us on TikTok & Instagram for daily updates!
