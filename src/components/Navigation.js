@@ -21,32 +21,22 @@ const Navigation = ({
 
       {/* 🔥 ANIMATED MARQUEE BANNER */}
       <div className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white overflow-hidden py-3">
-        <div className="animate-marquee-scroll whitespace-nowrap">
-          <span className="inline-flex items-center gap-3 text-sm font-semibold">
-            <Sparkles className="w-4 h-4" />
-            Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
-            <Heart className="w-4 h-4 fill-current" />
-            <span className="mx-6">•</span>
-            <Sparkles className="w-4 h-4" />
-            Follow us on TikTok & Instagram for daily updates! ✨
-            <Heart className="w-4 h-4 fill-current" />
-            <span className="mx-6">•</span>
-            <Sparkles className="w-4 h-4" />
-            New stock arrived! Start shopping 🛍️
-            <Heart className="w-4 h-4 fill-current" />
-            <span className="mx-6">•</span>
-            <Sparkles className="w-4 h-4" />
-            Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
-            <Heart className="w-4 h-4 fill-current" />
-            <span className="mx-6">•</span>
-            <Sparkles className="w-4 h-4" />
-            Follow us on TikTok & Instagram for daily updates! ✨
-            <Heart className="w-4 h-4 fill-current" />
-            <span className="mx-6">•</span>
-            <Sparkles className="w-4 h-4" />
-            New stock arrived! Start shopping 🛍️
-            <Heart className="w-4 h-4 fill-current" />
-          </span>
+        <div className="animate-marquee-scroll whitespace-nowrap inline-flex">
+          {[...Array(3)].map((_, i) => (
+            <span
+              key={i}
+              className="inline-flex items-center gap-3 text-sm font-semibold mx-8"
+            >
+              <Sparkles className="w-4 h-4" />
+              Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
+              <Heart className="w-4 h-4 fill-current" />
+              <span className="mx-4">•</span>
+              Follow us on TikTok & Instagram for daily updates! ✨
+              <span className="mx-4">•</span>
+              New stock arrived! Start shopping 🛍️
+              <span className="mx-4">•</span>
+            </span>
+          ))}
         </div>
       </div>
 
@@ -160,51 +150,60 @@ const Navigation = ({
         </div>
       </div>
 
-      {/* MOBILE DROPDOWN */}
+      {/* MOBILE DROPDOWN - Proper Width */}
       {showMobileMenu && (
-        <div className="md:hidden bg-white shadow-lg px-6 py-6 space-y-5 border-t">
-          {["home", "shop", "blog", "contact"].map((page) => (
-            <button
-              key={page}
-              onClick={() => {
-                setCurrentPage(page);
-                setShowMobileMenu(false);
-              }}
-              className={`block w-full text-left text-lg py-2 font-medium ${
-                currentPage === page ? "text-pink-600" : "text-gray-800"
-              }`}
-            >
-              {page.charAt(0).toUpperCase() + page.slice(1)}
-            </button>
-          ))}
-
-          {/* ADMIN MOBILE */}
-          {user?.role === "admin" && (
-            <>
-              <div className="border-t pt-4 text-gray-500 text-sm">Admin Panel</div>
-
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/50 z-[998] md:hidden"
+            onClick={() => setShowMobileMenu(false)}
+          />
+          
+          {/* Menu Panel */}
+          <div className="fixed top-[112px] right-0 h-[calc(100vh-112px)] w-[80%] max-w-[320px] bg-white shadow-2xl px-6 py-6 space-y-5 z-[999] md:hidden overflow-y-auto animate-slideInRight">
+            {["home", "shop", "blog", "contact"].map((page) => (
               <button
+                key={page}
                 onClick={() => {
-                  setCurrentPage("admin");
+                  setCurrentPage(page);
                   setShowMobileMenu(false);
                 }}
-                className="block w-full text-left text-red-600 font-medium text-lg"
+                className={`block w-full text-left text-lg py-2 font-medium ${
+                  currentPage === page ? "text-pink-600" : "text-gray-800"
+                }`}
               >
-                📦 Products
+                {page.charAt(0).toUpperCase() + page.slice(1)}
               </button>
+            ))}
 
-              <button
-                onClick={() => {
-                  setCurrentPage("admin-orders");
-                  setShowMobileMenu(false);
-                }}
-                className="block w-full text-left text-red-600 font-medium text-lg"
-              >
-                📋 Orders
-              </button>
-            </>
-          )}
-        </div>
+            {/* ADMIN MOBILE */}
+            {user?.role === "admin" && (
+              <>
+                <div className="border-t pt-4 text-gray-500 text-sm">Admin Panel</div>
+
+                <button
+                  onClick={() => {
+                    setCurrentPage("admin");
+                    setShowMobileMenu(false);
+                  }}
+                  className="block w-full text-left text-red-600 font-medium text-lg"
+                >
+                  📦 Products
+                </button>
+
+                <button
+                  onClick={() => {
+                    setCurrentPage("admin-orders");
+                    setShowMobileMenu(false);
+                  }}
+                  className="block w-full text-left text-red-600 font-medium text-lg"
+                >
+                  📋 Orders
+                </button>
+              </>
+            )}
+          </div>
+        </>
       )}
 
       {/* ANIMATION STYLES */}
@@ -217,10 +216,19 @@ const Navigation = ({
             transform: translateX(-50%);
           }
         }
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
         .animate-marquee-scroll {
-          display: inline-block;
-          animation: marquee-scroll 30s linear infinite;
-          padding-left: 100%;
+          animation: marquee-scroll 25s linear infinite;
+        }
+        .animate-slideInRight {
+          animation: slideInRight 0.3s ease-out;
         }
       `}</style>
     </nav>

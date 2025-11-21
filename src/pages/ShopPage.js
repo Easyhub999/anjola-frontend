@@ -154,33 +154,20 @@ const ShopPage = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 pt-32 pb-16">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 pt-28 pb-16">
       {/* Decorative Elements */}
       <div className="fixed top-20 right-10 w-72 h-72 bg-pink-200/20 rounded-full blur-3xl pointer-events-none"></div>
       <div className="fixed bottom-20 left-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        {/* BACK BUTTON */}
+        {/* COMPACT BACK BUTTON */}
         <button
           onClick={() => setCurrentPage("home")}
-          className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors mb-6 group animate-fadeIn"
+          className="flex items-center gap-1.5 text-gray-600 hover:text-pink-600 transition-colors mb-4 text-sm group"
         >
-          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" />
-          <span className="font-medium">Back to Home</span>
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" />
+          <span>Back to Home</span>
         </button>
-
-        {/* HEADER */}
-        <div className="text-center mb-12 animate-fadeIn">
-          <h1 className="text-5xl sm:text-6xl font-serif text-gray-900 mb-4 tracking-tight">
-            Our Collection
-          </h1>
-          <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto font-light">
-            Curated luxury self-care and aesthetic pieces, selected with love
-          </p>
-          <p className="text-sm text-gray-500 mt-3">
-            {processedProducts.length} {processedProducts.length === 1 ? 'product' : 'products'} available
-          </p>
-        </div>
 
         {/* SEARCH + SORT */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 animate-slideInUp">
