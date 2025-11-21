@@ -17,21 +17,6 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
   return (
     <div className="min-h-screen">
 
-      {/* ================= ANIMATED MARQUEE BANNER ================= */}
-      <div className="fixed top-0 left-0 right-0 z-[10000] bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-3 overflow-hidden">
-        <div className="animate-marquee flex whitespace-nowrap">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} className="flex items-center">
-                <span className="flex items-center gap-3 text-sm font-semibold tracking-wide mx-8">
-                  <Sparkles className="w-4 h-4" />
-                  Hi Girlies💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is  live! 🎉 Follow us on TikTok & Instagram for daily updates!
-                  <Heart className="w-4 h-4 fill-current" />
-                </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* ================= HERO SECTION (KEEP RIBBON) ================= */}
       <div className="relative h-[95vh] overflow-hidden flex items-center justify-center">
 
