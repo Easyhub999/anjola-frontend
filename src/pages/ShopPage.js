@@ -126,14 +126,17 @@ const ShopPage = ({
 
 const handlePageChange = (page) => {
   setCurrentPageNumber(page);
-  // Scroll to top of page content (below the fixed nav)
-  window.scrollTo({ top: 0, behavior: 'smooth' });
   
-  // Also try scrolling to the actual shop content
-  setTimeout(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, 100);
+  // Scroll to the shop-top element
+  const shopTop = document.getElementById('shop-top');
+  if (shopTop) {
+    shopTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    // Fallback
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 };
+
   const hasActiveFilter =
     selectedCategory !== "all" ||
     searchQuery.trim() !== "" ||
