@@ -16,7 +16,7 @@ const Navigation = ({
   const cartTotalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-[999] shadow-sm bg-white/80 backdrop-blur-lg">
+    <nav className="fixed top-0 left-0 w-full z-[999] shadow-sm bg-white/80 backdrop-blur-lg overflow-hidden pb-0">
       {/* 🔥 ANIMATED MARQUEE BANNER */}
       <div className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white overflow-hidden py-3">
         <div className="animate-marquee-scroll whitespace-nowrap inline-flex">
