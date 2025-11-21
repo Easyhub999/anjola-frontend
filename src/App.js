@@ -223,7 +223,7 @@ function App() {
   // MAIN RENDER
   // ======================================================
   return (
-    <div className="App page-container">
+    <div className="App">
       {/* TOP NAV */}
       <Navigation
         currentPage={currentPage}
@@ -249,7 +249,7 @@ function App() {
       />
 
       {/* PAGES - All pages except HomePage need top padding */}
-      <div className={currentPage !== 'home' ? 'pt-[140px]' : ''}>
+      <div className={currentPage !== 'home' ? 'pt-40' : ''}>
         {currentPage === 'home' && (
           <HomePage
             products={products}

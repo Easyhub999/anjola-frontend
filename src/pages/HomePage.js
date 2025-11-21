@@ -18,7 +18,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
     <div className="min-h-screen">
 
       {/* ================= HERO SECTION (KEEP RIBBON) ================= */}
-      <div className="relative h-[95vh] overflow-hidden flex items-center justify-center">
+      <div className="relative h-[95vh] overflow-hidden flex items-center justify-center" style={{ marginTop: '120px' }}>
 
         {/* Client's Ribbon Logo Background */}
         <img
@@ -448,9 +448,14 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
           </div>
         </div>
       </div>
-      
-       {/* ================= ANIMATIONS CSS ================= */}
+
+      {/* ================= ANIMATIONS CSS ================= */}
       <style jsx>{`
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-50%); }
+        }
+        
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
@@ -506,6 +511,12 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
         @keyframes spin-slow {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+        
+        .animate-marquee {
+          display: inline-flex;
+          animation: marquee 20s linear infinite;
+          width: max-content;
         }
         
         .animate-fadeIn {

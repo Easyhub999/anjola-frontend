@@ -17,23 +17,36 @@ const Navigation = ({
   const cartTotalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <nav className="w-full z-[9999] shadow-sm bg-white/80 backdrop-blur-lg overflow-hidden">
+    <nav className="fixed top-0 left-0 w-full z-[999] shadow-sm bg-white/80 backdrop-blur-lg overflow-hidden">
 
-      {/* 🔥 FIXED Marquee INSIDE NavBar (Smooth + No overlap) */}
-      <div className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white overflow-hidden py-2">
-        {/* FIXED min-w-[200%] */}
-        <div className="animate-marquee whitespace-nowrap inline-block min-w-[200%]">
-          {[...Array(2)].map((_, i) => (
-            <span
-              key={i}
-              className="mx-8 flex items-center gap-2 text-sm font-semibold"
-            >
-              <Sparkles className="w-4 h-4" />
-              Hi Girlies💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉  
-              Follow us on TikTok & Instagram for daily updates!
-              <Heart className="w-4 h-4 fill-current" />
-            </span>
-          ))}
+      {/* 🔥 ANIMATED MARQUEE BANNER */}
+      <div className="w-full bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white overflow-hidden py-3">
+        <div className="animate-marquee-scroll whitespace-nowrap">
+          <span className="inline-flex items-center gap-3 text-sm font-semibold">
+            <Sparkles className="w-4 h-4" />
+            Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
+            <Heart className="w-4 h-4 fill-current" />
+            <span className="mx-6">•</span>
+            <Sparkles className="w-4 h-4" />
+            Follow us on TikTok & Instagram for daily updates! ✨
+            <Heart className="w-4 h-4 fill-current" />
+            <span className="mx-6">•</span>
+            <Sparkles className="w-4 h-4" />
+            New stock arrived! Start shopping 🛍️
+            <Heart className="w-4 h-4 fill-current" />
+            <span className="mx-6">•</span>
+            <Sparkles className="w-4 h-4" />
+            Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
+            <Heart className="w-4 h-4 fill-current" />
+            <span className="mx-6">•</span>
+            <Sparkles className="w-4 h-4" />
+            Follow us on TikTok & Instagram for daily updates! ✨
+            <Heart className="w-4 h-4 fill-current" />
+            <span className="mx-6">•</span>
+            <Sparkles className="w-4 h-4" />
+            New stock arrived! Start shopping 🛍️
+            <Heart className="w-4 h-4 fill-current" />
+          </span>
         </div>
       </div>
 
@@ -82,6 +95,29 @@ const Navigation = ({
               )}
             </button>
           ))}
+
+          {/* ADMIN LINKS */}
+          {user?.role === "admin" && (
+            <>
+              <button
+                onClick={() => setCurrentPage("admin")}
+                className={`text-lg font-medium transition ${
+                  currentPage === "admin" ? "text-red-600" : "text-red-500 hover:text-red-700"
+                }`}
+              >
+                Products
+              </button>
+
+              <button
+                onClick={() => setCurrentPage("admin-orders")}
+                className={`text-lg font-medium transition ${
+                  currentPage === "admin-orders" ? "text-red-600" : "text-red-500 hover:text-red-700"
+                }`}
+              >
+                Orders
+              </button>
+            </>
+          )}
         </div>
 
         {/* RIGHT ICONS */}
@@ -141,8 +177,52 @@ const Navigation = ({
               {page.charAt(0).toUpperCase() + page.slice(1)}
             </button>
           ))}
+
+          {/* ADMIN MOBILE */}
+          {user?.role === "admin" && (
+            <>
+              <div className="border-t pt-4 text-gray-500 text-sm">Admin Panel</div>
+
+              <button
+                onClick={() => {
+                  setCurrentPage("admin");
+                  setShowMobileMenu(false);
+                }}
+                className="block w-full text-left text-red-600 font-medium text-lg"
+              >
+                📦 Products
+              </button>
+
+              <button
+                onClick={() => {
+                  setCurrentPage("admin-orders");
+                  setShowMobileMenu(false);
+                }}
+                className="block w-full text-left text-red-600 font-medium text-lg"
+              >
+                📋 Orders
+              </button>
+            </>
+          )}
         </div>
       )}
+
+      {/* ANIMATION STYLES */}
+      <style jsx>{`
+        @keyframes marquee-scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+        .animate-marquee-scroll {
+          display: inline-block;
+          animation: marquee-scroll 30s linear infinite;
+          padding-left: 100%;
+        }
+      `}</style>
     </nav>
   );
 };
