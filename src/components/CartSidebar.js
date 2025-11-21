@@ -14,10 +14,10 @@ const CartSidebar = ({
   return (
     <div
       className={`fixed right-0 top-0 h-full w-full sm:w-96 bg-white shadow-2xl 
-      transform transition-transform duration-300 z-50 
+      transform transition-transform duration-300 z-[1002]
       ${showCart ? 'translate-x-0' : 'translate-x-full'}`}
     >
-      <div className="p-6 h-full flex flex-col">
+      <div className="p-6 pt-28 h-full flex flex-col">
 
         {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
