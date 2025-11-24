@@ -5,36 +5,38 @@ const ContactPage = () => {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      // FIXED 🔥 — removed env, added real backend URL
-      const response = await fetch(
-        "https://anjola-backend-1.onrender.com/api/contact",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
+  try {
+    console.log('Submitting form:', formData); // Debug log
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setSubmitted(true);
-        setFormData({ name: "", email: "", message: "" });
-
-        setTimeout(() => setSubmitted(false), 3000);
-      } else {
-        alert(data.message || "Failed to send message");
+    const response = await fetch(
+      "https://anjola-backend-1.onrender.com/api/contact",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       }
-    } catch (error) {
-      alert("Error sending message. Please try again later.");
-      console.log("Contact error:", error);
-    }
-  };
+    );
 
+    const data = await response.json();
+    console.log('Response from backend:', data); // Debug log
+
+    if (response.ok) {
+      console.log('Email sent successfully!', data); // Debug log
+      setSubmitted(true);
+      setFormData({ name: "", email: "", message: "" });
+      setTimeout(() => setSubmitted(false), 3000);
+    } else {
+      console.error('Failed:', data); // Debug log
+      alert(data.message || "Failed to send message");
+    }
+  } catch (error) {
+    console.error("Contact error:", error); // Debug log
+    alert("Error sending message. Please try again later.");
+  }
+};
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 pt-24 pb-12">
       <div className="max-w-4xl mx-auto px-4">
