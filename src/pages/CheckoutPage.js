@@ -17,7 +17,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
     state: ''
   });
 
-  const totalAmount = getTotalPrice() + 2500; // SHIPPING INCLUDED
+  const totalAmount = getTotalPrice() + 0; // SHIPPING INCLUDED
 
 
   // =============================
@@ -323,7 +323,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
                 </div>
                 <div className="flex justify-between text-gray-700">
                   <span>Shipping</span>
-                  <span>₦2,500</span>
+                  <span>₦0</span>
                 </div>
                 <div className="flex justify-between text-xl font-bold border-t pt-4">
                   <span>Total</span>
