@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 import Navigation from './components/Navigation';
 import CartSidebar from './components/CartSidebar';
@@ -17,10 +18,12 @@ import AdminOrdersPage from './pages/AdminOrdersPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import { productsAPI } from './api';
 
-function App() {
-  const [currentPage, setCurrentPage] = useState('home');
+// Wrapper component to handle navigation
+function AppContent() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const [selectedProduct, setSelectedProduct] = useState(null);
-
   const [cart, setCart] = useState([]);
   const [user, setUser] = useState(null);
   const [showCart, setShowCart] = useState(false);
@@ -29,17 +32,23 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-
   const [toast, setToast] = useState(null);
   const [cartBump, setCartBump] = useState(false);
 
+  // Get current page from URL
+  const currentPage = location.pathname.slice(1) || 'home';
+
+  // Custom setCurrentPage that uses navigate
+  const setCurrentPage = (page) => {
+    navigate(`/${page === 'home' ? '' : page}`);
+  };
+
   // ======================================================
-  // 🔥 1. Load user, cart, AND last page from localStorage
+  // LOAD USER & CART FROM LOCALSTORAGE
   // ======================================================
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const storedCart = localStorage.getItem('cart');
-    const savedPage = localStorage.getItem('currentPage');
     const savedProduct = localStorage.getItem('selectedProduct');
 
     if (storedUser) {
@@ -58,32 +67,24 @@ function App() {
       }
     }
 
-    // restore page
-    if (savedPage) setCurrentPage(savedPage);
-
-    // restore selected product ONLY if user was on product page
-    if (savedPage === 'product' && savedProduct) {
+    // Restore selected product if navigating to product page
+    if (location.pathname === '/product' && savedProduct) {
       try {
         setSelectedProduct(JSON.parse(savedProduct));
       } catch {
         // ignore
       }
     }
-  }, []);
+  }, [location.pathname]);
 
   // ======================================================
-  // 🔥 2. Save currentPage + selectedProduct to localStorage
+  // SAVE SELECTED PRODUCT TO LOCALSTORAGE
   // ======================================================
   useEffect(() => {
-    localStorage.setItem('currentPage', currentPage);
-
-    if (currentPage === 'product' && selectedProduct) {
-      localStorage.setItem(
-        'selectedProduct',
-        JSON.stringify(selectedProduct)
-      );
+    if (location.pathname === '/product' && selectedProduct) {
+      localStorage.setItem('selectedProduct', JSON.stringify(selectedProduct));
     }
-  }, [currentPage, selectedProduct]);
+  }, [selectedProduct, location.pathname]);
 
   // ======================================================
   // LOAD PRODUCTS FROM BACKEND
@@ -128,16 +129,12 @@ function App() {
   // CART FUNCTIONS
   // ======================================================
   const addToCart = (product) => {
-    // Extra safety: respect visibility + stock
     if (product.visible === false) {
       triggerCartFeedback('This product is currently unavailable.');
       return;
     }
 
-    if (
-      typeof product.quantity === 'number' &&
-      product.quantity <= 0
-    ) {
+    if (typeof product.quantity === 'number' && product.quantity <= 0) {
       triggerCartFeedback('This product is out of stock.');
       return;
     }
@@ -248,82 +245,117 @@ function App() {
         setCurrentPage={setCurrentPage}
       />
 
-      {/* PAGES - All pages except HomePage need top padding */}
+      {/* ROUTES */}
       <div className={currentPage !== 'home' ? 'pt-40' : ''}>
-        {currentPage === 'home' && (
-          <HomePage
-            products={products}
-            cart={cart}
-            addToCart={addToCart}
-            updateQuantity={updateQuantity}
-            setCurrentPage={setCurrentPage}
-            setSelectedProduct={setSelectedProduct}
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <HomePage
+                products={products}
+                cart={cart}
+                addToCart={addToCart}
+                updateQuantity={updateQuantity}
+                setCurrentPage={setCurrentPage}
+                setSelectedProduct={setSelectedProduct}
+              />
+            }
           />
-        )}
 
-        {currentPage === 'shop' && (
-          <ShopPage
-            products={products}
-            cart={cart}
-            addToCart={addToCart}
-            updateQuantity={updateQuantity}
-            removeFromCart={removeFromCart}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            setCurrentPage={setCurrentPage}
-            setSelectedProduct={setSelectedProduct}
-            selectedProduct={selectedProduct}
+          <Route
+            path="/shop"
+            element={
+              <ShopPage
+                products={products}
+                cart={cart}
+                addToCart={addToCart}
+                updateQuantity={updateQuantity}
+                removeFromCart={removeFromCart}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                setCurrentPage={setCurrentPage}
+                setSelectedProduct={setSelectedProduct}
+                selectedProduct={selectedProduct}
+              />
+            }
           />
-        )}
 
-        {currentPage === 'product' && selectedProduct && (
-          <ProductDetailPage
-            selectedProduct={selectedProduct}
-            addToCart={addToCart}
-            user={user}
-            setCurrentPage={setCurrentPage}
+          <Route
+            path="/product"
+            element={
+              selectedProduct ? (
+                <ProductDetailPage
+                  selectedProduct={selectedProduct}
+                  addToCart={addToCart}
+                  user={user}
+                  setCurrentPage={setCurrentPage}
+                />
+              ) : (
+                <div className="min-h-screen flex items-center justify-center">
+                  <p className="text-gray-600">No product selected</p>
+                </div>
+              )
+            }
           />
-        )}
 
-        {currentPage === 'blog' && <BlogPage />}
-        {currentPage === 'contact' && <ContactPage />}
+          <Route path="/blog" element={<BlogPage />} />
+          
+          <Route path="/contact" element={<ContactPage />} />
 
-        {currentPage === 'auth' && (
-          <AuthPage setUser={setUser} setCurrentPage={setCurrentPage} />
-        )}
-
-        {currentPage === 'profile' && user && (
-          <ProfilePage
-            user={user}
-            setUser={setUser}
-            setCurrentPage={setCurrentPage}
+          <Route
+            path="/auth"
+            element={<AuthPage setUser={setUser} setCurrentPage={setCurrentPage} />}
           />
-        )}
 
-        {currentPage === 'checkout' && (
-          <CheckoutPage
-            cart={cart}
-            getTotalPrice={getTotalPrice}
-            clearCart={clearCart}
-            setCurrentPage={setCurrentPage}
-            user={user}
+          <Route
+            path="/profile"
+            element={
+              user ? (
+                <ProfilePage
+                  user={user}
+                  setUser={setUser}
+                  setCurrentPage={setCurrentPage}
+                />
+              ) : (
+                <div className="min-h-screen flex items-center justify-center">
+                  <p className="text-gray-600">Please log in to view your profile</p>
+                </div>
+              )
+            }
           />
-        )}
 
-        {currentPage === 'admin' && (
-          <AdminPage
-            user={user}
-            products={products}
-            setProducts={setProducts}
+          <Route
+            path="/checkout"
+            element={
+              <CheckoutPage
+                cart={cart}
+                getTotalPrice={getTotalPrice}
+                clearCart={clearCart}
+                setCurrentPage={setCurrentPage}
+                user={user}
+              />
+            }
           />
-        )}
 
-        {currentPage === 'admin-orders' && (
-          <AdminOrdersPage user={user} />
-        )}
+          <Route
+            path="/admin"
+            element={
+              <AdminPage
+                user={user}
+                products={products}
+                setProducts={setProducts}
+              />
+            }
+          />
+
+          <Route
+            path="/admin-orders"
+            element={<AdminOrdersPage user={user} />}
+          />
+        </Routes>
       </div>
 
-      {/* TOAST - Now above everything */}
+      {/* TOAST */}
       {toast && (
         <div className="fixed top-20 right-4 bg-gray-900 text-white text-sm px-4 py-3 rounded-2xl shadow-xl animate-fade-in-up z-[1000]">
           <span>{toast.message}</span>
@@ -333,6 +365,15 @@ function App() {
       {/* FOOTER */}
       <Footer setCurrentPage={setCurrentPage} />
     </div>
+  );
+}
+
+// Main App component wraps everything in Router
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 
