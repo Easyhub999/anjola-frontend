@@ -11,7 +11,7 @@ const Footer = () => {
             Anjola Aesthetics
           </h2>
           <p className="text-gray-400 leading-relaxed">
-            Luxury self-care products for the modern woman.
+            Pretty little things for your daily bliss 😊✨🎀
           </p>
         </div>
 
@@ -29,7 +29,7 @@ const Footer = () => {
         <div>
           <h3 className="text-white text-lg font-semibold mb-4">Customer Care</h3>
           <ul className="space-y-2">
-            <li className="hover:text-white cursor-pointer">Shipping & Returns</li>
+            <li className="hover:text-white cursor-pointer">Fast Shipping</li>
             <li className="hover:text-white cursor-pointer">Privacy Policy</li>
             <li className="hover:text-white cursor-pointer">Terms & Conditions</li>
           </ul>
