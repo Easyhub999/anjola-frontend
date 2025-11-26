@@ -195,7 +195,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
   // =============================
   if (orderPlaced) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 pt-24 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 pt-0 flex items-center justify-center px-4">
         <div className="bg-white rounded-2xl shadow-2xl p-12 text-center max-w-md w-full">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Check className="w-12 h-12 text-green-500" />
