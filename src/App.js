@@ -44,47 +44,48 @@ function AppContent() {
   };
 
   // ======================================================
-  // LOAD USER & CART FROM LOCALSTORAGE
-  // ======================================================
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const storedCart = localStorage.getItem('cart');
-    const savedProduct = localStorage.getItem('selectedProduct');
+// LOAD USER & CART FROM LOCALSTORAGE (ONE-TIME ONLY)
+// ======================================================
+useEffect(() => {
+  const storedUser = localStorage.getItem('user');
+  const storedCart = localStorage.getItem('cart');
 
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        // ignore bad JSON
-      }
+  if (storedUser) {
+    try {
+      setUser(JSON.parse(storedUser));
+    } catch {
+      // ignore bad JSON
     }
+  }
 
-    if (storedCart) {
-      try {
-        setCart(JSON.parse(storedCart));
-      } catch {
-        // ignore bad JSON
-      }
+  if (storedCart) {
+    try {
+      setCart(JSON.parse(storedCart));
+    } catch {
+      // ignore bad JSON
     }
+  }
 
-    // Restore selected product if navigating to product page
-    if (location.pathname === '/product' && savedProduct) {
-      try {
-        setSelectedProduct(JSON.parse(savedProduct));
-      } catch {
-        // ignore
-      }
+  // ONLY restore selected product on INITIAL page load (not on every navigation)
+  const savedProduct = localStorage.getItem('selectedProduct');
+  if (location.pathname === '/product' && savedProduct && !selectedProduct) {
+    try {
+      setSelectedProduct(JSON.parse(savedProduct));
+    } catch {
+      // ignore
     }
-  }, [location.pathname]);
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []); // ✅ Empty dependency array - runs ONCE on mount
 
-  // ======================================================
-  // SAVE SELECTED PRODUCT TO LOCALSTORAGE
-  // ======================================================
-  useEffect(() => {
-    if (location.pathname === '/product' && selectedProduct) {
-      localStorage.setItem('selectedProduct', JSON.stringify(selectedProduct));
-    }
-  }, [selectedProduct, location.pathname]);
+// ======================================================
+// SAVE SELECTED PRODUCT TO LOCALSTORAGE
+// ======================================================
+useEffect(() => {
+  if (selectedProduct) {
+    localStorage.setItem('selectedProduct', JSON.stringify(selectedProduct));
+  }
+}, [selectedProduct]); // ✅ Save whenever selectedProduct changes
 
   // ======================================================
   // LOAD PRODUCTS FROM BACKEND
