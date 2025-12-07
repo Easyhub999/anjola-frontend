@@ -17,6 +17,7 @@ import AdminPage from './pages/AdminPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import { productsAPI } from './api';
+import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 
 // Wrapper component to handle navigation
 function AppContent() {
@@ -346,6 +347,13 @@ useEffect(() => {
                 products={products}
                 setProducts={setProducts}
               />
+            }
+          />
+
+          <Route
+            path="/admin-analytics"
+            element={
+              <AdminAnalyticsPage user={user} />
             }
           />
 

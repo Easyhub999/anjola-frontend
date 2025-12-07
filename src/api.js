@@ -362,7 +362,87 @@ export const paymentsAPI = {
   }
 };
 
+// ==========================================
+// ANALYTICS API
+// ==========================================
 
+export const analyticsAPI = {
+  
+  // Get revenue analytics
+  getRevenueAnalytics: async (token) => {
+    try {
+      const response = await fetch(`${API_URL}/analytics/revenue`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      return await handleResponse(response);
+    } catch (error) {
+      console.error("Get revenue analytics error:", error);
+      throw error;
+    }
+  },
+
+  // Get monthly breakdown
+  getMonthlyBreakdown: async (token, months = 12) => {
+    try {
+      const response = await fetch(`${API_URL}/analytics/monthly-breakdown?months=${months}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      return await handleResponse(response);
+    } catch (error) {
+      console.error("Get monthly breakdown error:", error);
+      throw error;
+    }
+  },
+
+  // Get top products
+  getTopProducts: async (token, limit = 10, period = 'all') => {
+    try {
+      const response = await fetch(`${API_URL}/analytics/top-products?limit=${limit}&period=${period}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      return await handleResponse(response);
+    } catch (error) {
+      console.error("Get top products error:", error);
+      throw error;
+    }
+  },
+
+  // Get order status breakdown
+  getOrderStatusBreakdown: async (token, period = 'all') => {
+    try {
+      const response = await fetch(`${API_URL}/analytics/order-status?period=${period}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      return await handleResponse(response);
+    } catch (error) {
+      console.error("Get order status error:", error);
+      throw error;
+    }
+  },
+
+  // Get payment status breakdown
+  getPaymentStatusBreakdown: async (token, period = 'all') => {
+    try {
+      const response = await fetch(`${API_URL}/analytics/payment-status?period=${period}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      return await handleResponse(response);
+    } catch (error) {
+      console.error("Get payment status error:", error);
+      throw error;
+    }
+  }
+};
 
 // ==========================================
 // DEFAULT EXPORT
@@ -372,5 +452,6 @@ export default {
   auth: authAPI,
   products: productsAPI,
   orders: ordersAPI,
-  payments: paymentsAPI
+  payments: paymentsAPI,
+  analytics: analyticsAPI
 };

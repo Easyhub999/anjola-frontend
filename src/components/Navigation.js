@@ -236,6 +236,14 @@ const Navigation = ({
 
                 <button
                   onClick={() => {
+                    setCurrentPage("admin-analytics");
+                    setShowMobileMenu(false);
+                  }}>
+                    📊 Analytics
+                  </button>
+
+                <button
+                  onClick={() => {
                     setCurrentPage("admin-orders");
                     setShowMobileMenu(false);
                   }}
