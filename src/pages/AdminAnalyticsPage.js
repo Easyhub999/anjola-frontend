@@ -86,7 +86,7 @@ const AdminAnalyticsPage = ({ user }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 pt-0 pb-12">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 pt-20 pb-12">
       <div className="max-w-7xl mx-auto px-4">
         
         {/* Header */}
