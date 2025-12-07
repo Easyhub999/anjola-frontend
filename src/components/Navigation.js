@@ -238,8 +238,10 @@ const Navigation = ({
                   onClick={() => {
                     setCurrentPage("admin-analytics");
                     setShowMobileMenu(false);
-                  }}>
-                    📊 Analytics
+                  }}
+                  className="block w-full text-left text-red-600 font-medium text-lg"
+                >
+                  📊 Analytics
                   </button>
 
                 <button
