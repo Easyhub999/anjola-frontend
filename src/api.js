@@ -273,6 +273,20 @@ export const ordersAPI = {
     }
   },
 
+  // Create Manual Order (admin)
+  createManualOrder: async (orderData, token) => {
+    const res = await fetch(`${API_URL}/orders/manual`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(orderData)
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    return data.data;
+  },
 
   // ADMIN: Get all orders
   getAllOrders: async (token) => {

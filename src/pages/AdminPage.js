@@ -6,9 +6,11 @@ import {
   Upload,
   X,
   Eye,
-  EyeOff
+  EyeOff,
+  Plus
 } from 'lucide-react';
 import { productsAPI } from '../api';
+import ManualOrderModal from '../components/ManualOrderModal';
 
 // =========================================================
 // MAIN ADMIN PAGE
@@ -19,6 +21,7 @@ const AdminPage = ({ user, products, setProducts }) => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [draggingIndex, setDraggingIndex] = useState(null);
   const [bulkUploading, setBulkUploading] = useState(false);
+  const [showManualOrderModal, setShowManualOrderModal] = useState(false);
 
   // Dynamic categories (from backend products)
   const [categories, setCategories] = useState([]);
@@ -475,6 +478,17 @@ const AdminPage = ({ user, products, setProducts }) => {
           Admin Dashboard
         </h1>
 
+        {/* Modal */}
+        <div className="mb-8 flex justify-end">
+         <button
+           onClick={() => setShowManualOrderModal(true)}
+           className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-600 transition shadow-lg"
+         >
+          <Plus className="w-5 h-5" />
+          Create Manual Order
+        </button>
+      </div>
+
         <div className="grid lg:grid-cols-2 gap-8">
           <AdminProductForm
             newProduct={newProduct}
@@ -512,6 +526,13 @@ const AdminPage = ({ user, products, setProducts }) => {
             />
           </div>
         </div>
+
+          <ManualOrderModal
+            isOpen={showManualOrderModal}
+            onClose={() => setShowManualOrderModal(false)}
+            products={products}
+            user={user}
+          />
       </div>
     </div>
   );
