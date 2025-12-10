@@ -122,12 +122,22 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8">
+    <div
+      className="fixed inset-0 z-[9999] bg-black/50 flex items-start justify-center overflow-y-auto pt-4 pb-20"
+      onClick={onClose}
+    >
+      <div 
+       className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 mb-8"
+       onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6 flex items-center justify-between rounded-t-2xl">
+        <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6 flex items-center justify-between rounded-t-2xl">
           <h2 className="text-2xl font-bold">Create Manual Order</h2>
-          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition">
+          <button
+            onClick={onClose} 
+            type="button"
+            className="p-2 hover:bg-white/20 rounded-full transition"
+          >
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -367,7 +377,7 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
             {loading ? (
               <>
                 <Loader className="w-5 h-5 animate-spin" />
-                Creating Order...
+                Creating Order for my baby...
               </>
             ) : (
               'Create Order'
