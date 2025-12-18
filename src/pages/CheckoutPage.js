@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Check, Loader, CreditCard, Lock, Truck, Info, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Check, Loader, CreditCard, Lock, Truck, Info } from 'lucide-react';
 import { ordersAPI, paymentsAPI } from '../api';
 
 const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) => {
-  const [orderPlaced, setOrderPlaced] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [verifying, setVerifying] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('paystack');
   const [shippingMethod, setShippingMethod] = useState('');
   const [formData, setFormData] = useState({
@@ -16,56 +14,6 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
     city: '',
     state: ''
   });
-
-  // =============================
-  // 🔥 HANDLE RETURN FROM PAYSTACK
-  // =============================
-  const handlePaymentReturn = async (reference) => {
-    setVerifying(true);
-
-    try {
-      console.log('🔍 Verifying payment:', reference);
-
-      const verification = await paymentsAPI.verifyPayment(reference);
-
-      console.log('✅ Verification response:', verification);
-
-      if (verification.success) {
-        setOrderPlaced(true);
-        clearCart();
-
-        // Clean URL
-        window.history.replaceState({}, document.title, '/checkout');
-
-        // Redirect after 5 seconds
-        setTimeout(() => {
-          setOrderPlaced(false);
-          setCurrentPage('home');
-        }, 5000);
-      } else {
-        alert('Payment verification failed. Please contact support with reference: ' + reference);
-      }
-    } catch (error) {
-      console.error('❌ Verification error:', error);
-      alert('Payment verification failed: ' + error.message);
-    } finally {
-      setVerifying(false);
-    }
-  };
-
-  // =============================
-  // 🔥 CHECK FOR PAYMENT SUCCESS ON LOAD
-  // =============================
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const paymentStatus = urlParams.get('payment');
-    const reference = urlParams.get('reference');
-
-    if (paymentStatus === 'success' && reference) {
-      handlePaymentReturn(reference);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // =============================
   // 🔥 SHIPPING OPTIONS
@@ -154,6 +102,15 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
       const paymentResponse = await paymentsAPI.initializePayment(paymentData);
 
       if (paymentResponse.success && paymentResponse.data.authorization_url) {
+        // ✅ Clear cart before redirect (payment will be verified by webhook)
+        clearCart();
+        
+        // ✅ Store payment info in localStorage so we can show message when they return
+        sessionStorage.setItem('pendingPayment', JSON.stringify({
+          email: formData.email,
+          orderNumber: order.orderNumber
+        }));
+
         // Redirect to Paystack
         window.location.href = paymentResponse.data.authorization_url;
       } else {
@@ -167,52 +124,6 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
       setCheckoutLoading(false);
     }
   };
-
-  // =============================
-  // 🔥 VERIFYING PAYMENT STATE
-  // =============================
-  if (verifying) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 pt-24 flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-12 text-center max-w-md w-full">
-          <Loader className="w-16 h-16 animate-spin text-purple-500 mx-auto mb-6" />
-          <h2 className="text-2xl font-serif text-gray-800 mb-4">Verifying Payment...</h2>
-          <p className="text-gray-600">Please wait while we confirm your payment with Paystack</p>
-        </div>
-      </div>
-    );
-  }
-
-  // =============================
-  // 🔥 PAYMENT SUCCESS STATE
-  // =============================
-  if (orderPlaced) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 pt-24 flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-12 text-center max-w-md w-full">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Check className="w-12 h-12 text-green-500" />
-          </div>
-          <h1 className="text-3xl font-serif text-gray-800 mb-4">Payment Successful!</h1>
-          <p className="text-gray-600 mb-4">Thank you for shopping with Anjola Aesthetics</p>
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-green-800">
-              <strong>Order confirmed!</strong><br />
-              Check your email for order details and tracking information.
-            </p>
-          </div>
-          <p className="text-sm text-gray-500">Redirecting to homepage in 5 seconds...</p>
-          
-          <button
-            onClick={() => setCurrentPage('home')}
-            className="mt-6 w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition"
-          >
-            Continue Shopping
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   // =============================
   // 🔥 CHECKOUT PAGE UI

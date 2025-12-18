@@ -14,6 +14,21 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
     setCurrentPage("product");
   };
 
+  //==============================
+  // CHECK FOR PAYMENT RETURN
+  //==============================
+  React.useEffect(() => {
+    const pendingPayment = sessionStorage.getItem("pendingPayment");
+
+    if (pendingPayment) {
+      const parsedPayment = JSON.parse(pendingPayment);
+      sessionStorage.removeItem('pendingPayment');
+
+      //Show success message
+      alert(`Payment of ₦${(parsedPayment.amount / 100).toLocaleString()} was successful! Your order is being processed.`);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen">
 
