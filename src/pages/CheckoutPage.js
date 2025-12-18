@@ -102,14 +102,8 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
       const paymentResponse = await paymentsAPI.initializePayment(paymentData);
 
       if (paymentResponse.success && paymentResponse.data.authorization_url) {
-        // ✅ Clear cart before redirect (payment will be verified by webhook)
+        // Clear cart before redirect
         clearCart();
-        
-        // ✅ Store payment info in localStorage so we can show message when they return
-        sessionStorage.setItem('pendingPayment', JSON.stringify({
-          email: formData.email,
-          orderNumber: order.orderNumber
-        }));
 
         // Redirect to Paystack
         window.location.href = paymentResponse.data.authorization_url;

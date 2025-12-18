@@ -4,8 +4,8 @@ import { Mail, Sparkles, Heart, Gift, Star } from "lucide-react";
 const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, setSelectedProduct }) => {
   const featuredProducts = products.filter((p) => p.featured && p.visible !== false).slice(0, 3);
 
-  // ✅ PAYMENT SUCCESS BANNER STATE
-  const [showPaymentSuccess, setShowPaymentSuccess] = React.useState(false);
+  // ✅ SUCCESS MODAL STATE
+  const [showSuccessModal, setShowSuccessModal] = React.useState(false);
 
   const getCartItemQty = (id) => {
     const found = cart.find((item) => item._id === id);
@@ -17,46 +17,76 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
     setCurrentPage("product");
   };
 
-  //==============================
   // ✅ CHECK FOR PAYMENT RETURN
-  //==============================
   React.useEffect(() => {
-    // Check URL for payment return
     const urlParams = new URLSearchParams(window.location.search);
     const reference = urlParams.get('reference');
     
     if (reference) {
-      setShowPaymentSuccess(true);
+      setShowSuccessModal(true);
       // Clean URL
       window.history.replaceState({}, '', '/');
-      // Hide banner after 10 seconds
-      setTimeout(() => setShowPaymentSuccess(false), 10000);
     }
   }, []);
 
   return (
     <div className="min-h-screen">
 
-      {/* ✅ PAYMENT SUCCESS BANNER */}
-      {showPaymentSuccess && (
-        <div style={{
-          position: 'fixed',
-          top: '100px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: '#10b981',
-          color: 'white',
-          padding: '20px 40px',
-          borderRadius: '16px',
-          boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
-          zIndex: 9999,
-          fontWeight: 'bold',
-          fontSize: '18px',
-          textAlign: 'center',
-          maxWidth: '90%',
-          animation: 'slideDown 0.5s ease-out'
-        }}>
-          ✅ Payment Successful! Check your email for order confirmation.
+      {/* ✅ SUCCESS MODAL */}
+      {showSuccessModal && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[10000] px-4"
+          onClick={() => setShowSuccessModal(false)}
+        >
+          <div 
+            className="bg-white rounded-3xl p-8 md:p-12 max-w-md w-full shadow-2xl transform animate-fadeInUp"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Success Icon */}
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+              <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-3xl font-serif text-gray-900 text-center mb-4">
+              Payment Successful! 🎉
+            </h2>
+
+            {/* Message */}
+            <p className="text-gray-600 text-center mb-6 leading-relaxed">
+              Thank you for your order! We've sent a confirmation email with your order details and tracking information.
+            </p>
+
+            {/* Info boxes */}
+            <div className="space-y-3 mb-8">
+              <div className="flex items-start gap-3 bg-pink-50 p-4 rounded-xl">
+                <span className="text-2xl">📧</span>
+                <div>
+                  <p className="font-semibold text-gray-900 text-sm">Check Your Email</p>
+                  <p className="text-xs text-gray-600">Order confirmation sent</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 bg-purple-50 p-4 rounded-xl">
+                <span className="text-2xl">🚚</span>
+                <div>
+                  <p className="font-semibold text-gray-900 text-sm">Processing Your Order</p>
+                  <p className="text-xs text-gray-600">We'll ship within 2-3 business days</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Button */}
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-4 rounded-xl font-semibold text-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              <Sparkles className="w-5 h-5" />
+              Continue Shopping
+            </button>
+          </div>
         </div>
       )}
 
@@ -523,17 +553,6 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
           to {
             opacity: 1;
             transform: translateY(0);
-          }
-        }
-        
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translate(-50%, -20px);
-          }
-          to {
-            opacity: 1;
-            transform: translate(-50%, 0);
           }
         }
         
