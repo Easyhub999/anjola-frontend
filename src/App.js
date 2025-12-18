@@ -18,6 +18,7 @@ import AdminOrdersPage from './pages/AdminOrdersPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import { productsAPI } from './api';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
 
 // Wrapper component to handle navigation
 function AppContent() {
@@ -360,6 +361,16 @@ useEffect(() => {
           <Route
             path="/admin-orders"
             element={<AdminOrdersPage user={user} />}
+          />
+
+          <Route
+            path="/payment-success"
+            element={
+              <PaymentSuccessPage
+                setCurrentPage={setCurrentPage}
+                clearCart={clearCart}
+              />
+            }
           />
         </Routes>
       </div>
