@@ -18,7 +18,6 @@ import AdminOrdersPage from './pages/AdminOrdersPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import { productsAPI } from './api';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
-import PaymentSuccessPage from './pages/PaymentSuccessPage';
 
 // Wrapper component to handle navigation
 function AppContent() {
