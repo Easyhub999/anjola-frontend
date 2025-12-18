@@ -17,55 +17,55 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
     state: ''
   });
 
-// =============================
-// 🔥 HANDLE RETURN FROM PAYSTACK
-// =============================
-const handlePaymentReturn = async (reference) => {
-  setVerifying(true);
+  // =============================
+  // 🔥 HANDLE RETURN FROM PAYSTACK
+  // =============================
+  const handlePaymentReturn = async (reference) => {
+    setVerifying(true);
 
-  try {
-    console.log('🔍 Verifying payment:', reference);
+    try {
+      console.log('🔍 Verifying payment:', reference);
 
-    const verification = await paymentsAPI.verifyPayment(reference);
+      const verification = await paymentsAPI.verifyPayment(reference);
 
-    console.log('✅ Verification response:', verification);
+      console.log('✅ Verification response:', verification);
 
-    if (verification.success) {
-      setOrderPlaced(true);
-      clearCart();
+      if (verification.success) {
+        setOrderPlaced(true);
+        clearCart();
 
-      // Clean URL
-      window.history.replaceState({}, document.title, '/checkout');
+        // Clean URL
+        window.history.replaceState({}, document.title, '/checkout');
 
-      // Redirect after 5 seconds
-      setTimeout(() => {
-        setOrderPlaced(false);
-        setCurrentPage('home');
-      }, 5000);
-    } else {
-      alert('Payment verification failed. Please contact support with reference: ' + reference);
+        // Redirect after 5 seconds
+        setTimeout(() => {
+          setOrderPlaced(false);
+          setCurrentPage('home');
+        }, 5000);
+      } else {
+        alert('Payment verification failed. Please contact support with reference: ' + reference);
+      }
+    } catch (error) {
+      console.error('❌ Verification error:', error);
+      alert('Payment verification failed: ' + error.message);
+    } finally {
+      setVerifying(false);
     }
-  } catch (error) {
-    console.error('❌ Verification error:', error);
-    alert('Payment verification failed: ' + error.message);
-  } finally {
-    setVerifying(false);
-  }
-};
+  };
 
-// =============================
-// 🔥 CHECK FOR PAYMENT SUCCESS ON LOAD
-// =============================
-useEffect(() => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const paymentStatus = urlParams.get('payment');
-  const reference = urlParams.get('reference');
+  // =============================
+  // 🔥 CHECK FOR PAYMENT SUCCESS ON LOAD
+  // =============================
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    const reference = urlParams.get('reference');
 
-  if (paymentStatus === 'success' && reference) {
-    handlePaymentReturn(reference);
-  }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, []);
+    if (paymentStatus === 'success' && reference) {
+      handlePaymentReturn(reference);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // =============================
   // 🔥 SHIPPING OPTIONS
