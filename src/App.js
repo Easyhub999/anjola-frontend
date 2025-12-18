@@ -16,6 +16,7 @@ import CheckoutPage from './pages/CheckoutPage';
 import AdminPage from './pages/AdminPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import { productsAPI } from './api';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 
@@ -45,48 +46,48 @@ function AppContent() {
   };
 
   // ======================================================
-// LOAD USER & CART FROM LOCALSTORAGE (ONE-TIME ONLY)
-// ======================================================
-useEffect(() => {
-  const storedUser = localStorage.getItem('user');
-  const storedCart = localStorage.getItem('cart');
+  // LOAD USER & CART FROM LOCALSTORAGE (ONE-TIME ONLY)
+  // ======================================================
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    const storedCart = localStorage.getItem('cart');
 
-  if (storedUser) {
-    try {
-      setUser(JSON.parse(storedUser));
-    } catch {
-      // ignore bad JSON
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        // ignore bad JSON
+      }
     }
-  }
 
-  if (storedCart) {
-    try {
-      setCart(JSON.parse(storedCart));
-    } catch {
-      // ignore bad JSON
+    if (storedCart) {
+      try {
+        setCart(JSON.parse(storedCart));
+      } catch {
+        // ignore bad JSON
+      }
     }
-  }
 
-  // ONLY restore selected product on INITIAL page load (not on every navigation)
-  const savedProduct = localStorage.getItem('selectedProduct');
-  if (location.pathname === '/product' && savedProduct && !selectedProduct) {
-    try {
-      setSelectedProduct(JSON.parse(savedProduct));
-    } catch {
-      // ignore
+    // ONLY restore selected product on INITIAL page load (not on every navigation)
+    const savedProduct = localStorage.getItem('selectedProduct');
+    if (location.pathname === '/product' && savedProduct && !selectedProduct) {
+      try {
+        setSelectedProduct(JSON.parse(savedProduct));
+      } catch {
+        // ignore
+      }
     }
-  }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, []); // ✅ Empty dependency array - runs ONCE on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // ✅ Empty dependency array - runs ONCE on mount
 
-// ======================================================
-// SAVE SELECTED PRODUCT TO LOCALSTORAGE
-// ======================================================
-useEffect(() => {
-  if (selectedProduct) {
-    localStorage.setItem('selectedProduct', JSON.stringify(selectedProduct));
-  }
-}, [selectedProduct]); // ✅ Save whenever selectedProduct changes
+  // ======================================================
+  // SAVE SELECTED PRODUCT TO LOCALSTORAGE
+  // ======================================================
+  useEffect(() => {
+    if (selectedProduct) {
+      localStorage.setItem('selectedProduct', JSON.stringify(selectedProduct));
+    }
+  }, [selectedProduct]); // ✅ Save whenever selectedProduct changes
 
   // ======================================================
   // LOAD PRODUCTS FROM BACKEND
@@ -178,6 +179,11 @@ useEffect(() => {
   const clearCart = () => setCart([]);
 
   // ======================================================
+  // CHECK IF CURRENT PAGE SHOULD HIDE NAV/FOOTER
+  // ======================================================
+  const isPaymentSuccessPage = location.pathname === '/payment-success';
+
+  // ======================================================
   // LOADING + ERROR UI
   // ======================================================
   if (loading) {
@@ -223,32 +229,36 @@ useEffect(() => {
   // ======================================================
   return (
     <div className="App">
-      {/* TOP NAV */}
-      <Navigation
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        cart={cart}
-        showCart={showCart}
-        setShowCart={setShowCart}
-        showMobileMenu={showMobileMenu}
-        setShowMobileMenu={setShowMobileMenu}
-        user={user}
-        cartBump={cartBump}
-      />
+      {/* TOP NAV - Hide on payment success page for cleaner UX */}
+      {!isPaymentSuccessPage && (
+        <Navigation
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          cart={cart}
+          showCart={showCart}
+          setShowCart={setShowCart}
+          showMobileMenu={showMobileMenu}
+          setShowMobileMenu={setShowMobileMenu}
+          user={user}
+          cartBump={cartBump}
+        />
+      )}
 
       {/* CART SIDEBAR */}
-      <CartSidebar
-        showCart={showCart}
-        setShowCart={setShowCart}
-        cart={cart}
-        updateQuantity={updateQuantity}
-        removeFromCart={removeFromCart}
-        getTotalPrice={getTotalPrice}
-        setCurrentPage={setCurrentPage}
-      />
+      {!isPaymentSuccessPage && (
+        <CartSidebar
+          showCart={showCart}
+          setShowCart={setShowCart}
+          cart={cart}
+          updateQuantity={updateQuantity}
+          removeFromCart={removeFromCart}
+          getTotalPrice={getTotalPrice}
+          setCurrentPage={setCurrentPage}
+        />
+      )}
 
       {/* ROUTES */}
-      <div className={currentPage !== 'home' ? 'pt-40' : ''}>
+      <div className={currentPage !== 'home' && !isPaymentSuccessPage ? 'pt-40' : ''}>
         <Routes>
           <Route
             path="/"
@@ -339,6 +349,12 @@ useEffect(() => {
             }
           />
 
+          {/* PAYMENT SUCCESS - Paystack redirects here after payment */}
+          <Route
+            path="/payment-success"
+            element={<PaymentSuccessPage />}
+          />
+
           <Route
             path="/admin"
             element={
@@ -371,8 +387,10 @@ useEffect(() => {
         </div>
       )}
 
-      {/* FOOTER */}
-      <Footer setCurrentPage={setCurrentPage} />
+      {/* FOOTER - Hide on payment success page */}
+      {!isPaymentSuccessPage && (
+        <Footer setCurrentPage={setCurrentPage} />
+      )}
     </div>
   );
 }
