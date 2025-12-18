@@ -1,14 +1,109 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { paymentsAPI } from '../api';
 
 const PaymentSuccessPage = () => {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [status, setStatus] = useState('verifying');
+  const [orderData, setOrderData] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const verifyPayment = async () => {
+      const reference = searchParams.get('reference') || searchParams.get('trxref');
+      
+      if (!reference) {
+        setStatus('failed');
+        setError('No payment reference found.');
+        return;
+      }
+
+      try {
+        const response = await paymentsAPI.verifyPayment(reference);
+        if (response.success) {
+          setOrderData(response.data);
+          setStatus('success');
+        } else {
+          throw new Error('Payment verification failed');
+        }
+      } catch (err) {
+        setStatus('failed');
+        setError(err.message);
+      }
+    };
+    verifyPayment();
+  }, [searchParams]);
+
+  const containerStyle = {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '20px',
+    backgroundColor: '#fdf2f8'
+  };
+
+  const cardStyle = {
+    backgroundColor: 'white',
+    borderRadius: '20px',
+    padding: '40px',
+    maxWidth: '500px',
+    width: '100%',
+    textAlign: 'center',
+    boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+  };
+
+  const buttonStyle = {
+    backgroundColor: '#ec4899',
+    color: 'white',
+    padding: '15px 30px',
+    border: 'none',
+    borderRadius: '10px',
+    fontSize: '16px',
+    cursor: 'pointer',
+    marginTop: '20px'
+  };
+
+  if (status === 'verifying') {
+    return (
+      <div style={containerStyle}>
+        <div style={cardStyle}>
+          <h1>Verifying Payment...</h1>
+          <p>Please wait</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === 'failed') {
+    return (
+      <div style={containerStyle}>
+        <div style={cardStyle}>
+          <h1>Verification Failed</h1>
+          <p>{error}</p>
+          <button style={buttonStyle} onClick={() => navigate('/')}>
+            Go Home
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ padding: '50px', textAlign: 'center' }}>
-      <h1>Payment Success Page</h1>
-      <p>If you see this, the route works!</p>
-      <button onClick={() => navigate('/')}>Go Home</button>
+    <div style={containerStyle}>
+      <div style={cardStyle}>
+        <h1 style={{color: '#10b981'}}>Payment Successful!</h1>
+        <p>Reference: {orderData?.reference}</p>
+        <p>Amount: NGN {((orderData?.amount || 0) / 100).toLocaleString()}</p>
+        <p>A confirmation email has been sent.</p>
+        <button style={buttonStyle} onClick={() => navigate('/')}>
+          Go Home
+        </button>
+        <button style={{...buttonStyle, marginLeft: '10px'}} onClick={() => navigate('/shop')}>
+          Shop More
+        </button>
+      </div>
     </div>
   );
 };
