@@ -20,7 +20,6 @@ import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import { productsAPI } from './api';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 
-// Wrapper component to handle navigation
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,66 +36,57 @@ function AppContent() {
   const [toast, setToast] = useState(null);
   const [cartBump, setCartBump] = useState(false);
 
-  // Get current page from URL
   const currentPage = location.pathname.slice(1) || 'home';
 
-  // Custom setCurrentPage that uses navigate
-  const setCurrentPage = (page) => {
-    navigate(`/${page === 'home' ? '' : page}`);
+  const setCurrentPage = function(page) {
+    if (page === 'home') {
+      navigate('/');
+    } else {
+      navigate('/' + page);
+    }
   };
 
-  // ======================================================
-  // LOAD USER & CART FROM LOCALSTORAGE (ONE-TIME ONLY)
-  // ======================================================
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const storedCart = localStorage.getItem('cart');
+  useEffect(function() {
+    var storedUser = localStorage.getItem('user');
+    var storedCart = localStorage.getItem('cart');
 
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
-      } catch {
-        // ignore bad JSON
+      } catch (e) {
+        console.error(e);
       }
     }
 
     if (storedCart) {
       try {
         setCart(JSON.parse(storedCart));
-      } catch {
-        // ignore bad JSON
+      } catch (e) {
+        console.error(e);
       }
     }
 
-    // ONLY restore selected product on INITIAL page load (not on every navigation)
-    const savedProduct = localStorage.getItem('selectedProduct');
+    var savedProduct = localStorage.getItem('selectedProduct');
     if (location.pathname === '/product' && savedProduct && !selectedProduct) {
       try {
         setSelectedProduct(JSON.parse(savedProduct));
-      } catch {
-        // ignore
+      } catch (e) {
+        console.error(e);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // ✅ Empty dependency array - runs ONCE on mount
+  }, []);
 
-  // ======================================================
-  // SAVE SELECTED PRODUCT TO LOCALSTORAGE
-  // ======================================================
-  useEffect(() => {
+  useEffect(function() {
     if (selectedProduct) {
       localStorage.setItem('selectedProduct', JSON.stringify(selectedProduct));
     }
-  }, [selectedProduct]); // ✅ Save whenever selectedProduct changes
+  }, [selectedProduct]);
 
-  // ======================================================
-  // LOAD PRODUCTS FROM BACKEND
-  // ======================================================
-  useEffect(() => {
-    const loadProducts = async () => {
+  useEffect(function() {
+    var loadProducts = async function() {
       try {
         setLoading(true);
-        const data = await productsAPI.getAllProducts();
+        var data = await productsAPI.getAllProducts();
         setProducts(data);
       } catch (err) {
         console.error(err);
@@ -109,29 +99,19 @@ function AppContent() {
     loadProducts();
   }, []);
 
-  // ======================================================
-  // SAVE CART
-  // ======================================================
-  useEffect(() => {
+  useEffect(function() {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  // ======================================================
-  // TOAST & CART FEEDBACK
-  // ======================================================
-  const triggerCartFeedback = (message) => {
-    const id = Date.now();
-    setToast({ id, message });
-
+  var triggerCartFeedback = function(message) {
+    var id = Date.now();
+    setToast({ id: id, message: message });
     setCartBump(true);
-    setTimeout(() => setCartBump(false), 300);
-    setTimeout(() => setToast(null), 2500);
+    setTimeout(function() { setCartBump(false); }, 300);
+    setTimeout(function() { setToast(null); }, 2500);
   };
 
-  // ======================================================
-  // CART FUNCTIONS
-  // ======================================================
-  const addToCart = (product) => {
+  var addToCart = function(product) {
     if (product.visible === false) {
       triggerCartFeedback('This product is currently unavailable.');
       return;
@@ -142,53 +122,48 @@ function AppContent() {
       return;
     }
 
-    const exists = cart.find((item) => item._id === product._id);
+    var exists = cart.find(function(item) { return item._id === product._id; });
 
     if (exists) {
       setCart(
-        cart.map((item) =>
-          item._id === product._id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
+        cart.map(function(item) {
+          if (item._id === product._id) {
+            return { ...item, quantity: item.quantity + 1 };
+          }
+          return item;
+        })
       );
     } else {
       setCart([...cart, { ...product, quantity: 1 }]);
     }
 
-    triggerCartFeedback(`"${product.name}" added to cart ✓`);
+    triggerCartFeedback(product.name + ' added to cart');
   };
 
-  const updateQuantity = (id, change) => {
+  var updateQuantity = function(id, change) {
     setCart(
-      cart.map((item) =>
-        item._id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + change) }
-          : item
-      )
+      cart.map(function(item) {
+        if (item._id === id) {
+          return { ...item, quantity: Math.max(1, item.quantity + change) };
+        }
+        return item;
+      })
     );
   };
 
-  const removeFromCart = (id) => {
-    setCart(cart.filter((item) => item._id !== id));
+  var removeFromCart = function(id) {
+    setCart(cart.filter(function(item) { return item._id !== id; }));
   };
 
-  const getTotalPrice = () =>
-    cart.reduce((t, i) => t + i.price * i.quantity, 0);
+  var getTotalPrice = function() {
+    return cart.reduce(function(t, i) { return t + i.price * i.quantity; }, 0);
+  };
 
-  const clearCart = () => setCart([]);
+  var clearCart = function() { setCart([]); };
 
-  // ======================================================
-  // CHECK IF CURRENT PAGE SHOULD HIDE NAV/FOOTER
-  // ======================================================
-  const isPaymentSuccessPage = location.pathname === '/payment-success';
-
-  // ======================================================
-  // LOADING + ERROR UI
-  // ======================================================
   if (loading) {
     return (
-      <>
+      <div>
         <Navigation
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
@@ -201,13 +176,13 @@ function AppContent() {
           cartBump={cartBump}
         />
         <LoadingSpinner />
-      </>
+      </div>
     );
   }
 
   if (error && products.length === 0) {
     return (
-      <>
+      <div>
         <Navigation
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
@@ -220,45 +195,35 @@ function AppContent() {
           cartBump={cartBump}
         />
         <ErrorDisplay message={error} />
-      </>
+      </div>
     );
   }
 
-  // ======================================================
-  // MAIN RENDER
-  // ======================================================
   return (
     <div className="App">
-      {/* TOP NAV - Hide on payment success page for cleaner UX */}
-      {!isPaymentSuccessPage && (
-        <Navigation
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          cart={cart}
-          showCart={showCart}
-          setShowCart={setShowCart}
-          showMobileMenu={showMobileMenu}
-          setShowMobileMenu={setShowMobileMenu}
-          user={user}
-          cartBump={cartBump}
-        />
-      )}
+      <Navigation
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        cart={cart}
+        showCart={showCart}
+        setShowCart={setShowCart}
+        showMobileMenu={showMobileMenu}
+        setShowMobileMenu={setShowMobileMenu}
+        user={user}
+        cartBump={cartBump}
+      />
 
-      {/* CART SIDEBAR */}
-      {!isPaymentSuccessPage && (
-        <CartSidebar
-          showCart={showCart}
-          setShowCart={setShowCart}
-          cart={cart}
-          updateQuantity={updateQuantity}
-          removeFromCart={removeFromCart}
-          getTotalPrice={getTotalPrice}
-          setCurrentPage={setCurrentPage}
-        />
-      )}
+      <CartSidebar
+        showCart={showCart}
+        setShowCart={setShowCart}
+        cart={cart}
+        updateQuantity={updateQuantity}
+        removeFromCart={removeFromCart}
+        getTotalPrice={getTotalPrice}
+        setCurrentPage={setCurrentPage}
+      />
 
-      {/* ROUTES */}
-      <div className={currentPage !== 'home' && !isPaymentSuccessPage ? 'pt-40' : ''}>
+      <div className={currentPage !== 'home' ? 'pt-40' : ''}>
         <Routes>
           <Route
             path="/"
@@ -303,8 +268,8 @@ function AppContent() {
                   setCurrentPage={setCurrentPage}
                 />
               ) : (
-                <div className="min-h-screen flex items-center justify-center">
-                  <p className="text-gray-600">No product selected</p>
+                <div style={{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                  <p style={{color: '#666'}}>No product selected</p>
                 </div>
               )
             }
@@ -329,8 +294,8 @@ function AppContent() {
                   setCurrentPage={setCurrentPage}
                 />
               ) : (
-                <div className="min-h-screen flex items-center justify-center">
-                  <p className="text-gray-600">Please log in to view your profile</p>
+                <div style={{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                  <p style={{color: '#666'}}>Please log in to view your profile</p>
                 </div>
               )
             }
@@ -349,11 +314,7 @@ function AppContent() {
             }
           />
 
-          {/* PAYMENT SUCCESS - Paystack redirects here after payment */}
-          <Route
-            path="/payment-success"
-            element={<PaymentSuccessPage />}
-          />
+          <Route path="/payment-success" element={<PaymentSuccessPage />} />
 
           <Route
             path="/admin"
@@ -368,9 +329,7 @@ function AppContent() {
 
           <Route
             path="/admin-analytics"
-            element={
-              <AdminAnalyticsPage user={user} />
-            }
+            element={<AdminAnalyticsPage user={user} />}
           />
 
           <Route
@@ -380,22 +339,17 @@ function AppContent() {
         </Routes>
       </div>
 
-      {/* TOAST */}
       {toast && (
-        <div className="fixed top-20 right-4 bg-gray-900 text-white text-sm px-4 py-3 rounded-2xl shadow-xl animate-fade-in-up z-[1000]">
+        <div style={{position: 'fixed', top: '80px', right: '16px', backgroundColor: '#111', color: 'white', fontSize: '14px', padding: '12px 16px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', zIndex: 1000}}>
           <span>{toast.message}</span>
         </div>
       )}
 
-      {/* FOOTER - Hide on payment success page */}
-      {!isPaymentSuccessPage && (
-        <Footer setCurrentPage={setCurrentPage} />
-      )}
+      <Footer setCurrentPage={setCurrentPage} />
     </div>
   );
 }
 
-// Main App component wraps everything in Router
 function App() {
   return (
     <Router>
