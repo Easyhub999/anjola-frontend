@@ -4,6 +4,9 @@ import { Mail, Sparkles, Heart, Gift, Star } from "lucide-react";
 const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, setSelectedProduct }) => {
   const featuredProducts = products.filter((p) => p.featured && p.visible !== false).slice(0, 3);
 
+  // ✅ PAYMENT SUCCESS BANNER STATE
+  const [showPaymentSuccess, setShowPaymentSuccess] = React.useState(false);
+
   const getCartItemQty = (id) => {
     const found = cart.find((item) => item._id === id);
     return found ? found.quantity : 0;
@@ -15,22 +18,47 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
   };
 
   //==============================
-  // CHECK FOR PAYMENT RETURN
+  // ✅ CHECK FOR PAYMENT RETURN
   //==============================
   React.useEffect(() => {
-    const pendingPayment = sessionStorage.getItem("pendingPayment");
-
-    if (pendingPayment) {
-      const parsedPayment = JSON.parse(pendingPayment);
-      sessionStorage.removeItem('pendingPayment');
-
-      //Show success message
-      alert(`Payment of ₦${(parsedPayment.amount / 100).toLocaleString()} was successful! Your order is being processed.`);
+    // Check URL for payment return
+    const urlParams = new URLSearchParams(window.location.search);
+    const reference = urlParams.get('reference');
+    
+    if (reference) {
+      setShowPaymentSuccess(true);
+      // Clean URL
+      window.history.replaceState({}, '', '/');
+      // Hide banner after 10 seconds
+      setTimeout(() => setShowPaymentSuccess(false), 10000);
     }
   }, []);
 
   return (
     <div className="min-h-screen">
+
+      {/* ✅ PAYMENT SUCCESS BANNER */}
+      {showPaymentSuccess && (
+        <div style={{
+          position: 'fixed',
+          top: '100px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#10b981',
+          color: 'white',
+          padding: '20px 40px',
+          borderRadius: '16px',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
+          zIndex: 9999,
+          fontWeight: 'bold',
+          fontSize: '18px',
+          textAlign: 'center',
+          maxWidth: '90%',
+          animation: 'slideDown 0.5s ease-out'
+        }}>
+          ✅ Payment Successful! Check your email for order confirmation.
+        </div>
+      )}
 
       {/* ================= HERO SECTION (KEEP RIBBON) ================= */}
       <div className="relative h-[95vh] overflow-hidden flex items-center justify-center" style={{ marginTop: '120px' }}>
@@ -495,6 +523,17 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
           to {
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+        
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -20px);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0);
           }
         }
         
