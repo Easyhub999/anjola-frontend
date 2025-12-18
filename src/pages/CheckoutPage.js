@@ -98,7 +98,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
     reference: `ANJ${Date.now()}`,
     email: formData.email,
     amount: totalAmount * 100,
-    publicKey: "pk_test_2f5d9bd0006358b6aa1010e2ec42c30f49b33a29",
+    publicKey: "pk_live_e010c44533a83f5053b0fa0c062c021a9778d2f2",
     metadata: {
       custom_fields: [
         {
