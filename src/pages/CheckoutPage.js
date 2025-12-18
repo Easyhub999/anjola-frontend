@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
-import { Check, Loader, CreditCard, Lock, Truck, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Check, Loader, CreditCard, Lock, Truck, Info, AlertCircle } from 'lucide-react';
 import { ordersAPI, paymentsAPI } from '../api';
-import { PaystackButton } from 'react-paystack';
 
 const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) => {
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [currentOrder, setCurrentOrder] = useState(null);
+  const [verifying, setVerifying] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('paystack');
   const [shippingMethod, setShippingMethod] = useState('');
   const [formData, setFormData] = useState({
@@ -17,6 +16,55 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
     city: '',
     state: ''
   });
+
+  // =============================
+  // 🔥 CHECK FOR PAYMENT SUCCESS ON LOAD
+  // =============================
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    const reference = urlParams.get('reference');
+
+    if (paymentStatus === 'success' && reference) {
+      handlePaymentReturn(reference);
+    }
+  }, []);
+
+  // =============================
+  // 🔥 HANDLE RETURN FROM PAYSTACK
+  // =============================
+  const handlePaymentReturn = async (reference) => {
+    setVerifying(true);
+
+    try {
+      console.log('🔍 Verifying payment:', reference);
+
+      const verification = await paymentsAPI.verifyPayment(reference);
+
+      console.log('✅ Verification response:', verification);
+
+      if (verification.success) {
+        setOrderPlaced(true);
+        clearCart();
+
+        // Clean URL
+        window.history.replaceState({}, document.title, '/checkout');
+
+        // Redirect after 5 seconds
+        setTimeout(() => {
+          setOrderPlaced(false);
+          setCurrentPage('home');
+        }, 5000);
+      } else {
+        alert('Payment verification failed. Please contact support with reference: ' + reference);
+      }
+    } catch (error) {
+      console.error('❌ Verification error:', error);
+      alert('Payment verification failed: ' + error.message);
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   // =============================
   // 🔥 SHIPPING OPTIONS
@@ -59,42 +107,9 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
   const totalAmount = getTotalPrice() + shippingCost;
 
   // =============================
-  // 🔥 HANDLE PAYMENT SUCCESS
-  // =============================
-  const handlePaymentSuccess = async (reference) => {
-    setCheckoutLoading(true);
-
-    try {
-      const verification = await paymentsAPI.verifyPayment(reference.reference);
-
-      if (verification.success) {
-        setOrderPlaced(true);
-        clearCart();
-
-        setTimeout(() => {
-          setOrderPlaced(false);
-          setCurrentPage('home');
-        }, 5000);
-      }
-    } catch (error) {
-      alert('Payment verification failed: ' + error.message);
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
-
-  // =============================
-  // 🔥 HANDLE PAYMENT CANCEL
-  // =============================
-  const handlePaymentClose = () => {
-    alert('Payment cancelled. Your order is still pending payment.');
-  };
-
-  // =============================
-  // 🔥 CREATE ORDER & OPEN PAYSTACK
+  // 🔥 CREATE ORDER & REDIRECT TO PAYSTACK
   // =============================
   const handleProceedToPayment = async () => {
-    // Validation
     if (!formData.fullName || !formData.email || !formData.phone || !formData.address) {
       alert('Please fill in all required fields');
       return;
@@ -127,10 +142,10 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
       const order = await ordersAPI.createOrder(orderData, user?.token);
       console.log('✅ Order created:', order._id);
 
-      // Step 2: Initialize Payment with Order ID
+      // Step 2: Initialize Payment
       const paymentData = {
         email: formData.email,
-        amount: totalAmount * 100,
+        amount: totalAmount * 100, // Convert to kobo
         orderId: order._id,
         customerInfo: formData
       };
@@ -153,7 +168,22 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
   };
 
   // =============================
-  // 🔥 PAYMENT SUCCESS SCREEN
+  // 🔥 VERIFYING PAYMENT STATE
+  // =============================
+  if (verifying) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 pt-24 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl shadow-2xl p-12 text-center max-w-md w-full">
+          <Loader className="w-16 h-16 animate-spin text-purple-500 mx-auto mb-6" />
+          <h2 className="text-2xl font-serif text-gray-800 mb-4">Verifying Payment...</h2>
+          <p className="text-gray-600">Please wait while we confirm your payment with Paystack</p>
+        </div>
+      </div>
+    );
+  }
+
+  // =============================
+  // 🔥 PAYMENT SUCCESS STATE
   // =============================
   if (orderPlaced) {
     return (
@@ -170,7 +200,14 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
               Check your email for order details and tracking information.
             </p>
           </div>
-          <p className="text-sm text-gray-500">Redirecting to homepage...</p>
+          <p className="text-sm text-gray-500">Redirecting to homepage in 5 seconds...</p>
+          
+          <button
+            onClick={() => setCurrentPage('home')}
+            className="mt-6 w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition"
+          >
+            Continue Shopping
+          </button>
         </div>
       </div>
     );
@@ -224,7 +261,6 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
             <h2 className="text-2xl font-semibold mb-6">Shipping Information</h2>
 
             <div className="space-y-4">
-              {/* FORM FIELDS */}
               <div>
                 <label className="block text-sm font-medium mb-2">Full Name *</label>
                 <input
@@ -273,7 +309,6 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
                 />
               </div>
 
-              {/* CITY / STATE */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">City *</label>
@@ -299,7 +334,6 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
                 </div>
               </div>
 
-              {/* SHIPPING METHOD DROPDOWN */}
               <div className="border-t pt-6 mt-6">
                 <label className="block text-sm font-medium mb-3 flex items-center gap-2">
                   <Truck className="w-5 h-5 text-pink-600" />
@@ -333,7 +367,6 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
                 )}
               </div>
 
-              {/* PAYMENT METHOD */}
               <div className="border-t pt-6 mt-6">
                 <h3 className="text-lg font-semibold mb-4">Payment Method</h3>
 
@@ -353,7 +386,6 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
                 </label>
               </div>
 
-              {/* PROCEED TO PAYMENT BUTTON */}
               <button
                 onClick={handleProceedToPayment}
                 disabled={checkoutLoading || !shippingMethod}
