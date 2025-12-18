@@ -361,16 +361,6 @@ useEffect(() => {
             path="/admin-orders"
             element={<AdminOrdersPage user={user} />}
           />
-
-          <Route
-            path="/payment-success"
-            element={
-              <PaymentSuccessPage
-                setCurrentPage={setCurrentPage}
-                clearCart={clearCart}
-              />
-            }
-          />
         </Routes>
       </div>
 
