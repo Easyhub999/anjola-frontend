@@ -59,68 +59,6 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
   const totalAmount = getTotalPrice() + shippingCost;
 
   // =============================
-  // 🔥 CREATE ORDER BEFORE PAYMENT
-  // =============================
-  const handleCreateOrder = async () => {
-    setCheckoutLoading(true);
-
-    try {
-      const orderData = {
-        customerInfo: {
-          ...formData,
-          shippingMethod: selectedShipping?.label || 'Not selected',
-          shippingCost: shippingCost
-        },
-        items: cart.map(item => ({
-          product: item._id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity
-        })),
-        totalAmount: totalAmount
-      };
-
-      const order = await ordersAPI.createOrder(orderData, user?.token);
-      setCurrentOrder(order);
-      return order;
-    } catch (error) {
-      alert('Failed to create order: ' + error.message);
-      throw error;
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
-
-  // =============================
-  // 🔥 PAYSTACK CONFIG
-  // =============================
-  const paystackConfig = {
-    reference: `ANJ${Date.now()}`,
-    email: formData.email,
-    amount: totalAmount * 100,
-    publicKey: "pk_live_e010c44533a83f5053b0fa0c062c021a9778d2f2",
-    metadata: {
-      custom_fields: [
-        {
-          display_name: "Customer Name",
-          variable_name: "customer_name",
-          value: formData.fullName
-        },
-        {
-          display_name: "Phone",
-          variable_name: "phone",
-          value: formData.phone
-        },
-        {
-          display_name: "Shipping Method",
-          variable_name: "shipping_method",
-          value: selectedShipping?.label || 'Not selected'
-        }
-      ]
-    }
-  };
-
-  // =============================
   // 🔥 HANDLE PAYMENT SUCCESS
   // =============================
   const handlePaymentSuccess = async (reference) => {
@@ -153,26 +91,10 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
   };
 
   // =============================
-  // 🔥 PAYSTACK BUTTON PROPS
+  // 🔥 CREATE ORDER & OPEN PAYSTACK
   // =============================
-  const componentProps = {
-    ...paystackConfig,
-    text: (
-      <div className="flex items-center justify-center gap-2">
-        <Lock className="w-5 h-5" />
-        Pay ₦{totalAmount.toLocaleString()} with Paystack
-      </div>
-    ),
-    onSuccess: handlePaymentSuccess,
-    onClose: handlePaymentClose,
-  };
-
-  // =============================
-  // 🔥 FORM SUBMIT HANDLER
-  // =============================
-  const handleCheckout = async (e) => {
-    e.preventDefault();
-
+  const handleProceedToPayment = async () => {
+    // Validation
     if (!formData.fullName || !formData.email || !formData.phone || !formData.address) {
       alert('Please fill in all required fields');
       return;
@@ -183,10 +105,50 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
       return;
     }
 
+    setCheckoutLoading(true);
+
     try {
-      await handleCreateOrder();
+      // Step 1: Create Order
+      const orderData = {
+        customerInfo: {
+          ...formData,
+          shippingMethod: selectedShipping?.label || 'Not selected',
+          shippingCost: shippingCost
+        },
+        items: cart.map(item => ({
+          product: item._id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        totalAmount: totalAmount
+      };
+
+      const order = await ordersAPI.createOrder(orderData, user?.token);
+      console.log('✅ Order created:', order._id);
+
+      // Step 2: Initialize Payment with Order ID
+      const paymentData = {
+        email: formData.email,
+        amount: totalAmount,
+        orderId: order._id,
+        customerInfo: formData
+      };
+
+      const paymentResponse = await paymentsAPI.initializePayment(paymentData);
+
+      if (paymentResponse.success && paymentResponse.data.authorization_url) {
+        // Redirect to Paystack
+        window.location.href = paymentResponse.data.authorization_url;
+      } else {
+        throw new Error('Payment initialization failed');
+      }
+
     } catch (error) {
       console.error('Checkout error:', error);
+      alert('Failed to process order: ' + error.message);
+    } finally {
+      setCheckoutLoading(false);
     }
   };
 
@@ -261,7 +223,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
           <div className="bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-semibold mb-6">Shipping Information</h2>
 
-            <form onSubmit={handleCheckout} className="space-y-4">
+            <div className="space-y-4">
               {/* FORM FIELDS */}
               <div>
                 <label className="block text-sm font-medium mb-2">Full Name *</label>
@@ -391,18 +353,30 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
                 </label>
               </div>
 
-              {/* PAYSTACK BUTTON */}
-              <PaystackButton
-                {...componentProps}
-                className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-4 rounded-lg font-semibold text-lg hover:from-pink-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              {/* PROCEED TO PAYMENT BUTTON */}
+              <button
+                onClick={handleProceedToPayment}
                 disabled={checkoutLoading || !shippingMethod}
-              />
+                className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-4 rounded-lg font-semibold text-lg hover:from-pink-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {checkoutLoading ? (
+                  <>
+                    <Loader className="w-5 h-5 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-5 h-5" />
+                    Pay ₦{totalAmount.toLocaleString()} with Paystack
+                  </>
+                )}
+              </button>
 
               <div className="flex items-center justify-center gap-2 text-sm text-gray-600 mt-4">
                 <Lock className="w-4 h-4" />
                 <span>Secure SSL Encrypted Payment</span>
               </div>
-            </form>
+            </div>
           </div>
 
           {/* RIGHT SIDE - SUMMARY */}
