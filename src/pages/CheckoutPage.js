@@ -130,7 +130,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
       // Step 2: Initialize Payment with Order ID
       const paymentData = {
         email: formData.email,
-        amount: totalAmount,
+        amount: totalAmount * 100,
         orderId: order._id,
         customerInfo: formData
       };
