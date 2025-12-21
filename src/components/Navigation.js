@@ -259,16 +259,6 @@ const Navigation = ({
         </>
       )}
 
-      {/* SLIDE IN ANIMATION */}
-      <style jsx>{`
-        @keyframes slideInRight {
-          from { transform: translateX(100%); }
-          to { transform: translateX(0); }
-        }
-        .animate-slideInRight {
-          animation: slideInRight 0.3s ease-out;
-        }
-      `}</style>
     </nav>
   );
 };
