@@ -2,16 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { paymentsAPI } from '../api';
 
-const PaymentSuccessPage = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const [status, setStatus] = useState('verifying');
-  const [orderData, setOrderData] = useState(null);
-  const [error, setError] = useState(null);
+function PaymentSuccessPage() {
+  var searchParamsHook = useSearchParams();
+  var searchParams = searchParamsHook[0];
+  var navigate = useNavigate();
+  var statusState = useState('verifying');
+  var status = statusState[0];
+  var setStatus = statusState[1];
+  var orderDataState = useState(null);
+  var orderData = orderDataState[0];
+  var setOrderData = orderDataState[1];
+  var errorState = useState(null);
+  var error = errorState[0];
+  var setError = errorState[1];
 
-  useEffect(() => {
-    const verifyPayment = async () => {
-      const reference = searchParams.get('reference') || searchParams.get('trxref');
+  useEffect(function() {
+    var verifyPayment = async function() {
+      var reference = searchParams.get('reference') || searchParams.get('trxref');
       
       if (!reference) {
         setStatus('failed');
@@ -20,7 +27,7 @@ const PaymentSuccessPage = () => {
       }
 
       try {
-        const response = await paymentsAPI.verifyPayment(reference);
+        var response = await paymentsAPI.verifyPayment(reference);
         if (response.success) {
           setOrderData(response.data);
           setStatus('success');
@@ -35,7 +42,7 @@ const PaymentSuccessPage = () => {
     verifyPayment();
   }, [searchParams]);
 
-  const containerStyle = {
+  var containerStyle = {
     minHeight: '100vh',
     display: 'flex',
     alignItems: 'center',
@@ -44,7 +51,7 @@ const PaymentSuccessPage = () => {
     backgroundColor: '#fdf2f8'
   };
 
-  const cardStyle = {
+  var cardStyle = {
     backgroundColor: 'white',
     borderRadius: '20px',
     padding: '40px',
@@ -54,7 +61,7 @@ const PaymentSuccessPage = () => {
     boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
   };
 
-  const buttonStyle = {
+  var buttonStyle = {
     backgroundColor: '#ec4899',
     color: 'white',
     padding: '15px 30px',
@@ -62,50 +69,56 @@ const PaymentSuccessPage = () => {
     borderRadius: '10px',
     fontSize: '16px',
     cursor: 'pointer',
-    marginTop: '20px'
+    marginTop: '20px',
+    marginRight: '10px'
+  };
+
+  var successTitleStyle = {
+    color: '#10b981',
+    fontSize: '28px',
+    marginBottom: '20px'
+  };
+
+  var handleGoHome = function() {
+    navigate('/');
+  };
+
+  var handleShopMore = function() {
+    navigate('/shop');
   };
 
   if (status === 'verifying') {
-    return (
-      <div style={containerStyle}>
-        <div style={cardStyle}>
-          <h1>Verifying Payment...</h1>
-          <p>Please wait</p>
-        </div>
-      </div>
+    return React.createElement('div', {style: containerStyle},
+      React.createElement('div', {style: cardStyle},
+        React.createElement('h1', null, 'Verifying Payment...'),
+        React.createElement('p', null, 'Please wait')
+      )
     );
   }
 
   if (status === 'failed') {
-    return (
-      <div style={containerStyle}>
-        <div style={cardStyle}>
-          <h1>Verification Failed</h1>
-          <p>{error}</p>
-          <button style={buttonStyle} onClick={() => navigate('/')}>
-            Go Home
-          </button>
-        </div>
-      </div>
+    return React.createElement('div', {style: containerStyle},
+      React.createElement('div', {style: cardStyle},
+        React.createElement('h1', null, 'Verification Failed'),
+        React.createElement('p', null, error),
+        React.createElement('button', {style: buttonStyle, onClick: handleGoHome}, 'Go Home')
+      )
     );
   }
 
-  return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
-        <h1 style={{color: '#10b981'}}>Payment Successful!</h1>
-        <p>Reference: {orderData?.reference}</p>
-        <p>Amount: NGN {((orderData?.amount || 0) / 100).toLocaleString()}</p>
-        <p>A confirmation email has been sent.</p>
-        <button style={buttonStyle} onClick={() => navigate('/')}>
-          Go Home
-        </button>
-        <button style={{...buttonStyle, marginLeft: '10px'}} onClick={() => navigate('/shop')}>
-          Shop More
-        </button>
-      </div>
-    </div>
+  var amount = orderData && orderData.amount ? orderData.amount / 100 : 0;
+  var reference = orderData && orderData.reference ? orderData.reference : 'N/A';
+
+  return React.createElement('div', {style: containerStyle},
+    React.createElement('div', {style: cardStyle},
+      React.createElement('h1', {style: successTitleStyle}, 'Payment Successful!'),
+      React.createElement('p', null, 'Reference: ' + reference),
+      React.createElement('p', null, 'Amount: NGN ' + amount.toLocaleString()),
+      React.createElement('p', null, 'A confirmation email has been sent.'),
+      React.createElement('button', {style: buttonStyle, onClick: handleGoHome}, 'Go Home'),
+      React.createElement('button', {style: buttonStyle, onClick: handleShopMore}, 'Shop More')
+    )
   );
-};
+}
 
 export default PaymentSuccessPage;
