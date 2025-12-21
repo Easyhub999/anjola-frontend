@@ -176,7 +176,7 @@ function AppContent() {
   if (loading) {
     return (
       <div>
-        <Navigation
+        {/* <Navigation
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
           cart={cart}
@@ -186,7 +186,7 @@ function AppContent() {
           setShowMobileMenu={setShowMobileMenu}
           user={user}
           cartBump={cartBump}
-        />
+        /> */}
         <LoadingSpinner />
       </div>
     );
@@ -225,7 +225,7 @@ function AppContent() {
         cartBump={cartBump}
       />
 
-      <CartSidebar
+      {/* <CartSidebar
         showCart={showCart}
         setShowCart={setShowCart}
         cart={cart}
@@ -233,7 +233,7 @@ function AppContent() {
         removeFromCart={removeFromCart}
         getTotalPrice={getTotalPrice}
         setCurrentPage={setCurrentPage}
-      />
+      /> */}
 
       <div className={currentPage !== 'home' ? 'pt-40' : ''}>
         <Routes>
@@ -349,7 +349,7 @@ function AppContent() {
         </div>
       )}
 
-      <Footer setCurrentPage={setCurrentPage} />
+    {/*  <Footer setCurrentPage={setCurrentPage} /> */}
     </div>
   );
 }
