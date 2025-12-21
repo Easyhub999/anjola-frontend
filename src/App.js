@@ -314,7 +314,7 @@ function AppContent() {
             }
           />
 
-          <Route path="/payment-success" element={<ContactPage />} />
+          <Route path="/payment-success" element={<PaymentSuccessPage />} />
 
           <Route
             path="/admin"

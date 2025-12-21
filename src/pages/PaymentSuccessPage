@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Check, Home, ShoppingBag, Mail, Package, AlertCircle, Loader } from "lucide-react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { paymentsAPI } from "../api";
 
 const PaymentSuccessPage = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState("verifying");
   const [orderData, setOrderData] = useState(null);
@@ -12,7 +11,9 @@ const PaymentSuccessPage = () => {
 
   useEffect(() => {
     const verifyPayment = async () => {
-      const reference = searchParams.get("reference") || searchParams.get("trxref");
+      // Get reference from URL using window.location instead of useSearchParams
+      const urlParams = new URLSearchParams(window.location.search);
+      const reference = urlParams.get("reference") || urlParams.get("trxref");
 
       if (!reference) {
         setStatus("failed");
@@ -36,7 +37,7 @@ const PaymentSuccessPage = () => {
     };
 
     verifyPayment();
-  }, [searchParams]);
+  }, []);
 
   if (status === "verifying") {
     return (
