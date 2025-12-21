@@ -142,8 +142,10 @@ const PaymentSuccessPage = () => {
                 <div>
                   <p className="text-gray-400 text-sm mb-1">Amount</p>
                   <p className="font-semibold text-gray-800">
-                    ₦
-                    {((orderData?.amount || 0) / 100).toLocaleString()}
+                    {new Intl.NumberFormat("en-NG", { 
+                      style: "currency", 
+                      currency: "NGN" 
+                    }).format((orderData?.amount || 0) / 100)}
                   </p>
                 </div>
 
@@ -158,7 +160,7 @@ const PaymentSuccessPage = () => {
                 <div>
                   <p className="text-gray-400 text-sm mb-1">Date</p>
                   <p className="font-semibold text-gray-800">
-                    {new Date().toLocaleDateString()}
+                    {new Date().toLocaleDateString("en-GB")}
                   </p>
                 </div>
               </div>
