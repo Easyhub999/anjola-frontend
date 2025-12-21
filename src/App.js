@@ -16,7 +16,7 @@ import CheckoutPage from './pages/CheckoutPage';
 import AdminPage from './pages/AdminPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
 import ProductDetailPage from './pages/ProductDetailPage';
-import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import OrderSuccessPage from './pages/OrderSuccessPage';
 import { productsAPI } from './api';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 
@@ -314,7 +314,7 @@ function AppContent() {
             }
           />
 
-          <Route path="/payment-success" element={<PaymentSuccessPage />} />
+          <Route path="/payment-success" element={<OrderSuccessPage />} />
 
           <Route
             path="/admin"
