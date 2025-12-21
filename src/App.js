@@ -23,7 +23,7 @@ import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
-
+  
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [cart, setCart] = useState([]);
   const [user, setUser] = useState(null);
@@ -45,18 +45,6 @@ function AppContent() {
       navigate('/' + page);
     }
   };
-
-  // ✅ Global error catcher (safe for Vercel builds)
-  useEffect(() => {
-    window.onerror = function (message, source, lineno, colno, err) {
-      console.log("🔥 GLOBAL ERROR CAUGHT");
-      console.log({ message, source, lineno, colno, error: err });
-    };
-
-    return () => {
-      window.onerror = null;
-    };
-  }, []);
 
   useEffect(function() {
     var storedUser = localStorage.getItem('user');
@@ -176,7 +164,7 @@ function AppContent() {
   if (loading) {
     return (
       <div>
-        {/* <Navigation
+        <Navigation
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
           cart={cart}
@@ -186,7 +174,7 @@ function AppContent() {
           setShowMobileMenu={setShowMobileMenu}
           user={user}
           cartBump={cartBump}
-        /> */}
+        />
         <LoadingSpinner />
       </div>
     );
@@ -225,7 +213,7 @@ function AppContent() {
         cartBump={cartBump}
       />
 
-      {/* <CartSidebar
+      <CartSidebar
         showCart={showCart}
         setShowCart={setShowCart}
         cart={cart}
@@ -233,7 +221,7 @@ function AppContent() {
         removeFromCart={removeFromCart}
         getTotalPrice={getTotalPrice}
         setCurrentPage={setCurrentPage}
-      /> */}
+      />
 
       <div className={currentPage !== 'home' ? 'pt-40' : ''}>
         <Routes>
@@ -288,6 +276,7 @@ function AppContent() {
           />
 
           <Route path="/blog" element={<BlogPage />} />
+          
           <Route path="/contact" element={<ContactPage />} />
 
           <Route
@@ -325,7 +314,7 @@ function AppContent() {
             }
           />
 
-          <Route path="/checkout-complete" element={<OrderSuccessPage />} />
+          <Route path="/order-success" element={<OrderSuccessPage />} />
 
           <Route
             path="/admin"
@@ -338,8 +327,15 @@ function AppContent() {
             }
           />
 
-          <Route path="/admin-analytics" element={<AdminAnalyticsPage user={user} />} />
-          <Route path="/admin-orders" element={<AdminOrdersPage user={user} />} />
+          <Route
+            path="/admin-analytics"
+            element={<AdminAnalyticsPage user={user} />}
+          />
+
+          <Route
+            path="/admin-orders"
+            element={<AdminOrdersPage user={user} />}
+          />
         </Routes>
       </div>
 
@@ -349,7 +345,7 @@ function AppContent() {
         </div>
       )}
 
-    {/*  <Footer setCurrentPage={setCurrentPage} /> */}
+      <Footer setCurrentPage={setCurrentPage} />
     </div>
   );
 }
