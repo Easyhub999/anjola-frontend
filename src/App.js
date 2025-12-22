@@ -322,6 +322,16 @@ function AppContent() {
             path="/admin-orders"
             element={<AdminOrdersPage user={user} />}
           />
+          <Route
+            path="/admin"
+            elements={
+            <AdminPage 
+              user={user}
+              products={products}
+              setProducts={setProducts}
+            />
+            }
+          />
         </Routes>
       </div>
 
