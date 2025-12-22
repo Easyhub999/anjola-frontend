@@ -65,7 +65,7 @@ const Navigation = ({
         {/* LOGO */}
         <div
           className="flex items-center gap-3 cursor-pointer"
-          onClick={() => setCurrentPage("home")}
+          onClick={() => setCurrentPage("/home")}
         >
           <img
             src="/anjola-favicon-v2.png"
@@ -111,7 +111,7 @@ const Navigation = ({
           {user?.role === "admin" && (
             <>
               <button
-                onClick={() => setCurrentPage("admin")}
+                onClick={() => setCurrentPage("/admin")}
                 className={`text-lg font-medium transition ${
                   currentPage === "admin"
                     ? "text-red-600"
@@ -122,7 +122,7 @@ const Navigation = ({
               </button>
 
               <button
-                onClick={() => setCurrentPage("admin-orders")}
+                onClick={() => setCurrentPage("/admin-orders")}
                 className={`text-lg font-medium transition ${
                   currentPage === "admin-orders"
                     ? "text-red-600"
@@ -156,7 +156,7 @@ const Navigation = ({
           </button>
 
           {/* PROFILE */}
-          <button onClick={() => setCurrentPage(user ? "profile" : "auth")}>
+          <button onClick={() => setCurrentPage(user ? "/profile" : "auth")}>
             <User className="w-7 h-7 text-gray-700 hover:text-pink-500 transition" />
           </button>
 
@@ -226,7 +226,7 @@ const Navigation = ({
 
                 <button
                   onClick={() => {
-                    setCurrentPage("admin");
+                    setCurrentPage("/admin");
                     setShowMobileMenu(false);
                   }}
                   className="block w-full text-left text-red-600 font-medium text-lg"
@@ -236,7 +236,7 @@ const Navigation = ({
 
                 <button
                   onClick={() => {
-                    setCurrentPage("admin-analytics");
+                    setCurrentPage("/admin-analytics");
                     setShowMobileMenu(false);
                   }}
                   className="block w-full text-left text-red-600 font-medium text-lg"
@@ -246,7 +246,7 @@ const Navigation = ({
 
                 <button
                   onClick={() => {
-                    setCurrentPage("admin-orders");
+                    setCurrentPage("/admin-orders");
                     setShowMobileMenu(false);
                   }}
                   className="block w-full text-left text-red-600 font-medium text-lg"
