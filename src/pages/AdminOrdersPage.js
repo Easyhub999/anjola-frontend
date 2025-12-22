@@ -196,6 +196,12 @@ const AdminOrdersPage = ({ user }) => {
                             <p className="text-sm text-gray-600">
                               Qty: {item.quantity} × ₦{item.price.toLocaleString()}
                             </p>
+                          {(item.selectedSize || item.selectedColor) && (
+                            <p className="text-sm text-purple-600 mt-1">
+                              {item.selectedSize && <span className="mr-3">Size: <strong>{item.selectedSize}</strong></span>}
+                              {item.selectedColor && <span>Color: <strong>{item.selectedColor}</strong></span>}
+                            </p>
+                          )}
                           </div>
                           <p className="font-bold text-purple-600">
                             ₦{(item.quantity * item.price).toLocaleString()}

@@ -83,7 +83,9 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
           product: item._id,
           name: item.name,
           price: item.price,
-          quantity: item.quantity
+          quantity: item.quantity,
+          selectedSize: item.selectedSize || null,
+          selectedColor: item.selectedColor || null
         })),
         totalAmount: totalAmount
       };

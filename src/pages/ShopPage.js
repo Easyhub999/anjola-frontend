@@ -1,5 +1,7 @@
+// ================= SHOPPAGE.JS — THE PERFECT VERSION 🔥 =================
+
 import React, { useState, useEffect, useMemo } from "react";
-import { Search, ShoppingCart, X, ArrowLeft } from "lucide-react";
+import { Search, ShoppingCart, X, ArrowLeft, CheckCircle, Mail, Package, Home, ShoppingBag } from "lucide-react";
 import { paymentsAPI } from "../api";
 
 const PRODUCTS_PER_PAGE = 20;
@@ -15,6 +17,10 @@ const ShopPage = ({
   setCurrentPage,
   setSelectedProduct,
 }) => {
+  // Payment success modal state
+  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
+  const [paymentData, setPaymentData] = useState(null);
+
   // Handle payment return from Paystack
   useEffect(() => {
     const handlePaymentReturn = async () => {
@@ -28,9 +34,9 @@ const ShopPage = ({
         
         if (response.success) {
           localStorage.removeItem("cart");
-          alert("Payment successful! Thank you for your order. A confirmation email has been sent.");
+          setPaymentData(response.data);
+          setShowPaymentSuccess(true);
           window.history.replaceState({}, "", "/shop");
-          window.location.reload();
         } else {
           alert("Payment verification failed. If you were charged, please contact support.");
           window.history.replaceState({}, "", "/shop");
@@ -153,16 +159,13 @@ const ShopPage = ({
     setCurrentPage("product");
   };
 
-const handlePageChange = (page) => {
-  setCurrentPageNumber(page);
-  // Scroll to top of page content (below the fixed nav)
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  
-  // Also try scrolling to the actual shop content
-  setTimeout(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, 100);
-};
+  const handlePageChange = (page) => {
+    setCurrentPageNumber(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }, 100);
+  };
 
   const hasActiveFilter =
     selectedCategory !== "all" ||
@@ -188,8 +191,118 @@ const handlePageChange = (page) => {
     removeFromCart(productId);
   };
 
+  const handleCloseSuccessModal = () => {
+    setShowPaymentSuccess(false);
+    setPaymentData(null);
+    window.location.reload();
+  };
+
   return (
     <div id="shop-top" className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 pt-0 pb-16">
+      {/* Payment Success Modal */}
+      {showPaymentSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={handleCloseSuccessModal}
+          ></div>
+          
+          {/* Modal */}
+          <div className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-slideInUp">
+            {/* Success Header */}
+            <div className="bg-gradient-to-r from-green-400 to-emerald-500 px-8 py-10 text-center">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <CheckCircle className="w-12 h-12 text-green-500" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">Payment Successful!</h2>
+              <p className="text-green-100">Thank you for your order</p>
+            </div>
+            
+            {/* Content */}
+            <div className="px-8 py-6">
+              {/* Order Details */}
+              {paymentData && (
+                <div className="bg-gray-50 rounded-2xl p-4 mb-6">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-gray-500 text-sm">Reference</span>
+                    <span className="font-semibold text-gray-800 text-sm">{paymentData.reference || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500 text-sm">Amount Paid</span>
+                    <span className="font-bold text-green-600 text-lg">
+                      ₦{((paymentData.amount || 0) / 100).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              )}
+              
+              {/* Email Notice */}
+              <div className="flex items-start gap-3 bg-pink-50 border border-pink-200 rounded-2xl p-4 mb-6">
+                <Mail className="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-gray-800 text-sm">Check Your Email</p>
+                  <p className="text-gray-600 text-xs mt-1">
+                    A confirmation email with your order details has been sent to you.
+                  </p>
+                </div>
+              </div>
+              
+              {/* What's Next */}
+              <div className="mb-6">
+                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2 text-sm">
+                  <Package className="w-4 h-4 text-purple-500" />
+                  What Happens Next?
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-pink-400 rounded-full flex items-center justify-center text-white text-xs font-bold">1</div>
+                    <p className="text-gray-600 text-sm">We're preparing your order</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-purple-400 rounded-full flex items-center justify-center text-white text-xs font-bold">2</div>
+                    <p className="text-gray-600 text-sm">You'll receive tracking info via email</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-green-400 rounded-full flex items-center justify-center text-white text-xs font-bold">3</div>
+                    <p className="text-gray-600 text-sm">Delivery within 3-7 business days</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Buttons */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => {
+                    setShowPaymentSuccess(false);
+                    setCurrentPage("home");
+                    window.location.reload();
+                  }}
+                  className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition"
+                >
+                  <Home className="w-4 h-4" />
+                  Home
+                </button>
+                <button
+                  onClick={handleCloseSuccessModal}
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl text-white font-semibold hover:from-pink-600 hover:to-purple-600 transition"
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  Shop More
+                </button>
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="px-8 py-4 bg-gray-50 text-center">
+              <p className="text-gray-500 text-xs">
+                Need help? <a href="mailto:anjolaaestheticsng@gmail.com" className="text-pink-500 font-semibold hover:underline">Contact Support</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Decorative Elements */}
       <div className="fixed top-20 right-10 w-72 h-72 bg-pink-200/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
       <div className="fixed bottom-20 left-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
