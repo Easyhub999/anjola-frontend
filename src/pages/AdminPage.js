@@ -687,7 +687,7 @@ const AdminProductForm = ({
           <input
             type="text"
             placeholder="S, M, L, XL"
-            value={current.sizesInput === undefined ? current.sizesInput : asCommaString(current.sizes || [])}
+            value={current.sizesInput !== undefined ? current.sizesInput : asCommaString(current.sizes || [])}
             onChange={(e) => updateField('sizesInput', e.target.value)}
             onBlur={(e) => {
               const sizes = e.target.value
@@ -707,7 +707,7 @@ const AdminProductForm = ({
           <input
             type="text"
             placeholder="Red, Black, White"
-            value={current.colorsInput === undefined ? current.colorsInput : asCommaString(current.colors || [])}
+            value={current.colorsInput !== undefined ? current.colorsInput : asCommaString(current.colors || [])}
             onChange={(e) => updateField('colorsInput', e.target.value)}
             onBlur={(e) => {
               const colors = e.target.value
