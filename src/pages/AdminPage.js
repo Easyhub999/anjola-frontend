@@ -688,14 +688,9 @@ const AdminProductForm = ({
             type="text"
             placeholder="S, M, L, XL"
             value={current.sizesInput !== undefined ? current.sizesInput : asCommaString(current.sizes || [])}
-            onChange={(e) => updateField('sizesInput', e.target.value)}
-            onBlur={(e) => {
-              const sizes = e.target.value
-                .split(',')
-                .map((s) => s.trim())
-                .filter(Boolean);
-              updateField('sizes', sizes);
-              updateField('sizesInput', undefined);
+            onChange={(e) => {
+              updateField('sizesInput', e.target.value);
+              updateField('sizes', e.target.value.split(',').map((s) => s.trim()).filter(Boolean));
             }}
             className="w-full border px-4 py-3 rounded-lg"
           />
@@ -708,14 +703,9 @@ const AdminProductForm = ({
             type="text"
             placeholder="Red, Black, White"
             value={current.colorsInput !== undefined ? current.colorsInput : asCommaString(current.colors || [])}
-            onChange={(e) => updateField('colorsInput', e.target.value)}
-            onBlur={(e) => {
-              const colors = e.target.value
-                .split(',')
-                .map((c) => c.trim())
-                .filter(Boolean);
-              updateField('colors', colors);
-              updateField('colorsInput', undefined);
+            onChange={(e) => {
+              updateField('colorsInput', e.target.value);
+              updateField('colors', e.target.value.split(',').map((c) => c.trim()).filter(Boolean));
             }}
             className="w-full border px-4 py-3 rounded-lg"
           />
