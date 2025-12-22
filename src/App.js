@@ -324,7 +324,7 @@ function AppContent() {
           />
           <Route
             path="/admin"
-            elements={
+            element={
             <AdminPage 
               user={user}
               products={products}
