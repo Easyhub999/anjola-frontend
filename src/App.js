@@ -16,7 +16,6 @@ import CheckoutPage from './pages/CheckoutPage';
 import AdminPage from './pages/AdminPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
 import ProductDetailPage from './pages/ProductDetailPage';
-import OrderSuccessPage from './pages/OrderSuccessPage';
 import { productsAPI } from './api';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 
@@ -310,19 +309,6 @@ function AppContent() {
                 clearCart={clearCart}
                 setCurrentPage={setCurrentPage}
                 user={user}
-              />
-            }
-          />
-
-          <Route path="/checkout-complete" element={<OrderSuccessPage />} />
-
-          <Route
-            path="/admin"
-            element={
-              <AdminPage
-                user={user}
-                products={products}
-                setProducts={setProducts}
               />
             }
           />

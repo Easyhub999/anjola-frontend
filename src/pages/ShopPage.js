@@ -1,7 +1,6 @@
-// ================= SHOPPAGE.JS — THE PERFECT VERSION 🔥 =================
-
 import React, { useState, useEffect, useMemo } from "react";
 import { Search, ShoppingCart, X, ArrowLeft } from "lucide-react";
+import { paymentsAPI } from "../api";
 
 const PRODUCTS_PER_PAGE = 20;
 
@@ -16,6 +15,36 @@ const ShopPage = ({
   setCurrentPage,
   setSelectedProduct,
 }) => {
+  // Handle payment return from Paystack
+  useEffect(() => {
+    const handlePaymentReturn = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const reference = urlParams.get("reference") || urlParams.get("trxref");
+      
+      if (!reference) return;
+      
+      try {
+        const response = await paymentsAPI.verifyPayment(reference);
+        
+        if (response.success) {
+          localStorage.removeItem("cart");
+          alert("Payment successful! Thank you for your order. A confirmation email has been sent.");
+          window.history.replaceState({}, "", "/shop");
+          window.location.reload();
+        } else {
+          alert("Payment verification failed. If you were charged, please contact support.");
+          window.history.replaceState({}, "", "/shop");
+        }
+      } catch (error) {
+        console.error("Payment verification error:", error);
+        alert("Could not verify payment. Please contact support if you were charged.");
+        window.history.replaceState({}, "", "/shop");
+      }
+    };
+    
+    handlePaymentReturn();
+  }, []);
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);

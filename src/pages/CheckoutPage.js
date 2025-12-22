@@ -102,8 +102,6 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
       const paymentResponse = await paymentsAPI.initializePayment(paymentData);
 
       if (paymentResponse.success && paymentResponse.data.authorization_url) {
-        // Clear cart before redirect
-        clearCart();
 
         // Redirect to Paystack
         window.location.href = paymentResponse.data.authorization_url;
