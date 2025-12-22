@@ -37,14 +37,10 @@ const AdminPage = ({ user, products, setProducts }) => {
     colors: [],
     reviews: [],
     featured: false,
-
-    // 🔥 Inventory fields
     quantity: 0,
     lowStockWarningAt: 0,
     inStock: true,
     autoHideWhenZero: true,
-
-    // 🔥 Visibility
     visible: true
   });
 
@@ -102,7 +98,7 @@ const AdminPage = ({ user, products, setProducts }) => {
         reader.readAsDataURL(file);
       } catch (err) {
         console.error('Compression error:', err);
-        resolve(file); // fall back to original
+        resolve(file);
       }
     });
   };
@@ -121,9 +117,8 @@ const AdminPage = ({ user, products, setProducts }) => {
 
       for (const file of files) {
         if (!file.type.startsWith('image/')) continue;
-        if (file.size > 8 * 1024 * 1024) continue; // 8MB limit
+        if (file.size > 8 * 1024 * 1024) continue;
 
-        // compress before upload
         const compressed = await compressImage(file);
 
         const formData = new FormData();
@@ -201,7 +196,7 @@ const AdminPage = ({ user, products, setProducts }) => {
   // =========================================================
   // ADD PRODUCT
   // =========================================================
-  const handleAddProduct = async (e) => {
+  const handleAddProduct = async (e, sizesArray, colorsArray) => {
     e.preventDefault();
 
     if (newProduct.images.length === 0) {
@@ -217,13 +212,12 @@ const AdminPage = ({ user, products, setProducts }) => {
 
     try {
       const quantity = parseInt(newProduct.quantity || 0, 10);
-      const lowStockWarningAt = parseInt(
-        newProduct.lowStockWarningAt || 0,
-        10
-      );
+      const lowStockWarningAt = parseInt(newProduct.lowStockWarningAt || 0, 10);
 
       const productData = {
         ...newProduct,
+        sizes: sizesArray,
+        colors: colorsArray,
         price: parseInt(newProduct.price, 10),
         quantity,
         lowStockWarningAt,
@@ -237,7 +231,6 @@ const AdminPage = ({ user, products, setProducts }) => {
       );
       setProducts([...products, createdProduct]);
 
-      // reset form
       setNewProduct({
         name: '',
         price: '',
@@ -267,7 +260,7 @@ const AdminPage = ({ user, products, setProducts }) => {
   // =========================================================
   // UPDATE PRODUCT
   // =========================================================
-  const handleUpdateProduct = async (e) => {
+  const handleUpdateProduct = async (e, sizesArray, colorsArray) => {
     e.preventDefault();
     if (!editingProduct) return;
 
@@ -275,13 +268,12 @@ const AdminPage = ({ user, products, setProducts }) => {
 
     try {
       const quantity = parseInt(editingProduct.quantity || 0, 10);
-      const lowStockWarningAt = parseInt(
-        editingProduct.lowStockWarningAt || 0,
-        10
-      );
+      const lowStockWarningAt = parseInt(editingProduct.lowStockWarningAt || 0, 10);
 
       const payload = {
         ...editingProduct,
+        sizes: sizesArray,
+        colors: colorsArray,
         price: parseInt(editingProduct.price, 10),
         quantity,
         lowStockWarningAt,
@@ -435,7 +427,7 @@ const AdminPage = ({ user, products, setProducts }) => {
     }
 
     setBulkUploading(false);
-    e.target.value = ''; // reset input
+    e.target.value = '';
   };
 
   // =========================================================
@@ -478,16 +470,15 @@ const AdminPage = ({ user, products, setProducts }) => {
           Admin Dashboard
         </h1>
 
-        {/* Modal */}
         <div className="mb-8 flex justify-end">
-         <button
-           onClick={() => setShowManualOrderModal(true)}
-           className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-600 transition shadow-lg"
-         >
-          <Plus className="w-5 h-5" />
-          Create Manual Order
-        </button>
-      </div>
+          <button
+            onClick={() => setShowManualOrderModal(true)}
+            className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-600 transition shadow-lg"
+          >
+            <Plus className="w-5 h-5" />
+            Create Manual Order
+          </button>
+        </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
           <AdminProductForm
@@ -527,12 +518,12 @@ const AdminPage = ({ user, products, setProducts }) => {
           </div>
         </div>
 
-          <ManualOrderModal
-            isOpen={showManualOrderModal}
-            onClose={() => setShowManualOrderModal(false)}
-            products={products}
-            user={user}
-          />
+        <ManualOrderModal
+          isOpen={showManualOrderModal}
+          onClose={() => setShowManualOrderModal(false)}
+          products={products}
+          user={user}
+        />
       </div>
     </div>
   );
@@ -562,6 +553,21 @@ const AdminProductForm = ({
   const isEditing = !!editingProduct;
   const current = isEditing ? editingProduct : newProduct;
 
+  // LOCAL STATE for sizes and colors text - this is the key fix!
+  const [sizesText, setSizesText] = useState('');
+  const [colorsText, setColorsText] = useState('');
+
+  // When switching between add/edit or when editingProduct changes, sync the text fields
+  useEffect(() => {
+    if (isEditing && editingProduct) {
+      setSizesText((editingProduct.sizes || []).join(', '));
+      setColorsText((editingProduct.colors || []).join(', '));
+    } else {
+      setSizesText((newProduct.sizes || []).join(', '));
+      setColorsText((newProduct.colors || []).join(', '));
+    }
+  }, [isEditing, editingProduct, newProduct.sizes, newProduct.colors]);
+
   const updateField = (field, value) => {
     if (isEditing) {
       setEditingProduct({ ...editingProduct, [field]: value });
@@ -570,7 +576,33 @@ const AdminProductForm = ({
     }
   };
 
-  const asCommaString = (arr) => (arr && arr.length ? arr.join(',') : '');
+  // Parse text to array
+  const parseSizes = () => {
+    return sizesText.split(',').map((s) => s.trim()).filter(Boolean);
+  };
+
+  const parseColors = () => {
+    return colorsText.split(',').map((c) => c.trim()).filter(Boolean);
+  };
+
+  // Handle form submit
+  const onSubmit = (e) => {
+    e.preventDefault();
+    const sizesArray = parseSizes();
+    const colorsArray = parseColors();
+
+    if (isEditing) {
+      handleUpdateProduct(e, sizesArray, colorsArray);
+      // Reset text fields after successful edit
+      setSizesText('');
+      setColorsText('');
+    } else {
+      handleAddProduct(e, sizesArray, colorsArray);
+      // Reset text fields after successful add
+      setSizesText('');
+      setColorsText('');
+    }
+  };
 
   return (
     <div className="bg-white shadow-lg p-8 rounded-lg">
@@ -578,10 +610,7 @@ const AdminProductForm = ({
         {isEditing ? 'Edit Product' : 'Add New Product'}
       </h2>
 
-      <form
-        onSubmit={isEditing ? handleUpdateProduct : handleAddProduct}
-        className="space-y-4"
-      >
+      <form onSubmit={onSubmit} className="space-y-4">
         {/* MULTI IMAGE UPLOAD */}
         <div>
           <label className="font-medium">Upload Images</label>
@@ -610,7 +639,6 @@ const AdminProductForm = ({
             )}
           </label>
 
-          {/* PREVIEW + DELETE + DRAG */}
           <div className="flex gap-3 mt-4 flex-wrap">
             {(current.images || []).map((img, idx) => (
               <div
@@ -626,13 +654,10 @@ const AdminProductForm = ({
                   alt=""
                   className="w-20 h-20 object-cover rounded-lg border"
                 />
-
                 <button
                   type="button"
                   onClick={() =>
-                    isEditing
-                      ? removeEditingImage(idx)
-                      : removeNewImage(idx)
+                    isEditing ? removeEditingImage(idx) : removeNewImage(idx)
                   }
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md"
                 >
@@ -681,44 +706,38 @@ const AdminProductForm = ({
           </select>
         </div>
 
-        {/* SIZES */}
+        {/* SIZES - Using local state */}
         <div>
           <label className="font-medium">Sizes (comma separated)</label>
           <input
             type="text"
             placeholder="S, M, L, XL"
-            value={current.sizesInput !== undefined ? current.sizesInput : asCommaString(current.sizes || [])}
-            onChange={(e) => {
-              updateField('sizesInput', e.target.value);
-            }}
-            onBlur={(e) => {
-              const val = e.target.value;
-              const arr = val.split(',').map((s) => s.trim()).filter(Boolean);
-              updateField('sizes', arr);
-              updateField('sizesInput', undefined);
-            }}
+            value={sizesText}
+            onChange={(e) => setSizesText(e.target.value)}
             className="w-full border px-4 py-3 rounded-lg"
           />
+          {sizesText && (
+            <p className="text-xs text-gray-500 mt-1">
+              Will save as: {parseSizes().join(', ') || '(empty)'}
+            </p>
+          )}
         </div>
 
-        {/* COLORS */}
+        {/* COLORS - Using local state */}
         <div>
           <label className="font-medium">Colors (comma separated)</label>
           <input
             type="text"
             placeholder="Red, Black, White"
-            value={current.colorsInput !== undefined ? current.colorsInput : asCommaString(current.colors || [])}
-            onChange={(e) => {
-              updateField('colorsInput', e.target.value);
-            }}
-            onBlur={(e) => {
-              const val = e.target.value;
-              const arr = val.split(',').map((s) => s.trim()).filter(Boolean);
-              updateField('colors', arr);
-              updateField('colorsInput', undefined);
-            }}
+            value={colorsText}
+            onChange={(e) => setColorsText(e.target.value)}
             className="w-full border px-4 py-3 rounded-lg"
           />
+          {colorsText && (
+            <p className="text-xs text-gray-500 mt-1">
+              Will save as: {parseColors().join(', ') || '(empty)'}
+            </p>
+          )}
         </div>
 
         {/* DESCRIPTION */}
@@ -753,10 +772,7 @@ const AdminProductForm = ({
               min="0"
               value={current.lowStockWarningAt ?? 0}
               onChange={(e) =>
-                updateField(
-                  'lowStockWarningAt',
-                  Number(e.target.value || 0)
-                )
+                updateField('lowStockWarningAt', Number(e.target.value || 0))
               }
               className="w-full border px-4 py-3 rounded-lg"
             />
@@ -779,9 +795,7 @@ const AdminProductForm = ({
             <input
               type="checkbox"
               checked={current.visible ?? true}
-              onChange={(e) =>
-                updateField('visible', e.target.checked)
-              }
+              onChange={(e) => updateField('visible', e.target.checked)}
             />
             <span>Visible on storefront</span>
           </label>
@@ -790,9 +804,7 @@ const AdminProductForm = ({
             <input
               type="checkbox"
               checked={current.featured ?? false}
-              onChange={(e) =>
-                updateField('featured', e.target.checked)
-              }
+              onChange={(e) => updateField('featured', e.target.checked)}
             />
             <span>Featured product</span>
           </label>
@@ -837,7 +849,11 @@ const AdminProductForm = ({
         {isEditing && (
           <button
             type="button"
-            onClick={() => setEditingProduct(null)}
+            onClick={() => {
+              setEditingProduct(null);
+              setSizesText('');
+              setColorsText('');
+            }}
             className="w-full bg-gray-200 py-3 rounded-lg"
           >
             Cancel
@@ -905,7 +921,7 @@ const CategoryManager = ({
 };
 
 // =========================================================
-  //COMPONENT PRODUCT LIST
+// COMPONENT: PRODUCT LIST
 // =========================================================
 const ProductList = ({
   products,
@@ -927,7 +943,7 @@ const ProductList = ({
             p.lowStockWarningAt > 0 &&
             p.quantity <= p.lowStockWarningAt;
 
-          const visible = p.visible !== false; // default true
+          const visible = p.visible !== false;
 
           return (
             <div
@@ -942,17 +958,14 @@ const ProductList = ({
 
               <div className="flex-1">
                 <h3 className="font-semibold">{p.name}</h3>
-                <p className="capitalize text-sm text-gray-600">
-                  {p.category}
-                </p>
+                <p className="capitalize text-sm text-gray-600">{p.category}</p>
                 <p className="font-bold text-purple-600">
                   ₦{p.price.toLocaleString()}
                 </p>
 
                 <div className="flex gap-3 mt-2 items-center text-xs">
                   <span>
-                    Qty:{' '}
-                    <strong>{p.quantity ?? 0}</strong>
+                    Qty: <strong>{p.quantity ?? 0}</strong>
                   </span>
 
                   {lowStock && (
@@ -979,7 +992,9 @@ const ProductList = ({
 
                 <button
                   className={`p-2 rounded flex items-center justify-center ${
-                    visible ? 'bg-gray-700 text-white' : 'bg-green-500 text-white'
+                    visible
+                      ? 'bg-gray-700 text-white'
+                      : 'bg-green-500 text-white'
                   }`}
                   onClick={() => handleToggleVisibility(p)}
                 >
