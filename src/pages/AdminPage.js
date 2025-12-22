@@ -690,7 +690,12 @@ const AdminProductForm = ({
             value={current.sizesInput !== undefined ? current.sizesInput : asCommaString(current.sizes || [])}
             onChange={(e) => {
               updateField('sizesInput', e.target.value);
-              updateField('sizes', e.target.value.split(',').map((s) => s.trim()).filter(Boolean));
+            }}
+            onBlur={(e) => {
+              const val = e.target.value;
+              const arr = val.split(',').map((s) => s.trim()).filter(Boolean);
+              updateField('sizes', arr);
+              updateField('sizesInput', undefined);
             }}
             className="w-full border px-4 py-3 rounded-lg"
           />
@@ -705,7 +710,12 @@ const AdminProductForm = ({
             value={current.colorsInput !== undefined ? current.colorsInput : asCommaString(current.colors || [])}
             onChange={(e) => {
               updateField('colorsInput', e.target.value);
-              updateField('colors', e.target.value.split(',').map((c) => c.trim()).filter(Boolean));
+            }}
+            onBlur={(e) => {
+              const val = e.target.value;
+              const arr = val.split(',').map((s) => s.trim()).filter(Boolean);
+              updateField('colors', arr);
+              updateField('colorsInput', undefined);
             }}
             className="w-full border px-4 py-3 rounded-lg"
           />
