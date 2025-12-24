@@ -45,7 +45,7 @@ const CartSidebar = ({
             </div>
           ) : (
             <div className="space-y-4">
-              {cart.map((item) => {
+              {cart.map((item, index) => {
 
                 // ====== SAFE IMAGE ======
                 const image =
@@ -63,9 +63,18 @@ const CartSidebar = ({
                 // ====== VISIBILITY ======
                 const isHidden = item.visible === false;
 
+                // ====== PRICE VARIATION INFO ======
+                const hasPieces = item.selectedPieces && item.selectedPieces > 1;
+                const pricePerPiece = item.pricePerPiece || item.price;
+
+                // Unique key for items with variations
+                const cartKey = item.selectedPieces 
+                  ? `${item._id}-${item.selectedPieces}-${index}`
+                  : `${item._id}-${item.selectedSize || 'nosize'}-${item.selectedColor || 'nocolor'}-${index}`;
+
                 return (
                   <div
-                    key={`${item._id}-${item.selectedSize || 'nosize'}-${item.selectedColor || 'nocolor'}`}
+                    key={cartKey}
                     className="flex gap-3 bg-gradient-to-br from-pink-50 to-purple-50 p-4 rounded-xl 
                       relative border border-pink-100 hover:shadow-md transition-shadow"
                   >
@@ -83,19 +92,38 @@ const CartSidebar = ({
                         {item.name}
                       </h3>
 
+                      {/* 🔥 PIECES INFO (Price Variation) */}
+                      {hasPieces && (
+                        <p className="text-xs text-green-600 font-semibold mb-1 flex items-center gap-1">
+                          <span className="bg-green-100 px-2 py-0.5 rounded-full">
+                            📦 {item.selectedPieces} pieces
+                          </span>
+                          <span className="text-gray-500 font-normal">
+                            (₦{pricePerPiece.toLocaleString()}/pc)
+                          </span>
+                        </p>
+                      )}
+
                       {/* SIZE & COLOR LABELS */}
                       {(item.selectedSize || item.selectedColor) && (
-                        <p className="text-xs text-gray-600 mb-2">
-                          {item.selectedSize && <span className="bg-white px-2 py-0.5 rounded">Size: {item.selectedSize}</span>}
-                          {item.selectedSize && item.selectedColor && ' '}
-                          {item.selectedColor && <span className="bg-white px-2 py-0.5 rounded">Color: {item.selectedColor}</span>}
+                        <p className="text-xs text-gray-600 mb-2 flex flex-wrap gap-1">
+                          {item.selectedSize && (
+                            <span className="bg-white px-2 py-0.5 rounded border border-gray-200">
+                              Size: {item.selectedSize}
+                            </span>
+                          )}
+                          {item.selectedColor && (
+                            <span className="bg-white px-2 py-0.5 rounded border border-gray-200">
+                              Color: {item.selectedColor}
+                            </span>
+                          )}
                         </p>
                       )}
 
                       {/* PRICE */}
                       <p className="text-pink-600 font-bold text-base mb-2">
                         ₦{((item.price || 0) * itemQty).toLocaleString()}
-                        {itemQty > 1 && (
+                        {itemQty > 1 && !hasPieces && (
                           <span className="text-xs text-gray-500 font-normal ml-1">
                             (₦{(item.price || 0).toLocaleString()} each)
                           </span>
@@ -137,7 +165,7 @@ const CartSidebar = ({
                           {itemQty}
                         </span>
 
-                        {/* PLUS BUTTON - FIXED STYLING */}
+                        {/* PLUS BUTTON */}
                         <button
                           onClick={() => updateQuantity(item._id, 1)}
                           disabled={isOutOfStock || itemQty >= productStock}
