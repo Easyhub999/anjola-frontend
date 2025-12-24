@@ -72,7 +72,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
     setCheckoutLoading(true);
 
     try {
-      // Step 1: Create Order
+      // Step 1: Create Order with price variation data
       const orderData = {
         customerInfo: {
           ...formData,
@@ -85,7 +85,10 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
           price: item.price,
           quantity: item.quantity,
           selectedSize: item.selectedSize || null,
-          selectedColor: item.selectedColor || null
+          selectedColor: item.selectedColor || null,
+          // 🔥 NEW: Price variation fields
+          selectedPieces: item.selectedPieces || null,
+          pricePerPiece: item.pricePerPiece || null
         })),
         totalAmount: totalAmount
       };
@@ -323,22 +326,50 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
               <h2 className="text-2xl font-semibold mb-6">Order Summary</h2>
 
               <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
-                {cart.map(item => (
-                  <div key={item._id} className="flex gap-4 pb-4 border-b">
-                    <img 
-                      src={item.images?.[0] || item.image || "/placeholder.png"}
-                      alt={item.name} 
-                      className="w-16 h-16 object-cover rounded"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-medium text-gray-800">{item.name}</h3>
-                      <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                {cart.map((item, index) => {
+                  // 🔥 Check if item has price variations
+                  const hasPieces = item.selectedPieces && item.selectedPieces > 1;
+                  const pricePerPiece = item.pricePerPiece || item.price;
+                  
+                  return (
+                    <div key={`${item._id}-${index}`} className="flex gap-4 pb-4 border-b">
+                      <img 
+                        src={item.images?.[0] || item.image || "/placeholder.png"}
+                        alt={item.name} 
+                        className="w-16 h-16 object-cover rounded"
+                      />
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-800">{item.name}</h3>
+                        
+                        {/* 🔥 Show pieces info if applicable */}
+                        {hasPieces ? (
+                          <div className="text-sm">
+                            <p className="text-green-600 font-semibold">
+                              📦 {item.selectedPieces} pieces
+                            </p>
+                            <p className="text-gray-500 text-xs">
+                              ₦{pricePerPiece.toLocaleString()}/pc
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                        )}
+                        
+                        {/* Show size/color if selected */}
+                        {(item.selectedSize || item.selectedColor) && (
+                          <p className="text-xs text-purple-600 mt-1">
+                            {item.selectedSize && <span>Size: {item.selectedSize}</span>}
+                            {item.selectedSize && item.selectedColor && ' | '}
+                            {item.selectedColor && <span>Color: {item.selectedColor}</span>}
+                          </p>
+                        )}
+                      </div>
+                      <span className="font-semibold text-gray-800">
+                        ₦{(item.price * item.quantity).toLocaleString()}
+                      </span>
                     </div>
-                    <span className="font-semibold text-gray-800">
-                      ₦{(item.price * item.quantity).toLocaleString()}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="border-t pt-4 space-y-3">

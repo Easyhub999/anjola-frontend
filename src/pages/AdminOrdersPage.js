@@ -189,26 +189,62 @@ const AdminOrdersPage = ({ user }) => {
                   <div className="border-t pt-4 mt-4">
                     <h4 className="font-semibold mb-3">Order Items</h4>
                     <div className="space-y-2 mb-4">
-                      {order.items.map((item, idx) => (
-                        <div key={idx} className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                          <div>
-                            <p className="font-medium">{item.name}</p>
-                            <p className="text-sm text-gray-600">
-                              Qty: {item.quantity} × ₦{item.price.toLocaleString()}
+                      {order.items.map((item, idx) => {
+                        // 🔥 Check if item has price variations
+                        const hasPieces = item.selectedPieces && item.selectedPieces > 1;
+                        const pricePerPiece = item.pricePerPiece || item.price;
+                        
+                        return (
+                          <div key={idx} className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                            <div className="flex-1">
+                              <p className="font-medium">{item.name}</p>
+                              
+                              {/* 🔥 Show pieces info if applicable */}
+                              {hasPieces ? (
+                                <div className="mt-1">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                                    📦 {item.selectedPieces} pieces
+                                  </span>
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    ₦{pricePerPiece.toLocaleString()}/pc × {item.selectedPieces} = ₦{item.price.toLocaleString()}
+                                  </p>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-gray-600">
+                                  Qty: {item.quantity} × ₦{item.price.toLocaleString()}
+                                </p>
+                              )}
+                              
+                              {/* Show size/color if selected */}
+                              {(item.selectedSize || item.selectedColor) && (
+                                <p className="text-sm text-purple-600 mt-1">
+                                  {item.selectedSize && <span className="mr-3">Size: <strong>{item.selectedSize}</strong></span>}
+                                  {item.selectedColor && <span>Color: <strong>{item.selectedColor}</strong></span>}
+                                </p>
+                              )}
+                            </div>
+                            <p className="font-bold text-purple-600">
+                              ₦{(item.quantity * item.price).toLocaleString()}
                             </p>
-                          {(item.selectedSize || item.selectedColor) && (
-                            <p className="text-sm text-purple-600 mt-1">
-                              {item.selectedSize && <span className="mr-3">Size: <strong>{item.selectedSize}</strong></span>}
-                              {item.selectedColor && <span>Color: <strong>{item.selectedColor}</strong></span>}
-                            </p>
-                          )}
                           </div>
-                          <p className="font-bold text-purple-600">
-                            ₦{(item.quantity * item.price).toLocaleString()}
-                          </p>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
+
+                    {/* Shipping Info */}
+                    {order.customerInfo.shippingMethod && (
+                      <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                        <p className="text-sm">
+                          <span className="font-semibold text-blue-800">🚚 Shipping:</span>{' '}
+                          <span className="text-gray-700">{order.customerInfo.shippingMethod}</span>
+                        </p>
+                        {order.customerInfo.shippingCost > 0 && (
+                          <p className="text-sm text-blue-600 font-semibold mt-1">
+                            Shipping Cost: ₦{order.customerInfo.shippingCost.toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                    )}
 
                     <div className="flex justify-between items-center text-xl font-bold border-t pt-3">
                       <span>Total Amount:</span>
@@ -223,14 +259,14 @@ const AdminOrdersPage = ({ user }) => {
                             key={status}
                             onClick={() => handleUpdateStatus(order._id, status)}
                             disabled={updatingStatus || order.status === status}
-                            className={`px-4 py-2 rounded-lg font-medium capitalize transition ${
+                            className={`px-4 py-2 rounded-lg font-medium capitalize transition flex items-center gap-2 ${
                               order.status === status
                                 ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                                 : 'bg-purple-600 text-white hover:bg-purple-700'
                             }`}
                           >
-                            {getStatusIcon(status)}  
-                            <span className="ml-2">{status}</span>
+                            {getStatusIcon(status)}
+                            <span>{status}</span>
                           </button>
                         ))}
                       </div>

@@ -393,7 +393,7 @@ const ProductDetailPage = ({
                   </svg>
                   Select Quantity 
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   {selectedProduct.priceVariations.map((variation, i) => {
                     const isSelected = selectedVariation?.pieces === variation.pieces;
                     const pricePerPc = Math.round(variation.price / variation.pieces);
@@ -404,7 +404,7 @@ const ProductDetailPage = ({
                         key={i}
                         type="button"
                         onClick={() => setSelectedVariation(variation)}
-                        className={`relative p-4 rounded-xl text-left transition-all duration-300 ${
+                        className={`relative p-3 rounded-lg text-left transition-all duration-300 ${
                           isSelected
                             ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/30 scale-105'
                             : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-green-300 hover:shadow-md'
@@ -417,13 +417,13 @@ const ProductDetailPage = ({
                           {variation.label}
                         </span>
                       )}
-                      <div className="font-bold text-lg">
-                        {variation.pieces} {variation.pieces === 1 ? 'piece' : 'pieces'}
+                      <div className="font-bold text-sm">
+                        {variation.pieces}pcs
                       </div>
-                      <div className={`text-xl font-bold ${isSelected ? 'text-white' : 'text-green-600'}`}>
+                      <div className={`text-base font-bold ${isSelected ? 'text-white' : 'text-green-600'}`}>
                        ₦{variation.price.toLocaleString()}
                       </div>
-                      <div className={`text-xs mt-1 ${isSelected ? 'text-green-100' : 'text-gray-500'}`}>
+                      <div className={`text-[10px]mt-0.5 ${isSelected ? 'text-green-100' : 'text-gray-500'}`}>
                         ₦{pricePerPc.toLocaleString()}/Pc
                       </div>
                       {savings > 0 && (
