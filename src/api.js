@@ -213,17 +213,23 @@ export const productsAPI = {
       const response = await fetch(`${API_URL}/products/${productId}`, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
 
-      return await handleResponse(response);
+     if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to delete product');
+      }
+
+      return response.json();
     } catch (error) {
       console.error("Delete product error:", error);
       throw error;
     }
   },
-
+  
   // ⭐ ADD REVIEW
   addReview: async (productId, reviewData, token) => {
     try {
