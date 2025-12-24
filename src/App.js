@@ -190,6 +190,7 @@ function AppContent() {
           setShowMobileMenu={setShowMobileMenu}
           user={user}
           cartBump={cartBump}
+          handleLogout={handleLogout}
         />
         <LoadingSpinner />
       </div>
