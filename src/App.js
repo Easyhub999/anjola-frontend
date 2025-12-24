@@ -45,6 +45,14 @@ function AppContent() {
     }
   };
 
+  // 🔥 HANDLE LOGOUT FUNCTION
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    setShowMobileMenu(false);
+    navigate('/');
+  };
+
   useEffect(function() {
     var storedUser = localStorage.getItem('user');
     var storedCart = localStorage.getItem('cart');
@@ -210,6 +218,7 @@ function AppContent() {
           setShowMobileMenu={setShowMobileMenu}
           user={user}
           cartBump={cartBump}
+          handleLogout={handleLogout}
         />
         <ErrorDisplay message={error} />
       </div>
@@ -228,6 +237,7 @@ function AppContent() {
         setShowMobileMenu={setShowMobileMenu}
         user={user}
         cartBump={cartBump}
+        handleLogout={handleLogout}
       />
 
       <CartSidebar
