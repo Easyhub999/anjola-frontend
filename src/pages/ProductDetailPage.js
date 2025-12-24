@@ -52,19 +52,72 @@ const ProductDetailPage = ({
   const [selectedColor, setSelectedColor] = useState(null);
   const [addedToCart, setAddedToCart] = useState(false);
 
+  // ============================
+ // 🔥 PRICE VARIATION SELECTION
+ // ============================
+ const [selectedVariation, setSelectedVariation] = useState(null);
+
+ const hasPriceVariations = hasProduct && 
+   selectedProduct.priceVariations && 
+   selectedProduct.priceVariations.length > 0;
+
+ // Auto-select first variation if product has variations
+ useEffect(() => {
+   if (hasPriceVariations && !selectedVariation) {
+     setSelectedVariation(selectedProduct.priceVariations[0]);
+   }
+ }, [hasPriceVariations, selectedProduct]);
+
+ // Get current display price
+ const getDisplayPrice = () => {
+   if (selectedVariation) {
+     return selectedVariation.price;
+   }
+   return hasProduct ? selectedProduct.price : 0;
+ };
+
+ // Get price per piece for display
+ const getPricePerPiece = () => {
+   if (selectedVariation) {
+     return Math.round(selectedVariation.price / selectedVariation.pieces);
+   }
+   return hasProduct ? selectedProduct.price : 0;
+ };
+
+ // Calculate savings compared to buying single pieces
+ const getSavings = () => {
+   if (!selectedVariation || !hasProduct || selectedVariation.pieces <= 1) return 0;
+   const singlePiecePrice = selectedProduct.price;
+   const regularTotal = singlePiecePrice * selectedVariation.pieces;
+   return regularTotal - selectedVariation.price;
+ };
+
   const handleAddToCart = () => {
-    if (!hasProduct || isHidden || isOutOfStock) return;
+   if (!hasProduct || isHidden || isOutOfStock) return;
 
-    addToCart({
-      ...selectedProduct,
-      selectedSize,
-      selectedColor,
-    });
+   // If product has price variations, require selection
+   if (hasPriceVariations && !selectedVariation) {
+     alert('Please select a quantity option');
+     return;
+   }
 
-    // Show success animation
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
-  };
+   const cartItem = {
+     ...selectedProduct,
+     selectedSize,
+     selectedColor,
+     // Price variation fields
+     selectedPieces: selectedVariation ? selectedVariation.pieces : 1,
+     pricePerPiece: getPricePerPiece(),
+     // Override price with variation price if selected
+     price: getDisplayPrice(),
+   };
+
+   addToCart(cartItem);
+
+   // Show success animation
+   setAddedToCart(true);
+   setTimeout(() => setAddedToCart(false), 2000);
+ };
 
   // Lightbox handlers
   const openLightbox = (index) => {
@@ -309,12 +362,88 @@ const ProductDetailPage = ({
             <div className="relative inline-block">
               <div className="absolute -inset-1 bg-gradient-to-r from-pink-300 to-purple-300 rounded-xl opacity-30 blur-lg"></div>
               <div className="relative bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl px-6 py-4 border border-pink-200/50">
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">Price</p>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">
+                  {hasPriceVariations && selectedVariation
+                    ? `Price for ${selectedVariation.pieces} ${selectedVariation.pieces === 1 ? 'piece' : 'pieces'}`
+                    : 'Price'
+                  }
+                </p>
                 <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                  ₦{selectedProduct.price.toLocaleString()}
+                  ₦{getDisplayPrice().toLocaleString()}
                 </h2>
+                {hasPriceVariations && selectedVariation && selectedVariation.pieces > 1 && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    ₦{getPricePerPiece().toLocaleString()} per piece
+                  </p>
+                )}
+                {getSavings() > 0 && (
+                  <p className="text-sm text-green-600 font-semibold mt-1">
+                    You save ₦{getSavings().toLocaleString()}!
+                  </p>
+                )}
               </div>
             </div>
+
+            {/* 🔥 PRICE VARIATIONS SELECTOR */}
+            {hasPriceVariations && (
+              <div className="space-y-4">
+                <h3 className="font-semibold text-gray-800 text-lg tracking-wide flex items-center gap-2">
+                  <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                  Select Quantity 
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {selectedProduct.priceVariations.map((variation, i) => {
+                    const isSelected = selectedVariation?.pieces === variation.pieces;
+                    const pricePerPc = Math.round(variation.price / variation.pieces);
+                    const savings = (selectedProduct.price * variation.pieces) - variation.price;
+
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setSelectedVariation(variation)}
+                        className={`relative p-4 rounded-xl text-left transition-all duration-300 ${
+                          isSelected
+                            ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/30 scale-105'
+                            : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-green-300 hover:shadow-md'
+                        }`}
+                      >
+                        {variation.label && (
+                          <span className={`absolute top-3 -right-2 text-xs px-2 py-0.5 rounded-fll ${
+                            isSelected ? 'bg-yellow-400 text-yellow-900' : 'bg-yellow-200 text-yellow-800'
+                        }`}>
+                          {variation.label}
+                        </span>
+                      )}
+                      <div className="font-bold text-lg">
+                        {variation.pieces} {variation.pieces === 1 ? 'piece' : 'pieces'}
+                      </div>
+                      <div className={`text-xl font-bold ${isSelected ? 'text-white' : 'text-green-600'}`}>
+                       ₦{variation.price.toLocaleString()}
+                      </div>
+                      <div className={`text-xs mt-1 ${isSelected ? 'text-green-100' : 'text-gray-500'}`}>
+                        ₦{pricePerPc.toLocaleString()}/Pc
+                      </div>
+                      {savings > 0 && (
+                        <div className={`text-xs mt-1 font-semibold ${isSelected ? 'text-yellow-200' : 'text-orange-600'}`}>
+                          Save ₦{savings.toLocaleString()}
+                        </div>
+                      )}
+                      {isSelected && (
+                        <div className="absolute top-2 left-2">
+                          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
             {/* Description Section */}
             <div className="py-4 border-t border-gray-200">
@@ -466,7 +595,10 @@ const ProductDetailPage = ({
                           <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                           </svg>
-                          Add to Cart
+                          {hasPriceVariations && selectedVariation
+                            ? `Add ${selectedVariastion.pieces} ${selectedVariation.pieces === 1 ? 'piece' : 'pieces'} - ₦${getDisplayPrice().toLocaleString()}`
+                            : 'Add to Cart'
+                          }
                           <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                           </svg>

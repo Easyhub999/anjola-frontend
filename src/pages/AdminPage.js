@@ -7,7 +7,8 @@ import {
   X,
   Eye,
   EyeOff,
-  Plus
+  Plus,
+  DollarSign
 } from 'lucide-react';
 import { productsAPI } from '../api';
 import ManualOrderModal from '../components/ManualOrderModal';
@@ -35,6 +36,7 @@ const AdminPage = ({ user, products, setProducts }) => {
     images: [],
     sizes: [],
     colors: [],
+    priceVariations: [],
     reviews: [],
     featured: false,
     quantity: 0,
@@ -196,7 +198,7 @@ const AdminPage = ({ user, products, setProducts }) => {
   // =========================================================
   // ADD PRODUCT
   // =========================================================
-  const handleAddProduct = async (e, sizesArray, colorsArray) => {
+  const handleAddProduct = async (e, sizesArray, colorsArray, priceVariationsArray) => {
     e.preventDefault();
 
     if (newProduct.images.length === 0) {
@@ -218,6 +220,7 @@ const AdminPage = ({ user, products, setProducts }) => {
         ...newProduct,
         sizes: sizesArray,
         colors: colorsArray,
+        priceVariations: priceVariationsArray,
         price: parseInt(newProduct.price, 10),
         quantity,
         lowStockWarningAt,
@@ -239,6 +242,7 @@ const AdminPage = ({ user, products, setProducts }) => {
         images: [],
         sizes: [],
         colors: [],
+        priceVariations: [],
         reviews: [],
         featured: false,
         quantity: 0,
@@ -260,7 +264,7 @@ const AdminPage = ({ user, products, setProducts }) => {
   // =========================================================
   // UPDATE PRODUCT
   // =========================================================
-  const handleUpdateProduct = async (e, sizesArray, colorsArray) => {
+  const handleUpdateProduct = async (e, sizesArray, colorsArray, priceVariationsArray) => {
     e.preventDefault();
     if (!editingProduct) return;
 
@@ -274,6 +278,7 @@ const AdminPage = ({ user, products, setProducts }) => {
         ...editingProduct,
         sizes: sizesArray,
         colors: colorsArray,
+        priceVariations: priceVariationsArray,
         price: parseInt(editingProduct.price, 10),
         quantity,
         lowStockWarningAt,
@@ -403,6 +408,7 @@ const AdminPage = ({ user, products, setProducts }) => {
           images,
           sizes,
           colors,
+          priceVariations: [],
           reviews: [],
           featured: false,
           quantity,
@@ -553,20 +559,26 @@ const AdminProductForm = ({
   const isEditing = !!editingProduct;
   const current = isEditing ? editingProduct : newProduct;
 
-  // LOCAL STATE for sizes and colors text - this is the key fix!
+  // LOCAL STATE for sizes, colors, and price variations
   const [sizesText, setSizesText] = useState('');
   const [colorsText, setColorsText] = useState('');
+  const [priceVariations, setPriceVariations] = useState([]);
+  const [newVariationPieces, setNewVariationPieces] = useState('');
+  const [newVariationPrice, setNewVariationPrice] = useState('');
+  const [newVariationLabel, setNewVariationLabel] = useState('');
 
-  // When switching between add/edit or when editingProduct changes, sync the text fields
+  // Sync when switching between add/edit
   useEffect(() => {
     if (isEditing && editingProduct) {
       setSizesText((editingProduct.sizes || []).join(', '));
       setColorsText((editingProduct.colors || []).join(', '));
+      setPriceVariations(editingProduct.priceVariations || []);
     } else {
       setSizesText((newProduct.sizes || []).join(', '));
       setColorsText((newProduct.colors || []).join(', '));
+      setPriceVariations(newProduct.priceVariations || []);
     }
-  }, [isEditing, editingProduct, newProduct.sizes, newProduct.colors]);
+  }, [isEditing, editingProduct, newProduct.sizes, newProduct.colors, newProduct.priceVariations]);
 
   const updateField = (field, value) => {
     if (isEditing) {
@@ -585,6 +597,46 @@ const AdminProductForm = ({
     return colorsText.split(',').map((c) => c.trim()).filter(Boolean);
   };
 
+  // Price Variations handlers
+  const handleAddVariation = () => {
+    const pieces = parseInt(newVariationPieces, 10);
+    const price = parseInt(newVariationPrice, 10);
+
+    if (!pieces || pieces < 1) {
+      alert('Please enter a valid number of pieces (minimum 1)');
+      return;
+    }
+    if (!price || price < 0) {
+      alert('Please enter a valid price');
+      return;
+    }
+
+    // Check if pieces already exists
+    if (priceVariations.some(v => v.pieces === pieces)) {
+      alert(`Price for ${pieces} piece(s) already exists. Remove it first to update.`);
+      return;
+    }
+
+    const newVariation = {
+      pieces,
+      price,
+      label: newVariationLabel.trim() || null
+    };
+
+    // Sort by pieces ascending
+    const updated = [...priceVariations, newVariation].sort((a, b) => a.pieces - b.pieces);
+    setPriceVariations(updated);
+
+    // Clear inputs
+    setNewVariationPieces('');
+    setNewVariationPrice('');
+    setNewVariationLabel('');
+  };
+
+  const handleRemoveVariation = (pieces) => {
+    setPriceVariations(priceVariations.filter(v => v.pieces !== pieces));
+  };
+
   // Handle form submit
   const onSubmit = (e) => {
     e.preventDefault();
@@ -592,15 +644,15 @@ const AdminProductForm = ({
     const colorsArray = parseColors();
 
     if (isEditing) {
-      handleUpdateProduct(e, sizesArray, colorsArray);
-      // Reset text fields after successful edit
+      handleUpdateProduct(e, sizesArray, colorsArray, priceVariations);
       setSizesText('');
       setColorsText('');
+      setPriceVariations([]);
     } else {
-      handleAddProduct(e, sizesArray, colorsArray);
-      // Reset text fields after successful add
+      handleAddProduct(e, sizesArray, colorsArray, priceVariations);
       setSizesText('');
       setColorsText('');
+      setPriceVariations([]);
     }
   };
 
@@ -678,15 +730,18 @@ const AdminProductForm = ({
           className="w-full border px-4 py-3 rounded-lg"
         />
 
-        {/* PRICE */}
-        <input
-          type="number"
-          placeholder="Price"
-          required
-          value={current.price}
-          onChange={(e) => updateField('price', e.target.value)}
-          className="w-full border px-4 py-3 rounded-lg"
-        />
+        {/* BASE PRICE */}
+        <div>
+          <label className="font-medium">Base Price (for single item or if no variations)</label>
+          <input
+            type="number"
+            placeholder="Price"
+            required
+            value={current.price}
+            onChange={(e) => updateField('price', e.target.value)}
+            className="w-full border px-4 py-3 rounded-lg mt-1"
+          />
+        </div>
 
         {/* CATEGORY */}
         <div>
@@ -706,7 +761,7 @@ const AdminProductForm = ({
           </select>
         </div>
 
-        {/* SIZES - Using local state */}
+        {/* SIZES */}
         <div>
           <label className="font-medium">Sizes (comma separated)</label>
           <input
@@ -723,7 +778,7 @@ const AdminProductForm = ({
           )}
         </div>
 
-        {/* COLORS - Using local state */}
+        {/* COLORS */}
         <div>
           <label className="font-medium">Colors (comma separated)</label>
           <input
@@ -738,6 +793,97 @@ const AdminProductForm = ({
               Will save as: {parseColors().join(', ') || '(empty)'}
             </p>
           )}
+        </div>
+
+        {/* 🔥 PRICE VARIATIONS BY PIECES */}
+        <div className="border-t pt-4 mt-4">
+          <label className="font-medium flex items-center gap-2 text-purple-700">
+            <DollarSign className="w-5 h-5" />
+            Price Variations (by Pieces)
+          </label>
+          <p className="text-xs text-gray-500 mb-3">
+            Set different prices based on quantity. Leave empty if product has single price.
+          </p>
+
+          {/* Current Variations */}
+          {priceVariations.length > 0 && (
+            <div className="mb-4 space-y-2">
+              {priceVariations.map((v, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between bg-purple-50 p-3 rounded-lg"
+                >
+                  <div>
+                    <span className="font-semibold text-purple-700">
+                      {v.pieces} {v.pieces === 1 ? 'piece' : 'pieces'}
+                    </span>
+                    <span className="mx-2">→</span>
+                    <span className="font-bold text-green-600">
+                      ₦{v.price.toLocaleString()}
+                    </span>
+                    {v.label && (
+                      <span className="ml-2 text-xs bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded-full">
+                        {v.label}
+                      </span>
+                    )}
+                    <span className="ml-2 text-xs text-gray-500">
+                      (₦{Math.round(v.price / v.pieces).toLocaleString()}/pc)
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveVariation(v.pieces)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Add New Variation */}
+          <div className="grid grid-cols-4 gap-2">
+            <div>
+              <input
+                type="number"
+                placeholder="Pieces"
+                min="1"
+                value={newVariationPieces}
+                onChange={(e) => setNewVariationPieces(e.target.value)}
+                className="w-full border px-3 py-2 rounded-lg text-sm"
+              />
+            </div>
+            <div>
+              <input
+                type="number"
+                placeholder="Price (₦)"
+                min="0"
+                value={newVariationPrice}
+                onChange={(e) => setNewVariationPrice(e.target.value)}
+                className="w-full border px-3 py-2 rounded-lg text-sm"
+              />
+            </div>
+            <div>
+              <input
+                type="text"
+                placeholder="Label (optional)"
+                value={newVariationLabel}
+                onChange={(e) => setNewVariationLabel(e.target.value)}
+                className="w-full border px-3 py-2 rounded-lg text-sm"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleAddVariation}
+              className="bg-purple-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-purple-600"
+            >
+              Add
+            </button>
+          </div>
+          <p className="text-xs text-gray-400 mt-2">
+            Example: 1pc = ₦5000, 2pcs = ₦9500, 3pcs = ₦14000
+          </p>
         </div>
 
         {/* DESCRIPTION */}
@@ -853,6 +999,7 @@ const AdminProductForm = ({
               setEditingProduct(null);
               setSizesText('');
               setColorsText('');
+              setPriceVariations([]);
             }}
             className="w-full bg-gray-200 py-3 rounded-lg"
           >
@@ -944,6 +1091,7 @@ const ProductList = ({
             p.quantity <= p.lowStockWarningAt;
 
           const visible = p.visible !== false;
+          const hasPriceVariations = p.priceVariations && p.priceVariations.length > 0;
 
           return (
             <div
@@ -961,6 +1109,11 @@ const ProductList = ({
                 <p className="capitalize text-sm text-gray-600">{p.category}</p>
                 <p className="font-bold text-purple-600">
                   ₦{p.price.toLocaleString()}
+                  {hasPriceVariations && (
+                    <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                      +{p.priceVariations.length} variations
+                    </span>
+                  )}
                 </p>
 
                 <div className="flex gap-3 mt-2 items-center text-xs">
