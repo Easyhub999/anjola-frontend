@@ -225,7 +225,7 @@ const ProductDetailPage = ({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* BACK BUTTON */}
-        <div className="p-2 animate-fadeIn">
+        <div className="pb-2 animate-fadeIn">
           <BackButton setCurrentPage={setCurrentPage} />
         </div>
 
