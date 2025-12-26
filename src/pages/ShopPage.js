@@ -1,6 +1,6 @@
 // ================= SHOPPAGE.JS — THE PERFECT VERSION 🔥 =================
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Search, ShoppingCart, X, ArrowLeft, CheckCircle, Mail, Package, Home, ShoppingBag } from "lucide-react";
 import { paymentsAPI } from "../api";
 
@@ -20,6 +20,10 @@ const ShopPage = ({
   // Payment success modal state
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
   const [paymentData, setPaymentData] = useState(null);
+
+  // Track if this is initial mount or returning from product
+  const isInitialMount = useRef(true);
+  const isReturningFromProduct = useRef(false);
 
   // Handle payment return from Paystack
   useEffect(() => {
@@ -51,45 +55,72 @@ const ShopPage = ({
     handlePaymentReturn();
   }, []);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
-
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [currentPageNumber, setCurrentPageNumber] = useState(1);
   const [sortOption, setSortOption] = useState("latest");
   const [addedToCartAnimation, setAddedToCartAnimation] = useState(null);
+  const [filtersRestored, setFiltersRestored] = useState(false);
 
-  // Restore saved filters
+  // Restore saved filters on mount
   useEffect(() => {
     const savedSearch = localStorage.getItem("shopSearch");
     const savedCategory = localStorage.getItem("shopCategory");
     const savedPage = localStorage.getItem("shopPage");
     const savedSort = localStorage.getItem("shopSort");
+    const returningFromProduct = localStorage.getItem("cameFromShop") === "true";
 
+    // Check if returning from product page
+    if (returningFromProduct) {
+      isReturningFromProduct.current = true;
+    }
+    
+    // Restore all filters including page
     if (savedSearch) setSearchQuery(savedSearch);
     if (savedCategory) setSelectedCategory(savedCategory);
     if (savedPage) setCurrentPageNumber(Number(savedPage));
     if (savedSort) setSortOption(savedSort);
+    
+    setFiltersRestored(true);
+    isInitialMount.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Save filters
+  // Scroll behavior - only scroll to top on fresh visits, not when returning
   useEffect(() => {
-    localStorage.setItem("shopSearch", searchQuery);
-  }, [searchQuery]);
+    if (filtersRestored && !isReturningFromProduct.current) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    // Clear the flag after handling
+    if (isReturningFromProduct.current) {
+      localStorage.removeItem("cameFromShop");
+      isReturningFromProduct.current = false;
+    }
+  }, [filtersRestored]);
+
+  // Save filters to localStorage
+  useEffect(() => {
+    if (filtersRestored) {
+      localStorage.setItem("shopSearch", searchQuery);
+    }
+  }, [searchQuery, filtersRestored]);
 
   useEffect(() => {
-    localStorage.setItem("shopCategory", selectedCategory);
-  }, [selectedCategory]);
+    if (filtersRestored) {
+      localStorage.setItem("shopCategory", selectedCategory);
+    }
+  }, [selectedCategory, filtersRestored]);
 
   useEffect(() => {
-    localStorage.setItem("shopPage", currentPageNumber);
-  }, [currentPageNumber]);
+    if (filtersRestored) {
+      localStorage.setItem("shopPage", currentPageNumber.toString());
+    }
+  }, [currentPageNumber, filtersRestored]);
 
   useEffect(() => {
-    localStorage.setItem("shopSort", sortOption);
-  }, [sortOption]);
+    if (filtersRestored) {
+      localStorage.setItem("shopSort", sortOption);
+    }
+  }, [sortOption, filtersRestored]);
 
   const visibleProducts = useMemo(
     () => products.filter((p) => p.visible !== false),
@@ -141,9 +172,12 @@ const ShopPage = ({
     return list;
   }, [visibleProducts, selectedCategory, searchQuery, sortOption]);
 
+  // Reset page to 1 only when filters change (not on initial load)
   useEffect(() => {
-    setCurrentPageNumber(1);
-  }, [selectedCategory, searchQuery, sortOption]);
+    if (filtersRestored && !isInitialMount.current && !isReturningFromProduct.current) {
+      setCurrentPageNumber(1);
+    }
+  }, [selectedCategory, searchQuery, sortOption, filtersRestored]);
 
   const totalPages = Math.ceil(processedProducts.length / PRODUCTS_PER_PAGE) || 1;
   const startIndex = (currentPageNumber - 1) * PRODUCTS_PER_PAGE;
@@ -155,6 +189,8 @@ const ShopPage = ({
   const isInCart = (id) => cart.some((item) => item._id === id);
 
   const handleOpenProduct = (product) => {
+    // Mark that we came from shop (for back button)
+    localStorage.setItem("cameFromShop", "true");
     setSelectedProduct(product);
     setCurrentPage("product");
   };
@@ -162,9 +198,6 @@ const ShopPage = ({
   const handlePageChange = (page) => {
     setCurrentPageNumber(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }, 100);
   };
 
   const hasActiveFilter =
@@ -427,7 +460,8 @@ const ShopPage = ({
                 const isOutOfStock = stock <= 0;
                 const hasOptions =
                   (Array.isArray(product.sizes) && product.sizes.length > 0) ||
-                  (Array.isArray(product.colors) && product.colors.length > 0);
+                  (Array.isArray(product.colors) && product.colors.length > 0) ||
+                  (Array.isArray(product.priceVariations) && product.priceVariations.length > 0);
                 const isAnimating = addedToCartAnimation === product._id;
 
                 return (
