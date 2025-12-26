@@ -21,9 +21,8 @@ const ShopPage = ({
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
   const [paymentData, setPaymentData] = useState(null);
 
-  // Track if this is initial mount or returning from product
-  const isInitialMount = useRef(true);
-  const isReturningFromProduct = useRef(false);
+  // Track if filters were just changed by user (not on load)
+  const userChangedFilters = useRef(false);
 
   // Handle payment return from Paystack
   useEffect(() => {
@@ -59,68 +58,67 @@ const ShopPage = ({
   const [currentPageNumber, setCurrentPageNumber] = useState(1);
   const [sortOption, setSortOption] = useState("latest");
   const [addedToCartAnimation, setAddedToCartAnimation] = useState(null);
-  const [filtersRestored, setFiltersRestored] = useState(false);
 
-  // Restore saved filters on mount
+  // Restore saved filters on mount - ONLY ONCE
   useEffect(() => {
-    const savedSearch = localStorage.getItem("shopSearch");
-    const savedCategory = localStorage.getItem("shopCategory");
+    const savedSearch = localStorage.getItem("shopSearch") || "";
+    const savedCategory = localStorage.getItem("shopCategory") || "all";
     const savedPage = localStorage.getItem("shopPage");
-    const savedSort = localStorage.getItem("shopSort");
-    const returningFromProduct = localStorage.getItem("cameFromShop") === "true";
+    const savedSort = localStorage.getItem("shopSort") || "latest";
 
-    // Check if returning from product page
-    if (returningFromProduct) {
-      isReturningFromProduct.current = true;
+    setSearchQuery(savedSearch);
+    setSelectedCategory(savedCategory);
+    setSortOption(savedSort);
+    
+    // Always restore the saved page
+    if (savedPage) {
+      setCurrentPageNumber(Number(savedPage));
     }
     
-    // Restore all filters including page
-    if (savedSearch) setSearchQuery(savedSearch);
-    if (savedCategory) setSelectedCategory(savedCategory);
-    if (savedPage) setCurrentPageNumber(Number(savedPage));
-    if (savedSort) setSortOption(savedSort);
+    // Check if returning from product - don't scroll to top
+    const returningFromProduct = localStorage.getItem("cameFromShop") === "true";
+    if (!returningFromProduct) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    localStorage.removeItem("cameFromShop");
     
-    setFiltersRestored(true);
-    isInitialMount.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Scroll behavior - only scroll to top on fresh visits, not when returning
+  // Save search to localStorage
   useEffect(() => {
-    if (filtersRestored && !isReturningFromProduct.current) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    // Clear the flag after handling
-    if (isReturningFromProduct.current) {
-      localStorage.removeItem("cameFromShop");
-      isReturningFromProduct.current = false;
-    }
-  }, [filtersRestored]);
+    localStorage.setItem("shopSearch", searchQuery);
+  }, [searchQuery]);
 
-  // Save filters to localStorage
-  useEffect(() => {
-    if (filtersRestored) {
-      localStorage.setItem("shopSearch", searchQuery);
-    }
-  }, [searchQuery, filtersRestored]);
+  // Save category and reset page when USER changes it
+  const handleCategoryChange = (cat) => {
+    setSelectedCategory(cat);
+    setCurrentPageNumber(1);
+    localStorage.setItem("shopCategory", cat);
+    localStorage.setItem("shopPage", "1");
+  };
 
-  useEffect(() => {
-    if (filtersRestored) {
-      localStorage.setItem("shopCategory", selectedCategory);
-    }
-  }, [selectedCategory, filtersRestored]);
+  // Save sort and reset page when USER changes it
+  const handleSortChange = (sort) => {
+    setSortOption(sort);
+    setCurrentPageNumber(1);
+    localStorage.setItem("shopSort", sort);
+    localStorage.setItem("shopPage", "1");
+  };
 
+  // Save page to localStorage whenever it changes
   useEffect(() => {
-    if (filtersRestored) {
-      localStorage.setItem("shopPage", currentPageNumber.toString());
-    }
-  }, [currentPageNumber, filtersRestored]);
+    localStorage.setItem("shopPage", currentPageNumber.toString());
+  }, [currentPageNumber]);
 
+  // Reset page when search changes (user typing)
   useEffect(() => {
-    if (filtersRestored) {
-      localStorage.setItem("shopSort", sortOption);
+    if (userChangedFilters.current) {
+      setCurrentPageNumber(1);
+      localStorage.setItem("shopPage", "1");
     }
-  }, [sortOption, filtersRestored]);
+    userChangedFilters.current = true;
+  }, [searchQuery]);
 
   const visibleProducts = useMemo(
     () => products.filter((p) => p.visible !== false),
@@ -172,13 +170,6 @@ const ShopPage = ({
     return list;
   }, [visibleProducts, selectedCategory, searchQuery, sortOption]);
 
-  // Reset page to 1 only when filters change (not on initial load)
-  useEffect(() => {
-    if (filtersRestored && !isInitialMount.current && !isReturningFromProduct.current) {
-      setCurrentPageNumber(1);
-    }
-  }, [selectedCategory, searchQuery, sortOption, filtersRestored]);
-
   const totalPages = Math.ceil(processedProducts.length / PRODUCTS_PER_PAGE) || 1;
   const startIndex = (currentPageNumber - 1) * PRODUCTS_PER_PAGE;
   const currentProducts = processedProducts.slice(
@@ -197,6 +188,7 @@ const ShopPage = ({
 
   const handlePageChange = (page) => {
     setCurrentPageNumber(page);
+    localStorage.setItem("shopPage", page.toString());
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -210,6 +202,10 @@ const ShopPage = ({
     setSearchQuery("");
     setSortOption("latest");
     setCurrentPageNumber(1);
+    localStorage.setItem("shopCategory", "all");
+    localStorage.setItem("shopSearch", "");
+    localStorage.setItem("shopSort", "latest");
+    localStorage.setItem("shopPage", "1");
   };
 
   const handleAddToCart = (product, e) => {
@@ -363,6 +359,7 @@ const ShopPage = ({
                   placeholder="Search luxury products..."
                   value={searchQuery}
                   onChange={(e) => {
+                    userChangedFilters.current = true;
                     setSelectedCategory("all");
                     setSearchQuery(e.target.value);
                   }}
@@ -388,7 +385,7 @@ const ShopPage = ({
             <div className="relative">
               <select
                 value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
+                onChange={(e) => handleSortChange(e.target.value)}
                 className="appearance-none border-2 border-gray-200 bg-white text-gray-700 
                   rounded-xl px-4 py-3 pr-10 focus:outline-none focus:border-pink-400 
                   focus:ring-4 focus:ring-pink-100 transition-all duration-300 cursor-pointer text-sm font-medium"
@@ -420,7 +417,7 @@ const ShopPage = ({
             {dynamicCategories.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setSelectedCategory(cat)}
+                onClick={() => handleCategoryChange(cat)}
                 className={`relative px-6 py-3 rounded-full capitalize text-sm font-semibold 
                   whitespace-nowrap transition-all duration-300 ${
                   selectedCategory === cat
@@ -591,19 +588,9 @@ const ShopPage = ({
               })}
             </div>
 
-            {/* PAGINATION */}
+            {/* PAGINATION - CLEANER WITHOUT FIRST BUTTON */}
             {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-12 animate-fadeIn">
-                {currentPageNumber > 1 && (
-                  <button
-                    onClick={() => handlePageChange(1)}
-                    className="px-5 py-2.5 rounded-xl border-2 border-gray-300 text-gray-700 
-                      hover:border-pink-400 hover:bg-pink-50 transition font-medium text-sm"
-                  >
-                    ← First
-                  </button>
-                )}
-
+              <div className="flex justify-center items-center gap-2 mt-12 animate-fadeIn">
                 <div className="flex items-center gap-2 flex-wrap justify-center">
                   {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                     let page;
@@ -621,11 +608,11 @@ const ShopPage = ({
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`min-w-[40px] px-4 py-2.5 rounded-xl font-semibold text-sm 
+                        className={`min-w-[44px] h-[44px] rounded-xl font-semibold text-sm 
                           transition-all duration-300 ${
                           page === currentPageNumber
                             ? "bg-pink-400 text-white shadow-lg scale-110"
-                            : "bg-white text-gray-700 border-2 border-gray-300 hover:border-pink-400 hover:bg-pink-50"
+                            : "bg-white text-gray-700 border-2 border-gray-200 hover:border-pink-400 hover:bg-pink-50"
                         }`}
                       >
                         {page}
@@ -637,8 +624,8 @@ const ShopPage = ({
                 {currentPageNumber < totalPages && (
                   <button
                     onClick={() => handlePageChange(currentPageNumber + 1)}
-                    className="px-5 py-2.5 rounded-xl border-2 border-gray-300 text-gray-700 
-                      hover:border-pink-400 hover:bg-pink-50 transition font-medium text-sm"
+                    className="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-gray-700 
+                      hover:border-pink-400 hover:bg-pink-50 transition font-medium text-sm ml-2"
                   >
                     Next →
                   </button>
