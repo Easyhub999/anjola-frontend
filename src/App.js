@@ -252,7 +252,7 @@ function AppContent() {
 
       <div className={
         currentPage === 'home' ? ''
-        : currentPage === 'shop' ? 'pt-32'
+        : currentPage === 'shop' ? 'pt-36'
         : 'pt-24'
       }>
         <Routes>
