@@ -91,7 +91,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
       )}
 
       {/* ================= HERO SECTION (KEEP RIBBON) ================= */}
-      <div className="relative h-[95vh] overflow-hidden flex items-center justify-center" style={{ marginTop: '60px' }}>
+      <div className="relative h-[95vh] overflow-hidden flex items-center justify-center">
 
         {/* Client's Ribbon Logo Background */}
         <img

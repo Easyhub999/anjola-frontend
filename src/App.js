@@ -250,11 +250,10 @@ function AppContent() {
         setCurrentPage={setCurrentPage}
       />
 
-      <div className={`transition-all duration-150 ${
-        currentPage === 'home' ? 'pt-0'
-        : currentPage === 'shop' ? 'pt-40'
+      <div className={
+        currentPage === 'shop' ? 'pt-40'
         : 'pt-24'
-      }`}>
+      }>
         <Routes>
           <Route
             path="/"
