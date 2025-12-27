@@ -126,7 +126,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) 
   // 🔥 CHECKOUT PAGE UI
   // =============================
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 pt-0 pb-12">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 pt-24 pb-4">
       <div className="max-w-6xl mx-auto px-4">
         <h1 className="text-4xl font-serif text-center mb-12 text-gray-800">Secure Checkout</h1>
 
