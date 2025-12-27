@@ -250,7 +250,11 @@ function AppContent() {
         setCurrentPage={setCurrentPage}
       />
 
-      <div className={currentPage !== 'home' ? 'pt-24' : ''}>
+      <div className={
+        currentPage === 'home' ? ''
+        : currentPage === 'shop' ? 'pt-32'
+        : 'pt-24'
+      }>
         <Routes>
           <Route
             path="/"
