@@ -225,7 +225,7 @@ const ShopPage = ({
     setPaymentData(null);
     window.location.reload();
   };
-
+ 
   return (
     <div id="shop-top" className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 pt-0 pb-16">
       {/* Payment Success Modal */}
