@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Check, Loader, CreditCard, Lock, Truck, Info } from 'lucide-react';
 import { ordersAPI, paymentsAPI } from '../api';
 
-const CheckoutPage = ({ cart, getTotalPrice, clearCart, setCurrentPage, user }) => {
+const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
   const [paymentMethod, setPaymentMethod] = useState('paystack');
   const [shippingMethod, setShippingMethod] = useState('');
   const [formData, setFormData] = useState({
