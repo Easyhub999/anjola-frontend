@@ -1,6 +1,6 @@
 // ================= SHOPPAGE.JS — THE PERFECT VERSION 🔥 =================
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Search, ShoppingCart, X, ArrowLeft, CheckCircle, Mail, Package, Home, ShoppingBag } from "lucide-react";
 import { paymentsAPI } from "../api";
 
@@ -23,6 +23,7 @@ const ShopPage = ({
 
   // Track if filters were just changed by user (not on load)
   const userChangedFilters = useRef(false);
+  const isInitialLoad = useRef(true);
 
   // Handle payment return from Paystack
   useEffect(() => {
@@ -59,6 +60,20 @@ const ShopPage = ({
   const [sortOption, setSortOption] = useState("latest");
   const [addedToCartAnimation, setAddedToCartAnimation] = useState(null);
 
+  // 🔥 Handle browser back/forward button for pagination
+  useEffect(() => {
+    const handlePopState = (event) => {
+      if (event.state && event.state.shopPage) {
+        setCurrentPageNumber(event.state.shopPage);
+        if (event.state.category) setSelectedCategory(event.state.category);
+        if (event.state.sort) setSortOption(event.state.sort);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // Restore saved filters on mount - ONLY ONCE
   useEffect(() => {
     const savedSearch = localStorage.getItem("shopSearch") || "";
@@ -82,6 +97,16 @@ const ShopPage = ({
     }
     localStorage.removeItem("cameFromShop");
     
+    // Set initial history state
+    const initialPage = savedPage ? Number(savedPage) : 1;
+    window.history.replaceState(
+      { shopPage: initialPage, category: savedCategory, sort: savedSort },
+      "",
+      window.location.pathname
+    );
+    
+    isInitialLoad.current = false;
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -96,6 +121,13 @@ const ShopPage = ({
     setCurrentPageNumber(1);
     localStorage.setItem("shopCategory", cat);
     localStorage.setItem("shopPage", "1");
+    
+    // Push to history
+    window.history.pushState(
+      { shopPage: 1, category: cat, sort: sortOption },
+      "",
+      window.location.pathname
+    );
   };
 
   // Save sort and reset page when USER changes it
@@ -104,6 +136,13 @@ const ShopPage = ({
     setCurrentPageNumber(1);
     localStorage.setItem("shopSort", sort);
     localStorage.setItem("shopPage", "1");
+    
+    // Push to history
+    window.history.pushState(
+      { shopPage: 1, category: selectedCategory, sort: sort },
+      "",
+      window.location.pathname
+    );
   };
 
   // Save page to localStorage whenever it changes
@@ -113,7 +152,7 @@ const ShopPage = ({
 
   // Reset page when search changes (user typing)
   useEffect(() => {
-    if (userChangedFilters.current) {
+    if (userChangedFilters.current && !isInitialLoad.current) {
       setCurrentPageNumber(1);
       localStorage.setItem("shopPage", "1");
     }
@@ -186,11 +225,20 @@ const ShopPage = ({
     setCurrentPage("product");
   };
 
-  const handlePageChange = (page) => {
+  // 🔥 Updated page change with browser history
+  const handlePageChange = useCallback((page) => {
     setCurrentPageNumber(page);
     localStorage.setItem("shopPage", page.toString());
+    
+    // Push new state to browser history
+    window.history.pushState(
+      { shopPage: page, category: selectedCategory, sort: sortOption },
+      "",
+      window.location.pathname
+    );
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, [selectedCategory, sortOption]);
 
   const hasActiveFilter =
     selectedCategory !== "all" ||
@@ -225,7 +273,41 @@ const ShopPage = ({
     setPaymentData(null);
     window.location.reload();
   };
- 
+
+  // 🔥 Generate pagination numbers with ellipsis
+  const getPaginationNumbers = () => {
+    const pages = [];
+    
+    if (totalPages <= 7) {
+      // Show all pages if 7 or less
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+      
+      if (currentPageNumber <= 3) {
+        // Near start: 1 2 3 4 ... last
+        pages.push(2, 3, 4);
+        pages.push('...');
+        pages.push(totalPages);
+      } else if (currentPageNumber >= totalPages - 2) {
+        // Near end: 1 ... last-3 last-2 last-1 last
+        pages.push('...');
+        pages.push(totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        // Middle: 1 ... current-1 current current+1 ... last
+        pages.push('...');
+        pages.push(currentPageNumber - 1, currentPageNumber, currentPageNumber + 1);
+        pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
+
   return (
     <div id="shop-top" className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 pt-0 pb-16">
       {/* Payment Success Modal */}
@@ -340,7 +422,7 @@ const ShopPage = ({
         {/* COMPACT BACK BUTTON */}
         <button
           onClick={() => setCurrentPage("home")}
-          className="flex items-center gap-1.5 text-gray-600 hover:text-pink-600 transition-colors mb-4 text-sm group -mt-10"
+          className="flex items-center gap-1.5 text-gray-600 hover:text-pink-600 transition-colors mb-4 text-sm group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" />
           <span>Back to Home</span>
@@ -588,27 +670,35 @@ const ShopPage = ({
               })}
             </div>
 
-            {/* PAGINATION - CLEANER WITHOUT FIRST BUTTON */}
+            {/* 🔥 IMPROVED PAGINATION WITH ELLIPSIS */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 mt-12 animate-fadeIn">
-                <div className="flex items-center gap-2 flex-wrap justify-center">
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                    let page;
-                    if (totalPages <= 5) {
-                      page = i + 1;
-                    } else if (currentPageNumber <= 3) {
-                      page = i + 1;
-                    } else if (currentPageNumber >= totalPages - 2) {
-                      page = totalPages - 4 + i;
-                    } else {
-                      page = currentPageNumber - 2 + i;
-                    }
+              <div className="flex justify-center items-center gap-1 sm:gap-2 mt-12 animate-fadeIn">
+                {/* Previous Button */}
+                {currentPageNumber > 1 && (
+                  <button
+                    onClick={() => handlePageChange(currentPageNumber - 1)}
+                    className="px-3 py-2 rounded-xl border-2 border-gray-200 text-gray-700 
+                      hover:border-pink-400 hover:bg-pink-50 transition font-medium text-sm"
+                  >
+                    ←
+                  </button>
+                )}
 
-                    return (
+                {/* Page Numbers with Ellipsis */}
+                <div className="flex items-center gap-1 sm:gap-2">
+                  {getPaginationNumbers().map((page, index) => (
+                    page === '...' ? (
+                      <span 
+                        key={`ellipsis-${index}`} 
+                        className="px-2 py-2 text-gray-400 text-sm"
+                      >
+                        •••
+                      </span>
+                    ) : (
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`min-w-[44px] h-[44px] rounded-xl font-semibold text-sm 
+                        className={`min-w-[40px] h-[40px] rounded-xl font-semibold text-sm 
                           transition-all duration-300 ${
                           page === currentPageNumber
                             ? "bg-pink-400 text-white shadow-lg scale-110"
@@ -617,17 +707,18 @@ const ShopPage = ({
                       >
                         {page}
                       </button>
-                    );
-                  })}
+                    )
+                  ))}
                 </div>
 
+                {/* Next Button */}
                 {currentPageNumber < totalPages && (
                   <button
                     onClick={() => handlePageChange(currentPageNumber + 1)}
-                    className="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-gray-700 
-                      hover:border-pink-400 hover:bg-pink-50 transition font-medium text-sm ml-2"
+                    className="px-3 py-2 rounded-xl border-2 border-gray-200 text-gray-700 
+                      hover:border-pink-400 hover:bg-pink-50 transition font-medium text-sm"
                   >
-                    Next →
+                    →
                   </button>
                 )}
               </div>
