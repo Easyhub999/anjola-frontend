@@ -312,7 +312,7 @@ const ShopPage = ({
     <div id="shop-top" className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 pt-0 pb-16 -mt-10">
       {/* Payment Success Modal */}
       {showPaymentSuccess && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pt-32 overflow-y-auto">
           {/* Backdrop */}
           <div 
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
