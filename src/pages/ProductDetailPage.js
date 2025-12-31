@@ -10,29 +10,17 @@ const ProductDetailPage = ({
   user,
   addToCart,
 }) => {
-  // 🔥 FORCE SCROLL TO TOP IMMEDIATELY
-  if (typeof window !== 'undefined') {
-    window.scrollTo(0, 0);
-  }
   // ============================
   // BASIC FLAGS & DERIVED VALUES
   // ============================
   const hasProduct = !!selectedProduct;
 
-  // Scroll to top whenever this page mounts or product changes
+  // 🔥 Scroll to top ONLY when component first mounts or product changes
   useEffect(() => {
-    // Immediate scroll
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
-    
-    // Also scroll after a tiny delay to override any other scrolling
-    const timer = setTimeout(() => {
-      window.scrollTo(0, 0);
-    }, 10);
-    
-    return () => clearTimeout(timer);
-  }, [selectedProduct]);
+  }, [selectedProduct?._id]); // Only triggers when product ID changes, not on every render
 
   // ============================
   // IMAGE HANDLING (SAFE)
