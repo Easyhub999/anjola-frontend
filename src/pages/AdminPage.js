@@ -9,7 +9,8 @@ import {
   EyeOff,
   Plus,
   DollarSign,
-  Tag
+  Tag,
+  Search
 } from 'lucide-react';
 import { productsAPI } from '../api';
 import ManualOrderModal from '../components/ManualOrderModal';
@@ -58,7 +59,8 @@ const AdminPage = ({ user, products, setProducts }) => {
     inStock: true,
     autoHideWhenZero: true,
     visible: true,
-    tag: ''  // 🔥 NEW: Product tag
+    tag: '',
+    searchCategories: []  // 🔥 NEW: Hidden searchable categories
   });
 
   // =========================================================
@@ -213,7 +215,7 @@ const AdminPage = ({ user, products, setProducts }) => {
   // =========================================================
   // ADD PRODUCT
   // =========================================================
-  const handleAddProduct = async (e, sizesArray, colorsArray, priceVariationsArray) => {
+  const handleAddProduct = async (e, sizesArray, colorsArray, priceVariationsArray, searchCategoriesArray) => {
     e.preventDefault();
 
     if (newProduct.images.length === 0) {
@@ -236,12 +238,13 @@ const AdminPage = ({ user, products, setProducts }) => {
         sizes: sizesArray,
         colors: colorsArray,
         priceVariations: priceVariationsArray,
+        searchCategories: searchCategoriesArray || [],  // 🔥 Use passed array
         price: parseInt(newProduct.price, 10),
         quantity,
         lowStockWarningAt,
         inStock: quantity > 0,
         visible: newProduct.visible ?? true,
-        tag: newProduct.tag || ''  // 🔥 Include tag
+        tag: newProduct.tag || ''
       };
 
       const createdProduct = await productsAPI.createProduct(
@@ -266,7 +269,8 @@ const AdminPage = ({ user, products, setProducts }) => {
         inStock: true,
         autoHideWhenZero: true,
         visible: true,
-        tag: ''  // 🔥 Reset tag
+        tag: '',
+        searchCategories: []  // 🔥 Reset searchCategories
       });
 
       alert('Product added successfully my wife! ❤️');
@@ -281,7 +285,7 @@ const AdminPage = ({ user, products, setProducts }) => {
   // =========================================================
   // UPDATE PRODUCT
   // =========================================================
-  const handleUpdateProduct = async (e, sizesArray, colorsArray, priceVariationsArray) => {
+  const handleUpdateProduct = async (e, sizesArray, colorsArray, priceVariationsArray, searchCategoriesArray) => {
     e.preventDefault();
     if (!editingProduct) return;
 
@@ -296,11 +300,12 @@ const AdminPage = ({ user, products, setProducts }) => {
         sizes: sizesArray,
         colors: colorsArray,
         priceVariations: priceVariationsArray,
+        searchCategories: searchCategoriesArray || [],  // 🔥 Use passed array
         price: parseInt(editingProduct.price, 10),
         quantity,
         lowStockWarningAt,
         inStock: quantity > 0,
-        tag: editingProduct.tag || ''  // 🔥 Include tag
+        tag: editingProduct.tag || ''
       };
 
       const updated = await productsAPI.updateProduct(
@@ -585,6 +590,7 @@ const AdminProductForm = ({
   // LOCAL STATE for sizes, colors, and price variations
   const [sizesText, setSizesText] = useState('');
   const [colorsText, setColorsText] = useState('');
+  const [searchCategoriesText, setSearchCategoriesText] = useState('');  // 🔥 NEW
   const [priceVariations, setPriceVariations] = useState([]);
   const [newVariationPieces, setNewVariationPieces] = useState('');
   const [newVariationPrice, setNewVariationPrice] = useState('');
@@ -595,13 +601,15 @@ const AdminProductForm = ({
     if (isEditing && editingProduct) {
       setSizesText((editingProduct.sizes || []).join(', '));
       setColorsText((editingProduct.colors || []).join(', '));
+      setSearchCategoriesText((editingProduct.searchCategories || []).join(', '));  // 🔥 NEW
       setPriceVariations(editingProduct.priceVariations || []);
     } else {
       setSizesText((newProduct.sizes || []).join(', '));
       setColorsText((newProduct.colors || []).join(', '));
+      setSearchCategoriesText((newProduct.searchCategories || []).join(', '));  // 🔥 NEW
       setPriceVariations(newProduct.priceVariations || []);
     }
-  }, [isEditing, editingProduct, newProduct.sizes, newProduct.colors, newProduct.priceVariations]);
+  }, [isEditing, editingProduct, newProduct.sizes, newProduct.colors, newProduct.searchCategories, newProduct.priceVariations]);
 
   const updateField = (field, value) => {
     if (isEditing) {
@@ -618,6 +626,11 @@ const AdminProductForm = ({
 
   const parseColors = () => {
     return colorsText.split(',').map((c) => c.trim()).filter(Boolean);
+  };
+
+  // 🔥 NEW: Parse search categories
+  const parseSearchCategories = () => {
+    return searchCategoriesText.split(',').map((c) => c.trim().toLowerCase()).filter(Boolean);
   };
 
   // Price Variations handlers
@@ -665,16 +678,22 @@ const AdminProductForm = ({
     e.preventDefault();
     const sizesArray = parseSizes();
     const colorsArray = parseColors();
+    const searchCategoriesArray = parseSearchCategories();  // 🔥 NEW
 
+    // 🔥 Update the product state with searchCategories before submitting
     if (isEditing) {
-      handleUpdateProduct(e, sizesArray, colorsArray, priceVariations);
+      setEditingProduct({ ...editingProduct, searchCategories: searchCategoriesArray });
+      handleUpdateProduct(e, sizesArray, colorsArray, priceVariations, searchCategoriesArray);
       setSizesText('');
       setColorsText('');
+      setSearchCategoriesText('');
       setPriceVariations([]);
     } else {
-      handleAddProduct(e, sizesArray, colorsArray, priceVariations);
+      setNewProduct({ ...newProduct, searchCategories: searchCategoriesArray });
+      handleAddProduct(e, sizesArray, colorsArray, priceVariations, searchCategoriesArray);
       setSizesText('');
       setColorsText('');
+      setSearchCategoriesText('');
       setPriceVariations([]);
     }
   };
@@ -768,7 +787,7 @@ const AdminProductForm = ({
 
         {/* CATEGORY */}
         <div>
-          <label className="font-medium">Category</label>
+          <label className="font-medium">Category (Displayed on product card)</label>
           <select
             required
             value={current.category}
@@ -782,6 +801,33 @@ const AdminProductForm = ({
               </option>
             ))}
           </select>
+        </div>
+
+        {/* 🔥 SEARCH CATEGORIES (Hidden but searchable) */}
+        <div>
+          <label className="font-medium flex items-center gap-2">
+            <Search className="w-4 h-4 text-blue-600" />
+            Additional Search Categories (Hidden)
+          </label>
+          <input
+            type="text"
+            placeholder="gifts, valentines, accessories, skincare"
+            value={searchCategoriesText}
+            onChange={(e) => setSearchCategoriesText(e.target.value)}
+            className="w-full border px-4 py-3 rounded-lg mt-1"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Comma separated. These won't show on the product card but will match when customers search.
+          </p>
+          {searchCategoriesText && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {parseSearchCategories().map((cat, idx) => (
+                <span key={idx} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                  {cat}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* 🔥 PRODUCT TAG SELECTOR */}
@@ -1328,6 +1374,7 @@ const ProductList = ({
           const visible = p.visible !== false;
           const hasPriceVariations = p.priceVariations && p.priceVariations.length > 0;
           const tagDisplay = getTagDisplay(p.tag);
+          const hasSearchCategories = p.searchCategories && p.searchCategories.length > 0;  // 🔥 NEW
 
           return (
             <div
@@ -1396,6 +1443,16 @@ const ProductList = ({
                   {tagDisplay && (
                     <span className="px-2 py-0.5 bg-gradient-to-r from-pink-100 to-purple-100 text-purple-700 rounded-full font-medium">
                       {tagDisplay}
+                    </span>
+                  )}
+
+                  {/* 🔥 Show search categories count */}
+                  {hasSearchCategories && (
+                    <span 
+                      className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full cursor-help"
+                      title={`Search categories: ${p.searchCategories.join(', ')}`}
+                    >
+                      +{p.searchCategories.length} search tags
                     </span>
                   )}
                 </div>

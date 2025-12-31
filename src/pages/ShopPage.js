@@ -252,9 +252,22 @@ const ShopPage = ({
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
-      list = list.filter((p) =>
-        p.name?.toLowerCase().includes(q)
-      );
+      list = list.filter((p) => {
+        // Search in product name
+        const nameMatch = p.name?.toLowerCase().includes(q);
+        // Search in primary category
+        const categoryMatch = p.category?.toLowerCase().includes(q);
+        // 🔥 Search in hidden searchCategories array
+        const searchCategoriesMatch = (p.searchCategories || []).some(
+          (cat) => cat.toLowerCase().includes(q)
+        );
+        // Search in description
+        const descriptionMatch = p.description?.toLowerCase().includes(q);
+        // Search in tag
+        const tagMatch = p.tag?.toLowerCase().includes(q);
+        
+        return nameMatch || categoryMatch || searchCategoriesMatch || descriptionMatch || tagMatch;
+      });
     }
 
     list.sort((a, b) => {
