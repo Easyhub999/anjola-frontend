@@ -1119,6 +1119,9 @@ const ProductList = ({
   handleDeleteProduct,
   handleToggleVisibility
 }) => {
+  // 🔥 Search state
+  const [searchQuery, setSearchQuery] = useState('');
+
   // 🔥 Helper to get tag display
   const getTagDisplay = (tag) => {
     const tagMap = {
@@ -1134,14 +1137,75 @@ const ProductList = ({
     return tagMap[tag] || null;
   };
 
+  // 🔥 Filter products based on search
+  const filteredProducts = products.filter((p) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase().trim();
+    return (
+      p.name?.toLowerCase().includes(query) ||
+      p.category?.toLowerCase().includes(query) ||
+      p.tag?.toLowerCase().includes(query)
+    );
+  });
+
   return (
     <div className="bg-white shadow-lg p-8 rounded-lg">
-      <h2 className="text-2xl font-semibold mb-6">
+      <h2 className="text-2xl font-semibold mb-4">
         Manage Products ({products.length})
       </h2>
 
+      {/* 🔥 SEARCH BAR */}
+      <div className="relative mb-4">
+        <input
+          type="text"
+          placeholder="Search products by name, category, or tag..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full border-2 border-gray-200 px-4 py-3 pl-10 rounded-lg focus:border-purple-400 focus:outline-none transition"
+          style={{ fontSize: '16px' }}
+        />
+        <svg
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+
+      {/* Search results count */}
+      {searchQuery && (
+        <p className="text-sm text-gray-500 mb-3">
+          Found {filteredProducts.length} of {products.length} products
+        </p>
+      )}
+
       <div className="space-y-4 max-h-[600px] overflow-y-auto">
-        {products.map((p) => {
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <p>No products found matching "{searchQuery}"</p>
+            <button
+              onClick={() => setSearchQuery('')}
+              className="mt-2 text-purple-500 hover:underline text-sm"
+            >
+              Clear search
+            </button>
+          </div>
+        ) : filteredProducts.map((p) => {
           const lowStock =
             typeof p.lowStockWarningAt === 'number' &&
             typeof p.quantity === 'number' &&
