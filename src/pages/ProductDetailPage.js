@@ -15,23 +15,30 @@ const ProductDetailPage = ({
   // ============================
   const hasProduct = !!selectedProduct;
   
-  // 🔥 Track if this is initial mount
-  const hasScrolled = useRef(false);
-
-  // 🔥 Scroll to top ONLY on first mount or when product changes
+  // 🔥 AGGRESSIVE SCROLL TO TOP - Multiple attempts
   useEffect(() => {
-    if (!hasScrolled.current || selectedProduct?._id) {
+    // Attempt 1: Immediate
+    window.scrollTo(0, 0);
+    
+    // Attempt 2: After paint
+    requestAnimationFrame(() => {
       window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      
-      const timer = setTimeout(() => {
-        window.scrollTo(0, 0);
-      }, 10);
-      
-      hasScrolled.current = true;
-      return () => clearTimeout(timer);
-    }
+    });
+    
+    // Attempt 3: After DOM settles
+    const timer1 = setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 50);
+    
+    // Attempt 4: Final fallback
+    const timer2 = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }, 100);
+    
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
   }, [selectedProduct?._id]);
 
   // ============================
