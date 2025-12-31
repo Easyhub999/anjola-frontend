@@ -93,7 +93,7 @@ const Navigation = ({
               className="flex-shrink-0 flex items-center gap-3 text-sm font-semibold mx-8"
             >
               <Sparkles className="w-4 h-4" />
-              Hi Girlies 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
+              Hi Loves 💕🎀, welcome. 🤗🌸 Anjola_aesthetics_ng is live! 🎉
               <Heart className="w-4 h-4 fill-current" />
               <span className="mx-4">•</span>
               Follow us on TikTok & Instagram for daily updates! ✨
