@@ -10,6 +10,10 @@ const ProductDetailPage = ({
   user,
   addToCart,
 }) => {
+  // 🔥 FORCE SCROLL TO TOP IMMEDIATELY
+  if (typeof window !== 'undefined') {
+    window.scrollTo(0, 0);
+  }
   // ============================
   // BASIC FLAGS & DERIVED VALUES
   // ============================
@@ -17,8 +21,17 @@ const ProductDetailPage = ({
 
   // Scroll to top whenever this page mounts or product changes
   useEffect(() => {
-    // Instant scroll to top - fixes the footer issue
+    // Immediate scroll
     window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // Also scroll after a tiny delay to override any other scrolling
+    const timer = setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 10);
+    
+    return () => clearTimeout(timer);
   }, [selectedProduct]);
 
   // ============================
