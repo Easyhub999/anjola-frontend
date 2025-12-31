@@ -547,7 +547,7 @@ const ProductDetailPage = ({
                 </button>
                 {showDescription && (
                   <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 animate-fadeIn">
-                    <p className="text-gray-600 leading-relaxed text-sm">
+                    <p className="text-gray-600 leading-relaxed text-sm whitespace-pre-line">
                       {selectedProduct.description}
                     </p>
                   </div>
