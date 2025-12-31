@@ -243,13 +243,13 @@ const ProductDetailPage = ({
       <div className="fixed top-20 right-10 w-72 h-72 bg-pink-200/20 rounded-full blur-3xl pointer-events-none"></div>
       <div className="fixed bottom-20 left-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12">
         {/* BACK BUTTON */}
         <div className="py-4 animate-fadeIn">
           <BackButton setCurrentPage={setCurrentPage} />
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-10">
           {/* ========================
               LEFT: IMAGES SECTION
           ========================== */}
