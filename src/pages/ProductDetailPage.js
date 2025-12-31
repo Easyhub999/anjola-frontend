@@ -17,7 +17,7 @@ const ProductDetailPage = ({
 
   // Scroll to top whenever this page mounts or product changes
   useEffect(() => {
-    if (!hasProduct) return;
+    // Instant scroll to top - fixes the footer issue
     window.scrollTo(0, 0);
   }, [selectedProduct]);
 
