@@ -10,7 +10,8 @@ import {
   Plus,
   DollarSign,
   Tag,
-  Search
+  Search,
+  Palette
 } from 'lucide-react';
 import { productsAPI } from '../api';
 import ManualOrderModal from '../components/ManualOrderModal';
@@ -60,7 +61,7 @@ const AdminPage = ({ user, products, setProducts }) => {
     autoHideWhenZero: true,
     visible: true,
     tag: '',
-    searchCategories: []  // 🔥 NEW: Hidden searchable categories
+    searchCategories: []
   });
 
   // =========================================================
@@ -230,7 +231,9 @@ const AdminPage = ({ user, products, setProducts }) => {
     setAdminLoading(true);
 
     try {
-      const quantity = parseInt(newProduct.quantity || 0, 10);
+      // 🔥 Calculate total quantity from colors if colors exist
+      const totalColorQty = colorsArray.reduce((sum, c) => sum + (c.quantity || 0), 0);
+      const quantity = colorsArray.length > 0 ? totalColorQty : parseInt(newProduct.quantity || 0, 10);
       const lowStockWarningAt = parseInt(newProduct.lowStockWarningAt || 0, 10);
 
       const productData = {
@@ -238,7 +241,7 @@ const AdminPage = ({ user, products, setProducts }) => {
         sizes: sizesArray,
         colors: colorsArray,
         priceVariations: priceVariationsArray,
-        searchCategories: searchCategoriesArray || [],  // 🔥 Use passed array
+        searchCategories: searchCategoriesArray || [],
         price: parseInt(newProduct.price, 10),
         quantity,
         lowStockWarningAt,
@@ -270,7 +273,7 @@ const AdminPage = ({ user, products, setProducts }) => {
         autoHideWhenZero: true,
         visible: true,
         tag: '',
-        searchCategories: []  // 🔥 Reset searchCategories
+        searchCategories: []
       });
 
       alert('Product added successfully my wife! ❤️');
@@ -292,7 +295,9 @@ const AdminPage = ({ user, products, setProducts }) => {
     setAdminLoading(true);
 
     try {
-      const quantity = parseInt(editingProduct.quantity || 0, 10);
+      // 🔥 Calculate total quantity from colors if colors exist
+      const totalColorQty = colorsArray.reduce((sum, c) => sum + (c.quantity || 0), 0);
+      const quantity = colorsArray.length > 0 ? totalColorQty : parseInt(editingProduct.quantity || 0, 10);
       const lowStockWarningAt = parseInt(editingProduct.lowStockWarningAt || 0, 10);
 
       const payload = {
@@ -300,7 +305,7 @@ const AdminPage = ({ user, products, setProducts }) => {
         sizes: sizesArray,
         colors: colorsArray,
         priceVariations: priceVariationsArray,
-        searchCategories: searchCategoriesArray || [],  // 🔥 Use passed array
+        searchCategories: searchCategoriesArray || [],
         price: parseInt(editingProduct.price, 10),
         quantity,
         lowStockWarningAt,
@@ -398,7 +403,7 @@ const AdminPage = ({ user, products, setProducts }) => {
       const sizesIdx = idx('sizes');
       const colorsIdx = idx('colors');
       const qtyIdx = idx('quantity');
-      const tagIdx = idx('tag');  // 🔥 NEW
+      const tagIdx = idx('tag');
 
       let createdCount = 0;
 
@@ -418,12 +423,14 @@ const AdminPage = ({ user, products, setProducts }) => {
           .split('|')
           .map((x) => x.trim())
           .filter(Boolean);
+        // 🔥 Parse colors - for CSV, default quantity to 0
         const colors = (cols[colorsIdx] || '')
           .split('|')
           .map((x) => x.trim())
-          .filter(Boolean);
+          .filter(Boolean)
+          .map(name => ({ name, quantity: 0 }));
         const quantity = parseInt(cols[qtyIdx] || '0', 10);
-        const tag = cols[tagIdx]?.trim() || '';  // 🔥 NEW
+        const tag = cols[tagIdx]?.trim() || '';
 
         const productData = {
           name,
@@ -441,7 +448,7 @@ const AdminPage = ({ user, products, setProducts }) => {
           inStock: quantity > 0,
           autoHideWhenZero: true,
           visible: true,
-          tag  // 🔥 NEW
+          tag
         };
 
         const created = await productsAPI.createProduct(
@@ -587,27 +594,45 @@ const AdminProductForm = ({
   const isEditing = !!editingProduct;
   const current = isEditing ? editingProduct : newProduct;
 
-  // LOCAL STATE for sizes, colors, and price variations
+  // LOCAL STATE for sizes and price variations
   const [sizesText, setSizesText] = useState('');
-  const [colorsText, setColorsText] = useState('');
-  const [searchCategoriesText, setSearchCategoriesText] = useState('');  // 🔥 NEW
+  const [searchCategoriesText, setSearchCategoriesText] = useState('');
   const [priceVariations, setPriceVariations] = useState([]);
   const [newVariationPieces, setNewVariationPieces] = useState('');
   const [newVariationPrice, setNewVariationPrice] = useState('');
   const [newVariationLabel, setNewVariationLabel] = useState('');
 
+  // 🔥 NEW: Color with quantity state
+  const [colors, setColors] = useState([]);
+  const [newColorName, setNewColorName] = useState('');
+  const [newColorQty, setNewColorQty] = useState('');
+
   // Sync when switching between add/edit
   useEffect(() => {
     if (isEditing && editingProduct) {
       setSizesText((editingProduct.sizes || []).join(', '));
-      setColorsText((editingProduct.colors || []).join(', '));
-      setSearchCategoriesText((editingProduct.searchCategories || []).join(', '));  // 🔥 NEW
+      setSearchCategoriesText((editingProduct.searchCategories || []).join(', '));
       setPriceVariations(editingProduct.priceVariations || []);
+      
+      // 🔥 Handle both old format (strings) and new format (objects)
+      const existingColors = editingProduct.colors || [];
+      if (existingColors.length > 0 && typeof existingColors[0] === 'string') {
+        // Old format - convert to new format with quantity 0
+        setColors(existingColors.map(name => ({ name, quantity: 0 })));
+      } else {
+        setColors(existingColors);
+      }
     } else {
       setSizesText((newProduct.sizes || []).join(', '));
-      setColorsText((newProduct.colors || []).join(', '));
-      setSearchCategoriesText((newProduct.searchCategories || []).join(', '));  // 🔥 NEW
+      setSearchCategoriesText((newProduct.searchCategories || []).join(', '));
       setPriceVariations(newProduct.priceVariations || []);
+      
+      const existingColors = newProduct.colors || [];
+      if (existingColors.length > 0 && typeof existingColors[0] === 'string') {
+        setColors(existingColors.map(name => ({ name, quantity: 0 })));
+      } else {
+        setColors(existingColors);
+      }
     }
   }, [isEditing, editingProduct, newProduct.sizes, newProduct.colors, newProduct.searchCategories, newProduct.priceVariations]);
 
@@ -624,13 +649,38 @@ const AdminProductForm = ({
     return sizesText.split(',').map((s) => s.trim()).filter(Boolean);
   };
 
-  const parseColors = () => {
-    return colorsText.split(',').map((c) => c.trim()).filter(Boolean);
-  };
-
-  // 🔥 NEW: Parse search categories
   const parseSearchCategories = () => {
     return searchCategoriesText.split(',').map((c) => c.trim().toLowerCase()).filter(Boolean);
+  };
+
+  // 🔥 Color handlers
+  const handleAddColor = () => {
+    const name = newColorName.trim();
+    const quantity = parseInt(newColorQty, 10) || 0;
+
+    if (!name) {
+      alert('Please enter a color name');
+      return;
+    }
+
+    if (colors.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+      alert(`Color "${name}" already exists`);
+      return;
+    }
+
+    setColors([...colors, { name, quantity }]);
+    setNewColorName('');
+    setNewColorQty('');
+  };
+
+  const handleRemoveColor = (colorName) => {
+    setColors(colors.filter(c => c.name !== colorName));
+  };
+
+  const handleUpdateColorQty = (colorName, newQty) => {
+    setColors(colors.map(c => 
+      c.name === colorName ? { ...c, quantity: parseInt(newQty, 10) || 0 } : c
+    ));
   };
 
   // Price Variations handlers
@@ -647,7 +697,6 @@ const AdminProductForm = ({
       return;
     }
 
-    // Check if pieces already exists
     if (priceVariations.some(v => v.pieces === pieces)) {
       alert(`Price for ${pieces} piece(s) already exists. Remove it first to update.`);
       return;
@@ -659,11 +708,9 @@ const AdminProductForm = ({
       label: newVariationLabel.trim() || null
     };
 
-    // Sort by pieces ascending
     const updated = [...priceVariations, newVariation].sort((a, b) => a.pieces - b.pieces);
     setPriceVariations(updated);
 
-    // Clear inputs
     setNewVariationPieces('');
     setNewVariationPrice('');
     setNewVariationLabel('');
@@ -677,26 +724,27 @@ const AdminProductForm = ({
   const onSubmit = (e) => {
     e.preventDefault();
     const sizesArray = parseSizes();
-    const colorsArray = parseColors();
-    const searchCategoriesArray = parseSearchCategories();  // 🔥 NEW
+    const searchCategoriesArray = parseSearchCategories();
 
-    // 🔥 Update the product state with searchCategories before submitting
     if (isEditing) {
       setEditingProduct({ ...editingProduct, searchCategories: searchCategoriesArray });
-      handleUpdateProduct(e, sizesArray, colorsArray, priceVariations, searchCategoriesArray);
+      handleUpdateProduct(e, sizesArray, colors, priceVariations, searchCategoriesArray);
       setSizesText('');
-      setColorsText('');
       setSearchCategoriesText('');
       setPriceVariations([]);
+      setColors([]);
     } else {
       setNewProduct({ ...newProduct, searchCategories: searchCategoriesArray });
-      handleAddProduct(e, sizesArray, colorsArray, priceVariations, searchCategoriesArray);
+      handleAddProduct(e, sizesArray, colors, priceVariations, searchCategoriesArray);
       setSizesText('');
-      setColorsText('');
       setSearchCategoriesText('');
       setPriceVariations([]);
+      setColors([]);
     }
   };
+
+  // 🔥 Calculate total color quantity
+  const totalColorQty = colors.reduce((sum, c) => sum + (c.quantity || 0), 0);
 
   return (
     <div className="bg-white shadow-lg p-8 rounded-lg">
@@ -869,21 +917,96 @@ const AdminProductForm = ({
           )}
         </div>
 
-        {/* COLORS */}
-        <div>
-          <label className="font-medium">Colors (comma separated)</label>
-          <input
-            type="text"
-            placeholder="Red, Black, White"
-            value={colorsText}
-            onChange={(e) => setColorsText(e.target.value)}
-            className="w-full border px-4 py-3 rounded-lg"
-          />
-          {colorsText && (
-            <p className="text-xs text-gray-500 mt-1">
-              Will save as: {parseColors().join(', ') || '(empty)'}
-            </p>
+        {/* 🔥 COLORS WITH QUANTITY */}
+        <div className="border-t pt-4 mt-4">
+          <label className="font-medium flex items-center gap-2 text-pink-700">
+            <Palette className="w-5 h-5" />
+            Colors with Stock Quantity
+          </label>
+          <p className="text-xs text-gray-500 mb-3">
+            Add each color variant with its individual stock quantity. Out of stock colors will be greyed out for customers.
+          </p>
+
+          {/* Current Colors */}
+          {colors.length > 0 && (
+            <div className="mb-4 space-y-2">
+              {colors.map((color, idx) => (
+                <div
+                  key={idx}
+                  className={`flex items-center justify-between p-3 rounded-lg ${
+                    color.quantity > 0 ? 'bg-green-50 border border-green-200' : 'bg-gray-100 border border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={`font-semibold ${color.quantity > 0 ? 'text-green-700' : 'text-gray-500'}`}>
+                      {color.name}
+                    </span>
+                    {color.quantity === 0 && (
+                      <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
+                        Out of Stock
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">Qty:</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={color.quantity}
+                      onChange={(e) => handleUpdateColorQty(color.name, e.target.value)}
+                      className="w-16 border px-2 py-1 rounded text-center text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveColor(color.name)}
+                      className="text-red-500 hover:text-red-700 ml-2"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              
+              {/* Total from colors */}
+              <div className="text-right text-sm font-medium text-purple-700 pt-2 border-t">
+                Total Stock (all colors): {totalColorQty}
+              </div>
+            </div>
           )}
+
+          {/* Add New Color */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="col-span-1">
+              <input
+                type="text"
+                placeholder="Color name"
+                value={newColorName}
+                onChange={(e) => setNewColorName(e.target.value)}
+                className="w-full border px-3 py-2 rounded-lg text-sm"
+              />
+            </div>
+            <div className="col-span-1">
+              <input
+                type="number"
+                placeholder="Quantity"
+                min="0"
+                value={newColorQty}
+                onChange={(e) => setNewColorQty(e.target.value)}
+                className="w-full border px-3 py-2 rounded-lg text-sm"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleAddColor}
+              className="bg-pink-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-pink-600 flex items-center justify-center gap-1"
+            >
+              <Plus className="w-4 h-4" />
+              Add Color
+            </button>
+          </div>
+          <p className="text-xs text-gray-400 mt-2">
+            Example: Black (3), Pink (2), White (0 - out of stock)
+          </p>
         </div>
 
         {/* 🔥 PRICE VARIATIONS BY PIECES */}
@@ -987,34 +1110,48 @@ const AdminProductForm = ({
           className="w-full border px-4 py-3 rounded-lg"
         />
 
-        {/* INVENTORY SECTION */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="font-medium">Quantity in stock</label>
-            <input
-              type="number"
-              min="0"
-              value={current.quantity ?? 0}
-              onChange={(e) =>
-                updateField('quantity', Number(e.target.value || 0))
-              }
-              className="w-full border px-4 py-3 rounded-lg"
-            />
-          </div>
+        {/* INVENTORY SECTION - Only show if no colors added */}
+        {colors.length === 0 && (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="font-medium">Quantity in stock</label>
+              <input
+                type="number"
+                min="0"
+                value={current.quantity ?? 0}
+                onChange={(e) =>
+                  updateField('quantity', Number(e.target.value || 0))
+                }
+                className="w-full border px-4 py-3 rounded-lg"
+              />
+            </div>
 
-          <div>
-            <label className="font-medium">Low stock warning at</label>
-            <input
-              type="number"
-              min="0"
-              value={current.lowStockWarningAt ?? 0}
-              onChange={(e) =>
-                updateField('lowStockWarningAt', Number(e.target.value || 0))
-              }
-              className="w-full border px-4 py-3 rounded-lg"
-            />
+            <div>
+              <label className="font-medium">Low stock warning at</label>
+              <input
+                type="number"
+                min="0"
+                value={current.lowStockWarningAt ?? 0}
+                onChange={(e) =>
+                  updateField('lowStockWarningAt', Number(e.target.value || 0))
+                }
+                className="w-full border px-4 py-3 rounded-lg"
+              />
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Note when colors are added */}
+        {colors.length > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <p className="text-sm text-blue-700">
+              📦 <strong>Total stock:</strong> {totalColorQty} (sum of all color quantities)
+            </p>
+            <p className="text-xs text-blue-600 mt-1">
+              Stock is automatically calculated from individual color quantities above.
+            </p>
+          </div>
+        )}
 
         <div className="flex flex-col gap-2">
           <label className="flex items-center gap-2">
@@ -1089,8 +1226,9 @@ const AdminProductForm = ({
             onClick={() => {
               setEditingProduct(null);
               setSizesText('');
-              setColorsText('');
+              setSearchCategoriesText('');
               setPriceVariations([]);
+              setColors([]);
             }}
             className="w-full bg-gray-200 py-3 rounded-lg"
           >
@@ -1256,6 +1394,20 @@ const ProductList = ({
     return tagMap[tag] || null;
   };
 
+  // 🔥 Helper to get color info display
+  const getColorInfo = (colors) => {
+    if (!colors || colors.length === 0) return null;
+    
+    // Handle both old format (strings) and new format (objects)
+    if (typeof colors[0] === 'string') {
+      return { count: colors.length, totalQty: null, inStockColors: colors.length };
+    }
+    
+    const totalQty = colors.reduce((sum, c) => sum + (c.quantity || 0), 0);
+    const inStockColors = colors.filter(c => c.quantity > 0).length;
+    return { count: colors.length, totalQty, inStockColors };
+  };
+
   // 🔥 Filter products based on search
   const filteredProducts = products.filter((p) => {
     if (!searchQuery.trim()) return true;
@@ -1374,7 +1526,8 @@ const ProductList = ({
           const visible = p.visible !== false;
           const hasPriceVariations = p.priceVariations && p.priceVariations.length > 0;
           const tagDisplay = getTagDisplay(p.tag);
-          const hasSearchCategories = p.searchCategories && p.searchCategories.length > 0;  // 🔥 NEW
+          const hasSearchCategories = p.searchCategories && p.searchCategories.length > 0;
+          const colorInfo = getColorInfo(p.colors);
 
           return (
             <div
@@ -1426,6 +1579,13 @@ const ProductList = ({
                   <span>
                     Qty: <strong>{p.quantity ?? 0}</strong>
                   </span>
+
+                  {/* 🔥 Color stock info */}
+                  {colorInfo && (
+                    <span className="px-2 py-0.5 bg-pink-100 text-pink-700 rounded-full">
+                      {colorInfo.count} colors {colorInfo.totalQty !== null && `(${colorInfo.inStockColors} in stock)`}
+                    </span>
+                  )}
 
                   {lowStock && (
                     <span className="px-2 py-0.5 bg-yellow-200 text-yellow-800 rounded-full">

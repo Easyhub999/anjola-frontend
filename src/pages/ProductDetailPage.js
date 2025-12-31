@@ -94,7 +94,34 @@ const ProductDetailPage = ({
     }
   }, [hasPriceVariations, selectedProduct]);
 
-  // Get current display price
+  // ============================
+  // 🔥 COLOR HELPERS (NEW FORMAT)
+  // ============================
+  const getColors = () => {
+    if (!hasProduct || !selectedProduct.colors) return [];
+    
+    // Handle both old format (strings) and new format (objects with quantity)
+    return selectedProduct.colors.map(color => {
+      if (typeof color === 'string') {
+        // Old format - assume in stock
+        return { name: color, quantity: 999, isOldFormat: true };
+      }
+      // New format
+      return { name: color.name, quantity: color.quantity || 0, isOldFormat: false };
+    });
+  };
+
+  const colors = getColors();
+  const hasColors = colors.length > 0;
+  
+  // Check if selected color is in stock
+  const isSelectedColorInStock = () => {
+    if (!selectedColor) return true;
+    const colorObj = colors.find(c => c.name === selectedColor);
+    return colorObj ? colorObj.quantity > 0 : true;
+  };
+
+  // Get display price
   const getDisplayPrice = () => {
     if (selectedVariation) {
       return selectedVariation.price;
@@ -125,6 +152,18 @@ const ProductDetailPage = ({
     if (hasPriceVariations && !selectedVariation) {
       alert('Please select a quantity option');
       return;
+    }
+
+    // 🔥 Check if color is required and selected
+    if (hasColors) {
+      if (!selectedColor) {
+        alert('Please select a color');
+        return;
+      }
+      if (!isSelectedColorInStock()) {
+        alert('Selected color is out of stock');
+        return;
+      }
     }
 
     const cartItem = {
@@ -243,7 +282,7 @@ const ProductDetailPage = ({
       <div className="fixed top-20 right-10 w-72 h-72 bg-pink-200/20 rounded-full blur-3xl pointer-events-none"></div>
       <div className="fixed bottom-20 left-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
         {/* BACK BUTTON */}
         <div className="py-4 animate-fadeIn">
           <BackButton setCurrentPage={setCurrentPage} />
@@ -485,32 +524,62 @@ const ProductDetailPage = ({
               </div>
             )}
 
-            {/* 🔥 COLORS - Dropdown */}
-            {selectedProduct.colors?.length > 0 && (
+            {/* 🔥 COLORS WITH STOCK STATUS */}
+            {hasColors && (
               <div className="space-y-2">
                 <h3 className="font-semibold text-gray-800 text-sm flex items-center gap-2">
                   <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                   </svg>
                   Select Color
+                  {selectedColor && <span className="text-purple-600 font-normal">: {selectedColor}</span>}
                 </h3>
-                <div className="relative">
-                  <select
-                    value={selectedColor || ""}
-                    onChange={(e) => setSelectedColor(e.target.value || null)}
-                    className="w-full appearance-none bg-white border-2 border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 rounded-xl px-4 py-3 pr-10 text-gray-700 font-medium transition-all cursor-pointer outline-none"
-                  >
-                    <option value="">-- Choose a color --</option>
-                    {selectedProduct.colors.map((color, i) => (
-                      <option key={i} value={color}>{color}</option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
+                <div className="flex gap-2 flex-wrap">
+                  {colors.map((color, i) => {
+                    const isSelected = selectedColor === color.name;
+                    const isInStock = color.quantity > 0;
+                    
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => {
+                          if (isInStock) {
+                            setSelectedColor(selectedColor === color.name ? null : color.name);
+                          }
+                        }}
+                        disabled={!isInStock}
+                        className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                          isSelected
+                            ? 'bg-purple-500 text-white shadow-md'
+                            : isInStock
+                              ? 'bg-white text-gray-700 border border-gray-200 hover:border-purple-300'
+                              : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
+                        }`}
+                      >
+                        {color.name}
+                        {!isInStock && (
+                          <span className="ml-1 text-xs">(Out of Stock)</span>
+                        )}
+                        {/* 🔥 Show stock count if low but not zero */}
+                        {isInStock && !color.isOldFormat && color.quantity <= 3 && (
+                          <span className={`ml-1 text-xs ${isSelected ? 'text-purple-200' : 'text-orange-500'}`}>
+                            (Only {color.quantity} left)
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
+                {/* Show message if selected color is out of stock */}
+                {selectedColor && !isSelectedColorInStock() && (
+                  <p className="text-red-500 text-sm flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    This color is currently out of stock
+                  </p>
+                )}
               </div>
             )}
 
@@ -567,9 +636,9 @@ const ProductDetailPage = ({
                 </button>
                 {showDescription && (
                   <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 animate-fadeIn">
-                    <p className="text-gray-600 leading-relaxed text-sm whitespace-pre-line">
+                    <div className="text-gray-600 leading-relaxed text-sm whitespace-pre-line">
                       {selectedProduct.description}
-                    </p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -748,7 +817,12 @@ const ProductDetailPage = ({
           ) : (
             <button
               onClick={handleAddToCart}
-              className="flex-1 bg-gradient-to-r from-pink-500 to-purple-500 text-white py-4 rounded-xl font-bold text-center shadow-lg shadow-pink-500/30 hover:shadow-xl hover:shadow-pink-500/40 active:scale-[0.98] transition-all"
+              disabled={hasColors && selectedColor && !isSelectedColorInStock()}
+              className={`flex-1 py-4 rounded-xl font-bold text-center shadow-lg active:scale-[0.98] transition-all ${
+                hasColors && selectedColor && !isSelectedColorInStock()
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-pink-500/30 hover:shadow-xl hover:shadow-pink-500/40'
+              }`}
             >
               {addedToCart ? (
                 <span className="flex items-center justify-center gap-2">
