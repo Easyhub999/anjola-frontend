@@ -1,10 +1,73 @@
-// ================= SHOPPAGE.JS — THE PERFECT VERSION 🔥 =================
+// ================= SHOPPAGE.JS — WITH PRODUCT TAGS 🔥 =================
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Search, ShoppingCart, X, ArrowLeft, CheckCircle, Mail, Package, Home, ShoppingBag } from "lucide-react";
 import { paymentsAPI } from "../api";
 
 const PRODUCTS_PER_PAGE = 20;
+
+// 🔥 PRODUCT TAG COMPONENT
+const ProductTag = ({ tag }) => {
+  const tagStyles = {
+    'best-seller': {
+      bg: 'bg-gradient-to-r from-amber-400 to-orange-500',
+      text: 'text-white',
+      icon: '👑',
+      label: 'Best Seller'
+    },
+    'hot': {
+      bg: 'bg-gradient-to-r from-red-500 to-pink-500',
+      text: 'text-white',
+      icon: '🔥',
+      label: 'Hot'
+    },
+    'new': {
+      bg: 'bg-gradient-to-r from-emerald-400 to-teal-500',
+      text: 'text-white',
+      icon: '✨',
+      label: 'New Arrival'
+    },
+    'recommended': {
+      bg: 'bg-gradient-to-r from-purple-500 to-indigo-500',
+      text: 'text-white',
+      icon: '💎',
+      label: 'Recommended'
+    },
+    'limited': {
+      bg: 'bg-gradient-to-r from-gray-800 to-gray-900',
+      text: 'text-white',
+      icon: '⏰',
+      label: 'Limited'
+    },
+    'trending': {
+      bg: 'bg-gradient-to-r from-pink-500 to-rose-500',
+      text: 'text-white',
+      icon: '📈',
+      label: 'Trending'
+    },
+    'sale': {
+      bg: 'bg-gradient-to-r from-red-600 to-red-500',
+      text: 'text-white',
+      icon: '🏷️',
+      label: 'Sale'
+    },
+    'popular': {
+      bg: 'bg-gradient-to-r from-blue-500 to-cyan-500',
+      text: 'text-white',
+      icon: '⭐',
+      label: 'Popular'
+    }
+  };
+
+  const style = tagStyles[tag] || tagStyles['new'];
+
+  return (
+    <div className={`${style.bg} ${style.text} px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold shadow-lg flex items-center gap-1 backdrop-blur-sm`}>
+      <span>{style.icon}</span>
+      <span>{style.label}</span>
+    </div>
+  );
+};
 
 const ShopPage = ({
   products,
@@ -312,10 +375,10 @@ const ShopPage = ({
     <div id="shop-top" className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 pt-0 pb-16 -mt-10">
       {/* Payment Success Modal */}
       {showPaymentSuccess && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pt-32 overflow-y-auto">
+        <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 pt-32 overflow-y-auto">
           {/* Backdrop */}
           <div 
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={handleCloseSuccessModal}
           ></div>
           
@@ -560,6 +623,13 @@ const ShopPage = ({
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
+
+                      {/* 🔥 PRODUCT TAG - Top Left */}
+                      {product.tag && !isOutOfStock && (
+                        <div className="absolute top-3 left-3 z-10">
+                          <ProductTag tag={product.tag} />
+                        </div>
+                      )}
 
                       {isOutOfStock && (
                         <div className="absolute top-3 left-3 backdrop-blur-md bg-red-600/90 text-white 

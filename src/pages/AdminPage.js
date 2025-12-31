@@ -8,10 +8,24 @@ import {
   Eye,
   EyeOff,
   Plus,
-  DollarSign
+  DollarSign,
+  Tag
 } from 'lucide-react';
 import { productsAPI } from '../api';
 import ManualOrderModal from '../components/ManualOrderModal';
+
+// 🔥 TAG OPTIONS
+const TAG_OPTIONS = [
+  { value: '', label: 'No Tag' },
+  { value: 'best-seller', label: '👑 Best Seller' },
+  { value: 'hot', label: '🔥 Hot' },
+  { value: 'new', label: '✨ New Arrival' },
+  { value: 'recommended', label: '💎 Recommended' },
+  { value: 'trending', label: '📈 Trending' },
+  { value: 'popular', label: '⭐ Popular' },
+  { value: 'limited', label: '⏰ Limited' },
+  { value: 'sale', label: '🏷️ Sale' }
+];
 
 // =========================================================
 // MAIN ADMIN PAGE
@@ -43,7 +57,8 @@ const AdminPage = ({ user, products, setProducts }) => {
     lowStockWarningAt: 0,
     inStock: true,
     autoHideWhenZero: true,
-    visible: true
+    visible: true,
+    tag: ''  // 🔥 NEW: Product tag
   });
 
   // =========================================================
@@ -225,7 +240,8 @@ const AdminPage = ({ user, products, setProducts }) => {
         quantity,
         lowStockWarningAt,
         inStock: quantity > 0,
-        visible: newProduct.visible ?? true
+        visible: newProduct.visible ?? true,
+        tag: newProduct.tag || ''  // 🔥 Include tag
       };
 
       const createdProduct = await productsAPI.createProduct(
@@ -249,7 +265,8 @@ const AdminPage = ({ user, products, setProducts }) => {
         lowStockWarningAt: 0,
         inStock: true,
         autoHideWhenZero: true,
-        visible: true
+        visible: true,
+        tag: ''  // 🔥 Reset tag
       });
 
       alert('Product added successfully my wife! ❤️');
@@ -282,7 +299,8 @@ const AdminPage = ({ user, products, setProducts }) => {
         price: parseInt(editingProduct.price, 10),
         quantity,
         lowStockWarningAt,
-        inStock: quantity > 0
+        inStock: quantity > 0,
+        tag: editingProduct.tag || ''  // 🔥 Include tag
       };
 
       const updated = await productsAPI.updateProduct(
@@ -375,6 +393,7 @@ const AdminPage = ({ user, products, setProducts }) => {
       const sizesIdx = idx('sizes');
       const colorsIdx = idx('colors');
       const qtyIdx = idx('quantity');
+      const tagIdx = idx('tag');  // 🔥 NEW
 
       let createdCount = 0;
 
@@ -399,6 +418,7 @@ const AdminPage = ({ user, products, setProducts }) => {
           .map((x) => x.trim())
           .filter(Boolean);
         const quantity = parseInt(cols[qtyIdx] || '0', 10);
+        const tag = cols[tagIdx]?.trim() || '';  // 🔥 NEW
 
         const productData = {
           name,
@@ -415,7 +435,8 @@ const AdminPage = ({ user, products, setProducts }) => {
           lowStockWarningAt: 0,
           inStock: quantity > 0,
           autoHideWhenZero: true,
-          visible: true
+          visible: true,
+          tag  // 🔥 NEW
         };
 
         const created = await productsAPI.createProduct(
@@ -761,6 +782,28 @@ const AdminProductForm = ({
           </select>
         </div>
 
+        {/* 🔥 PRODUCT TAG SELECTOR */}
+        <div>
+          <label className="font-medium flex items-center gap-2">
+            <Tag className="w-4 h-4 text-purple-600" />
+            Product Tag (Optional)
+          </label>
+          <select
+            value={current.tag || ''}
+            onChange={(e) => updateField('tag', e.target.value)}
+            className="w-full border px-4 py-3 rounded-lg mt-1 bg-white"
+          >
+            {TAG_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-500 mt-1">
+            Tags like "Best Seller" or "Hot" will be displayed on the product card in the shop.
+          </p>
+        </div>
+
         {/* SIZES */}
         <div>
           <label className="font-medium">Sizes (comma separated)</label>
@@ -970,7 +1013,7 @@ const AdminProductForm = ({
             />
             <p className="text-xs text-gray-500 mt-1">
               Expected headers: name, price, category, description,
-              images (separated by |), sizes (|), colors (|), quantity.
+              images (separated by |), sizes (|), colors (|), quantity, tag.
             </p>
             {bulkUploading && (
               <p className="text-xs text-purple-500 mt-1">
@@ -1076,6 +1119,21 @@ const ProductList = ({
   handleDeleteProduct,
   handleToggleVisibility
 }) => {
+  // 🔥 Helper to get tag display
+  const getTagDisplay = (tag) => {
+    const tagMap = {
+      'best-seller': '👑 Best Seller',
+      'hot': '🔥 Hot',
+      'new': '✨ New',
+      'recommended': '💎 Recommended',
+      'trending': '📈 Trending',
+      'popular': '⭐ Popular',
+      'limited': '⏰ Limited',
+      'sale': '🏷️ Sale'
+    };
+    return tagMap[tag] || null;
+  };
+
   return (
     <div className="bg-white shadow-lg p-8 rounded-lg">
       <h2 className="text-2xl font-semibold mb-6">
@@ -1092,6 +1150,7 @@ const ProductList = ({
 
           const visible = p.visible !== false;
           const hasPriceVariations = p.priceVariations && p.priceVariations.length > 0;
+          const tagDisplay = getTagDisplay(p.tag);
 
           return (
             <div
@@ -1116,7 +1175,7 @@ const ProductList = ({
                   )}
                 </p>
 
-                <div className="flex gap-3 mt-2 items-center text-xs">
+                <div className="flex gap-2 mt-2 items-center text-xs flex-wrap">
                   <span>
                     Qty: <strong>{p.quantity ?? 0}</strong>
                   </span>
@@ -1130,6 +1189,13 @@ const ProductList = ({
                   {!visible && (
                     <span className="px-2 py-0.5 bg-gray-200 text-gray-700 rounded-full">
                       Hidden
+                    </span>
+                  )}
+
+                  {/* 🔥 Show tag badge */}
+                  {tagDisplay && (
+                    <span className="px-2 py-0.5 bg-gradient-to-r from-pink-100 to-purple-100 text-purple-700 rounded-full font-medium">
+                      {tagDisplay}
                     </span>
                   )}
                 </div>
