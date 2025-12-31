@@ -18,8 +18,8 @@ const ProductDetailPage = ({
   // Scroll to top whenever this page mounts or product changes
   useEffect(() => {
     if (!hasProduct) return;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [hasProduct]);
+    window.scrollTo(0, 0);
+  }, [selectedProduct]);
 
   // ============================
   // IMAGE HANDLING (SAFE)
