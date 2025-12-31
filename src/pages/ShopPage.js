@@ -258,12 +258,25 @@ const ShopPage = ({
     }
 
     list.sort((a, b) => {
+      // Price sorting takes priority when selected
       if (sortOption === "price-asc") {
         return (a.price || 0) - (b.price || 0);
       }
       if (sortOption === "price-desc") {
         return (b.price || 0) - (a.price || 0);
       }
+      
+      // 🔥 For "latest" (default): Use displayOrder first, then createdAt as fallback
+      // Products with displayOrder set by admin appear first in their specified order
+      const aOrder = typeof a.displayOrder === 'number' ? a.displayOrder : 99999;
+      const bOrder = typeof b.displayOrder === 'number' ? b.displayOrder : 99999;
+      
+      // If both have displayOrder, sort by it
+      if (aOrder !== bOrder) {
+        return aOrder - bOrder;
+      }
+      
+      // If same displayOrder or neither has it, sort by createdAt (newest first)
       const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return bDate - aDate;
