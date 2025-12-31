@@ -1,6 +1,6 @@
 // src/pages/ProductDetailPage.js
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { productsAPI } from "../api";
 import BackButton from "../components/BackButton";
 
@@ -14,13 +14,25 @@ const ProductDetailPage = ({
   // BASIC FLAGS & DERIVED VALUES
   // ============================
   const hasProduct = !!selectedProduct;
+  
+  // 🔥 Track if this is initial mount
+  const hasScrolled = useRef(false);
 
-  // 🔥 Scroll to top ONLY when component first mounts or product changes
+  // 🔥 Scroll to top ONLY on first mount or when product changes
   useEffect(() => {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  }, [selectedProduct?._id]); // Only triggers when product ID changes, not on every render
+    if (!hasScrolled.current || selectedProduct?._id) {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      
+      const timer = setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 10);
+      
+      hasScrolled.current = true;
+      return () => clearTimeout(timer);
+    }
+  }, [selectedProduct?._id]);
 
   // ============================
   // IMAGE HANDLING (SAFE)
