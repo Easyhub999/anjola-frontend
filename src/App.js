@@ -82,7 +82,8 @@ function AppContent() {
         console.error(e);
       }
     }
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   useEffect(function() {
     if (selectedProduct) {

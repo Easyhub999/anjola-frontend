@@ -1,18 +1,12 @@
 import React, { useState } from 'react';
 import { 
-  Sparkles, 
-  Heart, 
-  Coffee, 
-  Sun, 
-  Moon, 
+  Heart,  
   Flower2,
   ShoppingBag,
   Instagram,
-  Facebook,
   Mail,
   ExternalLink,
   Clock,
-  Tag
 } from 'lucide-react';
 
 const BlogPage = () => {

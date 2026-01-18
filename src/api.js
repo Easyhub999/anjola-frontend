@@ -454,10 +454,12 @@ export const analyticsAPI = {
 // DEFAULT EXPORT
 // ==========================================
 
-export default {
+const apiExport = {
   auth: authAPI,
   products: productsAPI,
   orders: ordersAPI,
   payments: paymentsAPI,
   analytics: analyticsAPI
 };
+
+export default apiExport;

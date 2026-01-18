@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Mail, Package, Instagram, Facebook, Twitter, Check } from "lucide-react";
+import { Mail, Package, Instagram, Facebook, Check } from "lucide-react";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });

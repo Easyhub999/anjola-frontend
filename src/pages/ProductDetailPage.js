@@ -1,6 +1,6 @@
 // src/pages/ProductDetailPage.js
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { productsAPI } from "../api";
 import BackButton from "../components/BackButton";
 
@@ -92,7 +92,7 @@ const ProductDetailPage = ({
     if (hasPriceVariations && !selectedVariation) {
       setSelectedVariation(selectedProduct.priceVariations[0]);
     }
-  }, [hasPriceVariations, selectedProduct]);
+  }, [hasPriceVariations, selectedProduct, selectedVariation]);
 
   // ============================
   // 🔥 COLOR HELPERS (NEW FORMAT)
@@ -874,7 +874,7 @@ const ProductDetailPage = ({
           >
             <img
               src={allImages[lightboxIndex]}
-              alt={`${selectedProduct.name} - Image ${lightboxIndex + 1}`}
+              alt={`${selectedProduct.name} - ${lightboxIndex + 1}`}
               className="max-w-full max-h-full object-contain rounded-lg"
             />
           </div>
@@ -941,7 +941,7 @@ const ProductDetailPage = ({
           0% { background-position: -1000px 0; }
           100% { background-position: 1000px 0; }
         }
-        
+          
         .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
         .animate-slideInLeft { animation: slideInLeft 0.5s ease-out; }
         .animate-slideInRight { animation: slideInRight 0.5s ease-out; }

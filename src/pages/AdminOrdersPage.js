@@ -9,11 +9,7 @@ const AdminOrdersPage = ({ user }) => {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = async () => {
+  const fetchOrders = React.useCallback(async () => {
     try {
       setLoading(true);
       const data = await ordersAPI.getAllOrders(user.token);
@@ -23,7 +19,11 @@ const AdminOrdersPage = ({ user }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     setUpdatingStatus(true);
@@ -190,7 +190,6 @@ const AdminOrdersPage = ({ user }) => {
                     <h4 className="font-semibold mb-3">Order Items</h4>
                     <div className="space-y-2 mb-4">
                       {order.items.map((item, idx) => {
-                        // 🔥 Check if item has price variations
                         const hasPieces = item.selectedPieces && item.selectedPieces > 1;
                         const pricePerPiece = item.pricePerPiece || item.price;
                         
@@ -199,7 +198,6 @@ const AdminOrdersPage = ({ user }) => {
                             <div className="flex-1">
                               <p className="font-medium">{item.name}</p>
                               
-                              {/* 🔥 Show pieces info if applicable */}
                               {hasPieces ? (
                                 <div className="mt-1">
                                   <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
@@ -215,7 +213,6 @@ const AdminOrdersPage = ({ user }) => {
                                 </p>
                               )}
                               
-                              {/* Show size/color if selected */}
                               {(item.selectedSize || item.selectedColor) && (
                                 <p className="text-sm text-purple-600 mt-1">
                                   {item.selectedSize && <span className="mr-3">Size: <strong>{item.selectedSize}</strong></span>}
@@ -231,7 +228,6 @@ const AdminOrdersPage = ({ user }) => {
                       })}
                     </div>
 
-                    {/* Shipping Info */}
                     {order.customerInfo.shippingMethod && (
                       <div className="mb-4 p-3 bg-blue-50 rounded-lg">
                         <p className="text-sm">

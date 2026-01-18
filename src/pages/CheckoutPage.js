@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Check, Loader, CreditCard, Lock, Truck, Info } from 'lucide-react';
+import { Loader, CreditCard, Lock, Truck, Info } from 'lucide-react';
 import { ordersAPI, paymentsAPI } from '../api';
 
 const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {

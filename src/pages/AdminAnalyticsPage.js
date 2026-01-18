@@ -4,13 +4,11 @@ import {
   DollarSign,
   ShoppingBag,
   Calendar,
-  Download,
   RefreshCw,
   AlertCircle,
   Loader,
   Mail,
   BarChart3,
-  PieChart,
   TrendingDown
 } from 'lucide-react';
 import { analyticsAPI } from '../api';
@@ -23,15 +21,9 @@ const AdminAnalyticsPage = ({ user }) => {
   const [topProducts, setTopProducts] = useState([]);
   const [orderStatus, setOrderStatus] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
-  const [selectedPeriod, setSelectedPeriod] = useState('all');
+  const selectedPeriod = 'all';
 
-  useEffect(() => {
-    if (user?.role === 'admin') {
-      fetchAllAnalytics();
-    }
-  }, [user]);
-
-  const fetchAllAnalytics = async () => {
+  const fetchAllAnalytics = React.useCallback(async () => {
     try {
       setLoading(true);
       
@@ -54,7 +46,13 @@ const AdminAnalyticsPage = ({ user }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, selectedPeriod]);
+
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      fetchAllAnalytics();
+    }
+  }, [user, fetchAllAnalytics]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
