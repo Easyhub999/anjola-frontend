@@ -38,19 +38,19 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
     {
       id: 'zone1',
       label: 'Lagos, Akure, Ado-Ekiti, Ibadan, Ogbomosho, Oshogbo, Ota, Ilorin',
-      price: 5000,
+      price: 5600,
       description: 'Doorstep Delivery (3-7 days)'
     },
     {
       id: 'zone2',
       label: 'Aba, Asaba, Enugu, Onitsha, Owerri, Umuahia, Abuja, Benin, Calabar, Port-Harcourt, Uyo, Warri, Yenagoa',
-      price: 6500,
+      price: 7000,
       description: 'Doorstep Delivery (3-7 days)'
     },
     {
       id: 'zone3',
       label: 'Lafia, Lokoja, Makurdi, Minna, Bauchi, Jalingo, Jos, Gombe, Maiduguri, Damaturu, Yola, Kaduna, Katsina, Dutse, Birnin Kebbi, Sokoto, Kano',
-      price: 8000,
+      price: 8500,
       description: 'Doorstep Delivery (3-7 days)'
     }
   ];
