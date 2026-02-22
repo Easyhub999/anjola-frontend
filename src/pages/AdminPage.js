@@ -822,15 +822,52 @@ const AdminProductForm = ({
 
         {/* BASE PRICE */}
         <div>
-          <label className="font-medium">Base Price (for single item or if no variations)</label>
+          <label className="font-medium">Original Price (for single item or if no variations)</label>
           <input
             type="number"
-            placeholder="Price"
+            placeholder="Original Price"
             required
             value={current.price}
             onChange={(e) => updateField('price', e.target.value)}
             className="w-full border px-4 py-3 rounded-lg mt-1"
           />
+        </div>
+
+        {/* 🔥 SALES PRICE (OPTIONAL) */}
+        <div>
+          <label className="font-medium flex items-center gap-2">
+            <span className="text-red-600">🏷️</span>
+            Sales Price (Optional - Leave empty for no discount)
+          </label>
+          <input
+            type="number"
+            placeholder="Sales Price (discounted)"
+            value={current.salesPrice || ''}
+            onChange={(e) => {
+              const val = e.target.value;
+              updateField('salesPrice', val === '' ? null : Number(val));
+            }}
+            className="w-full border px-4 py-3 rounded-lg mt-1"
+          />
+          
+          {/* Show discount calculation */}
+          {current.salesPrice && current.salesPrice < current.price && (
+            <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-700">
+                <strong>💰 Discount:</strong> {Math.round(((current.price - current.salesPrice) / current.price) * 100)}% OFF
+              </p>
+              <p className="text-xs text-green-600 mt-1">
+                Original: ₦{Number(current.price).toLocaleString()} → 
+                Sale: ₦{Number(current.salesPrice).toLocaleString()} 
+                (Save ₦{(Number(current.price) - Number(current.salesPrice)).toLocaleString()})
+              </p>
+            </div>
+          )}
+          
+          <p className="text-xs text-gray-500 mt-1">
+            If set, customers will see the original price crossed out and pay the sales price. 
+            Perfect for clearance sales! 🔥
+          </p>
         </div>
 
         {/* CATEGORY */}

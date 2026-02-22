@@ -692,10 +692,38 @@ const ShopPage = ({
                       </h3>
 
                       <div className="mt-auto space-y-2.5">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-lg sm:text-xl font-bold text-pink-600">
-                            ₦{product.price.toLocaleString()}
-                          </span>
+                        {/* 🔥 PRICE DISPLAY WITH SALES PRICE */}
+                        <div className="flex flex-col gap-1">
+                          {product.salesPrice && product.salesPrice < product.price ? (
+                            <>
+                              {/* Original Price - Strikethrough */}
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-400 line-through">
+                                  ₦{product.price.toLocaleString()}
+                                </span>
+                                {/* Discount Badge */}
+                                <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                                  -{Math.round(((product.price - product.salesPrice) / product.price) * 100)}%
+                                </span>
+                              </div>
+                              {/* Sales Price - Bold */}
+                              <div className="flex items-baseline gap-2">
+                                <span className="text-lg sm:text-xl font-bold text-red-600">
+                                  ₦{product.salesPrice.toLocaleString()}
+                                </span>
+                                <span className="text-xs text-red-600 font-semibold">
+                                  SALE
+                                </span>
+                              </div>
+                            </>
+                          ) : (
+                            /* Regular Price */
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-lg sm:text-xl font-bold text-pink-600">
+                                ₦{product.price.toLocaleString()}
+                              </span>
+                            </div>
+                          )}
                         </div>
 
                         {isOutOfStock ? (

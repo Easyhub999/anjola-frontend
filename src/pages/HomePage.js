@@ -234,10 +234,28 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
                       Featured
                     </div>
 
-                    {/* Price badge */}
+                    {/* 🔥 Price badge with sales price */}
                     <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md 
-                      shadow-lg px-4 py-2 rounded-full text-pink-600 font-bold text-lg">
-                      ₦{product.price.toLocaleString()}
+                      shadow-lg px-4 py-2 rounded-full">
+                      {product.salesPrice && product.salesPrice < product.price ? (
+                        <div className="flex flex-col items-end gap-0.5">
+                          <span className="text-xs text-gray-400 line-through">
+                            ₦{product.price.toLocaleString()}
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-red-600 font-bold text-lg">
+                              ₦{product.salesPrice.toLocaleString()}
+                            </span>
+                            <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                              -{Math.round(((product.price - product.salesPrice) / product.price) * 100)}%
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-pink-600 font-bold text-lg">
+                          ₦{product.price.toLocaleString()}
+                        </span>
+                      )}
                     </div>
                   </div>
 

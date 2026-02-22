@@ -391,7 +391,7 @@ const ProductDetailPage = ({
               </div>
             )}
 
-            {/* Price Display - Compact */}
+           {/* 🔥 Price Display with Sales Price - Compact */}
             <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-4 border border-pink-200/50">
               <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">
                 {hasPriceVariations && selectedVariation
@@ -399,20 +399,57 @@ const ProductDetailPage = ({
                   : 'Price'
                 }
               </p>
-              <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-bold text-pink-600">
-                  ₦{getDisplayPrice().toLocaleString()}
-                </span>
-                {hasPriceVariations && selectedVariation && selectedVariation.pieces > 1 && (
-                  <span className="text-sm text-gray-500">
-                    (₦{getPricePerPiece().toLocaleString()}/pc)
-                  </span>
-                )}
-              </div>
-              {getSavings() > 0 && (
-                <p className="text-sm text-green-600 font-semibold mt-1">
-                  You save ₦{getSavings().toLocaleString()}!
-                </p>
+              
+              {/* Show sales price if it exists and is lower than regular price */}
+              {selectedProduct.salesPrice && selectedProduct.salesPrice < selectedProduct.price && !hasPriceVariations ? (
+                <div className="space-y-2">
+                  {/* Original Price - Strikethrough */}
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl text-gray-400 line-through">
+                      ₦{selectedProduct.price.toLocaleString()}
+                    </span>
+                    <span className="bg-red-500 text-white px-2.5 py-1 rounded-full text-xs font-bold">
+                      SAVE {Math.round(((selectedProduct.price - selectedProduct.salesPrice) / selectedProduct.price) * 100)}%
+                    </span>
+                  </div>
+                  
+                  {/* Sales Price - Bold & Red */}
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold text-red-600">
+                      ₦{selectedProduct.salesPrice.toLocaleString()}
+                    </span>
+                    <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-bold">
+                      SALE PRICE
+                    </span>
+                  </div>
+                  
+                  {/* Savings Amount */}
+                  <p className="text-sm text-green-600 font-semibold flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    You save ₦{(selectedProduct.price - selectedProduct.salesPrice).toLocaleString()}!
+                  </p>
+                </div>
+              ) : (
+                /* Regular Price Display */
+                <>
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-3xl font-bold text-pink-600">
+                      ₦{getDisplayPrice().toLocaleString()}
+                    </span>
+                    {hasPriceVariations && selectedVariation && selectedVariation.pieces > 1 && (
+                      <span className="text-sm text-gray-500">
+                        (₦{getPricePerPiece().toLocaleString()}/pc)
+                      </span>
+                    )}
+                  </div>
+                  {getSavings() > 0 && (
+                    <p className="text-sm text-green-600 font-semibold mt-1">
+                      You save ₦{getSavings().toLocaleString()}!
+                    </p>
+                  )}
+                </>
               )}
             </div>
 
@@ -797,12 +834,26 @@ const ProductDetailPage = ({
       ========================== */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-200 shadow-2xl z-50 px-4 py-3 safe-area-bottom">
         <div className="max-w-7xl mx-auto flex items-center gap-4">
-          {/* Price Summary */}
+          {/* 🔥 Price Summary with Sales Price */}
           <div className="flex-1">
-            <p className="text-xs text-gray-500">Total Price</p>
-            <p className="text-xl font-bold text-pink-600">₦{getDisplayPrice().toLocaleString()}</p>
-            {hasPriceVariations && selectedVariation && selectedVariation.pieces > 1 && (
-              <p className="text-[10px] text-gray-500">{selectedVariation.pieces} pieces</p>
+            {selectedProduct.salesPrice && selectedProduct.salesPrice < selectedProduct.price && !hasPriceVariations ? (
+              <>
+                <p className="text-xs text-gray-400 line-through">₦{selectedProduct.price.toLocaleString()}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xl font-bold text-red-600">₦{selectedProduct.salesPrice.toLocaleString()}</p>
+                  <span className="bg-red-500 text-white px-1.5 py-0.5 rounded text-[9px] font-bold">
+                    -{Math.round(((selectedProduct.price - selectedProduct.salesPrice) / selectedProduct.price) * 100)}%
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-xs text-gray-500">Total Price</p>
+                <p className="text-xl font-bold text-pink-600">₦{getDisplayPrice().toLocaleString()}</p>
+                {hasPriceVariations && selectedVariation && selectedVariation.pieces > 1 && (
+                  <p className="text-[10px] text-gray-500">{selectedVariation.pieces} pieces</p>
+                )}
+              </>
             )}
           </div>
           
