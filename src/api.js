@@ -2,8 +2,7 @@
 // API BASE URL
 // ==========================================
 
-const API_URL = "https://anjola-backend-1.onrender.com/api";
-
+const API_URL = "https://anjola-backend.onrender.com/api";
 
 // ==========================================
 // Helper: Handle API Responses
