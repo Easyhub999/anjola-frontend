@@ -131,7 +131,20 @@ function AppContent() {
       return;
     }
 
-    // For Products with price variations, use a unique key combining product ID and and pieces
+    // 🔥 USE SALES PRICE IF AVAILABLE
+    var effectivePrice = product.salesPrice && product.salesPrice < product.price 
+      ? product.salesPrice 
+      : product.price;
+
+    // Create cart item with effective price
+    var cartProduct = {
+      ...product,
+      price: effectivePrice,
+      originalPrice: product.price, // Keep original for reference
+      onSale: product.salesPrice && product.salesPrice < product.price
+    };
+
+    // For Products with price variations, use a unique key combining product ID and pieces
     var cartKey = product.selectedPieces
       ? product._id + '-' + product.selectedPieces
       : product._id;
@@ -156,7 +169,7 @@ function AppContent() {
         })
       );
     } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
+      setCart([...cart, { ...cartProduct, quantity: 1 }]);
     }
 
     var piecesText = product.selectedPieces && product.selectedPieces > 1
