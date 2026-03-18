@@ -26,7 +26,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
     {
       id: 'abeokuta',
       label: 'Delivery Within Abeokuta',
-      price: 1500,
+      price: 0,
       description: '24-48 hours delivery'
     },
     {
