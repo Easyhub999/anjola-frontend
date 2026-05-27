@@ -1,4 +1,4 @@
-import { Home, ShoppingBag, ShoppingCart, User, Heart } from 'lucide-react';
+import { Home, ShoppingBag, ShoppingCart, User } from 'lucide-react';
 
 const MobileBottomNav = ({ currentPage, setCurrentPage, cart, setShowCart, user }) => {
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
