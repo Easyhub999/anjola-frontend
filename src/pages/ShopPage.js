@@ -336,15 +336,15 @@ const ShopPage = ({
 
         {/* CATEGORIES */}
         <div className="relative mb-8">
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+          <div className="flex gap-2.5 overflow-x-auto pb-3 scrollbar-hide">
             {dynamicCategories.map((cat) => (
               <button key={cat} onClick={() => handleCategoryChange(cat)}
-                className={`px-4 py-2 rounded-lg capitalize text-[13px] font-medium whitespace-nowrap transition-all duration-200 ${
+                className={`flex-shrink-0 px-5 py-2.5 rounded-full capitalize text-sm font-medium transition-all duration-200 ${
                   selectedCategory === cat
-                    ? "bg-[#e84393]/10 text-[#e84393] border border-[#e84393]/20"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                    ? "bg-[#e84393] text-white shadow-sm"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}>
-                {cat === "all" ? "All" : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                {cat === "all" ? "All Products" : cat.charAt(0).toUpperCase() + cat.slice(1)}
               </button>
             ))}
           </div>
