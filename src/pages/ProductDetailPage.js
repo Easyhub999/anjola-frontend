@@ -155,9 +155,9 @@ const ProductDetailPage = ({
 
   if (!hasProduct) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fffbf7]">
+      <div className="min-h-screen flex items-center justify-center bg-[#fff7f9]">
         <div className="text-center">
-          <div className="w-12 h-12 border-3 border-gray-200 border-t-[#8B5E83] rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-3 border-gray-200 border-t-[#e84393] rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-400 text-sm">Loading product...</p>
         </div>
       </div>
@@ -165,7 +165,7 @@ const ProductDetailPage = ({
   }
 
   return (
-    <div className="min-h-screen bg-[#fffbf7] pb-32">
+    <div className="min-h-screen bg-[#fff7f9] pb-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
         <div className="py-4"><BackButton setCurrentPage={setCurrentPage} /></div>
 
@@ -210,7 +210,7 @@ const ProductDetailPage = ({
                 {allImages.map((img, i) => (
                   <button key={i} onClick={() => { setMainImage(img); setImageLoaded(false); }}
                     className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden transition-all duration-300 ${
-                      mainImage === img ? 'ring-2 ring-[#8B5E83] shadow-md' : 'ring-1 ring-gray-200 hover:ring-[#8B5E83]/50'
+                      mainImage === img ? 'ring-2 ring-[#e84393] shadow-md' : 'ring-1 ring-gray-200 hover:ring-[#e84393]/50'
                     }`}>
                     <img src={img} alt={`Thumbnail ${i + 1}`} className="w-full h-full object-cover" />
                   </button>
@@ -234,7 +234,7 @@ const ProductDetailPage = ({
                   </button>
                 )}
                 <button onClick={handleShare}
-                  className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-400 hover:text-[#8B5E83] hover:border-[#8B5E83]/30 transition-all duration-300">
+                  className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-400 hover:text-[#e84393] hover:border-[#e84393]/30 transition-all duration-300">
                   <Share2 className="w-5 h-5" />
                 </button>
               </div>
@@ -300,7 +300,7 @@ const ProductDetailPage = ({
                     return (
                       <button key={i} onClick={() => setSelectedVariation(variation)}
                         className={`relative p-2.5 rounded-xl text-center transition-all duration-300 ${
-                          isSelected ? 'bg-[#8B5E83] text-white shadow-md ring-2 ring-[#8B5E83]/30' : 'bg-white text-gray-700 border border-gray-200 hover:border-[#8B5E83]/30'
+                          isSelected ? 'bg-[#e84393] text-white shadow-md ring-2 ring-[#e84393]/30' : 'bg-white text-gray-700 border border-gray-200 hover:border-[#e84393]/30'
                         }`}>
                         {variation.label && (
                           <span className={`absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] px-1.5 py-0.5 rounded-full whitespace-nowrap ${
@@ -308,7 +308,7 @@ const ProductDetailPage = ({
                           }`}>{variation.label}</span>
                         )}
                         <div className={`font-bold text-sm ${variation.label ? 'mt-1' : ''}`}>{variation.pieces}pcs</div>
-                        <div className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-[#8B5E83]'}`}>₦{(variation.price / 1000).toFixed(0)}k</div>
+                        <div className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-[#e84393]'}`}>₦{(variation.price / 1000).toFixed(0)}k</div>
                         <div className={`text-[9px] ${isSelected ? 'text-white/70' : 'text-gray-500'}`}>₦{pricePerPc.toLocaleString()}/pc</div>
                         {savings > 0 && <div className={`text-[9px] font-semibold ${isSelected ? 'text-amber-200' : 'text-emerald-600'}`}>Save ₦{(savings / 1000).toFixed(0)}k</div>}
                       </button>
@@ -321,12 +321,12 @@ const ProductDetailPage = ({
             {/* Sizes */}
             {selectedProduct.sizes?.length > 0 && (
               <div className="space-y-2">
-                <h3 className="font-semibold text-gray-800 text-sm">Size {selectedSize && <span className="text-[#8B5E83] font-normal">— {selectedSize}</span>}</h3>
+                <h3 className="font-semibold text-gray-800 text-sm">Size {selectedSize && <span className="text-[#e84393] font-normal">— {selectedSize}</span>}</h3>
                 <div className="flex gap-2 flex-wrap">
                   {selectedProduct.sizes.map((size, i) => (
                     <button key={i} onClick={() => setSelectedSize(selectedSize === size ? null : size)}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                        selectedSize === size ? 'bg-[#8B5E83] text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:border-[#8B5E83]/30'
+                        selectedSize === size ? 'bg-[#e84393] text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:border-[#e84393]/30'
                       }`}>{size}</button>
                   ))}
                 </div>
@@ -336,7 +336,7 @@ const ProductDetailPage = ({
             {/* Colors */}
             {hasColors && (
               <div className="space-y-2">
-                <h3 className="font-semibold text-gray-800 text-sm">Color {selectedColor && <span className="text-[#8B5E83] font-normal">— {selectedColor}</span>}</h3>
+                <h3 className="font-semibold text-gray-800 text-sm">Color {selectedColor && <span className="text-[#e84393] font-normal">— {selectedColor}</span>}</h3>
                 <div className="flex gap-2 flex-wrap">
                   {colors.map((color, i) => {
                     const isSelected = selectedColor === color.name;
@@ -345,7 +345,7 @@ const ProductDetailPage = ({
                       <button key={i} onClick={() => isInStock && setSelectedColor(selectedColor === color.name ? null : color.name)}
                         disabled={!isInStock}
                         className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                          isSelected ? 'bg-[#8B5E83] text-white shadow-sm' : isInStock ? 'bg-white text-gray-700 border border-gray-200 hover:border-[#8B5E83]/30' : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
+                          isSelected ? 'bg-[#e84393] text-white shadow-sm' : isInStock ? 'bg-white text-gray-700 border border-gray-200 hover:border-[#e84393]/30' : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
                         }`}>
                         {color.name}
                         {!isInStock && <span className="ml-1 text-xs">(Sold out)</span>}
@@ -367,7 +367,7 @@ const ProductDetailPage = ({
                 { icon: <ShoppingBag className="w-4 h-4" />, label: "Secure Checkout" },
               ].map((badge, i) => (
                 <div key={i} className="flex flex-col items-center text-center gap-1.5">
-                  <div className="w-9 h-9 rounded-full bg-[#8B5E83]/8 flex items-center justify-center text-[#8B5E83]">{badge.icon}</div>
+                  <div className="w-9 h-9 rounded-full bg-[#e84393]/8 flex items-center justify-center text-[#e84393]">{badge.icon}</div>
                   <p className="text-[10px] text-gray-500 font-medium">{badge.label}</p>
                 </div>
               ))}
@@ -401,7 +401,7 @@ const ProductDetailPage = ({
                     <ul className="text-gray-600 text-sm space-y-2">
                       {["Delivery days: Tuesday & Saturday", "Within Abeokuta: 24-48 hours", "Nationwide: 3-7 business days", "Tracking sent via email"].map((item, i) => (
                         <li key={i} className="flex items-center gap-2">
-                          <span className="w-1 h-1 bg-[#8B5E83] rounded-full"></span>{item}
+                          <span className="w-1 h-1 bg-[#e84393] rounded-full"></span>{item}
                         </li>
                       ))}
                     </ul>
@@ -424,7 +424,7 @@ const ProductDetailPage = ({
                           <div key={i} className="bg-white p-4 rounded-xl">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-[#8B5E83] rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                <div className="w-8 h-8 bg-[#e84393] rounded-full flex items-center justify-center text-white font-bold text-sm">
                                   {rev.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
@@ -449,9 +449,9 @@ const ProductDetailPage = ({
                       <form onSubmit={handleReviewSubmit} className="space-y-3">
                         <input type="text" placeholder="Your name" value={reviewForm.name}
                           onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
-                          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:border-[#8B5E83] focus:ring-1 focus:ring-[#8B5E83]/10 outline-none" />
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:border-[#e84393] focus:ring-1 focus:ring-[#e84393]/10 outline-none" />
                         <select value={reviewForm.rating} onChange={(e) => setReviewForm({ ...reviewForm, rating: Number(e.target.value) })}
-                          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:border-[#8B5E83] outline-none">
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:border-[#e84393] outline-none">
                           <option value={5}>5 Stars — Excellent</option>
                           <option value={4}>4 Stars — Very Good</option>
                           <option value={3}>3 Stars — Good</option>
@@ -460,9 +460,9 @@ const ProductDetailPage = ({
                         </select>
                         <textarea placeholder="Your review..." rows={3} value={reviewForm.comment}
                           onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
-                          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:border-[#8B5E83] outline-none resize-none" />
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:border-[#e84393] outline-none resize-none" />
                         <button type="submit" disabled={loadingReview}
-                          className="w-full bg-[#8B5E83] text-white py-2.5 rounded-lg text-sm font-medium hover:bg-[#7a5073] transition-colors disabled:opacity-50">
+                          className="w-full bg-[#e84393] text-white py-2.5 rounded-lg text-sm font-medium hover:bg-[#d63384] transition-colors disabled:opacity-50">
                           {loadingReview ? 'Submitting...' : 'Submit Review'}
                         </button>
                       </form>
@@ -504,7 +504,7 @@ const ProductDetailPage = ({
               className={`flex-1 py-4 rounded-xl font-bold text-center shadow-md active:scale-[0.98] transition-all ${
                 hasColors && selectedColor && !isSelectedColorInStock()
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-[#8B5E83] text-white hover:bg-[#7a5073] shadow-[#8B5E83]/20 hover:shadow-lg'
+                  : 'bg-gradient-to-r from-[#e84393] to-[#a855f7] text-white hover:from-[#d63384] hover:to-[#9333ea] shadow-[#e84393]/20 hover:shadow-lg'
               }`}>
               {addedToCart ? (
                 <span className="flex items-center justify-center gap-2">

@@ -33,10 +33,10 @@ const BlogPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fffbf7]">
+    <div className="min-h-screen bg-[#fff7f9]">
       {/* Header */}
       <div className="pt-12 pb-10 text-center px-4">
-        <span className="inline-block text-[#8B5E83] font-medium text-sm tracking-[0.2em] uppercase mb-3">
+        <span className="inline-block text-[#e84393] font-medium text-sm tracking-[0.2em] uppercase mb-3">
           Inspiration
         </span>
         <h1 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">
@@ -55,20 +55,20 @@ const BlogPage = () => {
               <div className="relative h-72 md:h-auto overflow-hidden">
                 <img src={featuredArticle.image} alt={featuredArticle.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute top-4 left-4 bg-[#8B5E83] text-white px-3 py-1.5 rounded-full text-xs font-medium">
+                <div className="absolute top-4 left-4 bg-[#e84393] text-white px-3 py-1.5 rounded-full text-xs font-medium">
                   Featured
                 </div>
               </div>
               <div className="p-8 md:p-10 flex flex-col justify-center">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="px-3 py-1 bg-[#8B5E83]/8 text-[#8B5E83] rounded-full text-xs font-medium">{featuredArticle.category}</span>
+                  <span className="px-3 py-1 bg-[#e84393]/8 text-[#e84393] rounded-full text-xs font-medium">{featuredArticle.category}</span>
                   <span className="text-gray-400 text-xs flex items-center gap-1"><Clock className="w-3 h-3" /> {featuredArticle.readTime}</span>
                 </div>
                 <h2 className="text-2xl md:text-3xl font-serif text-gray-900 mb-4 leading-tight">{featuredArticle.title}</h2>
                 <p className="text-gray-500 mb-6 leading-relaxed">{featuredArticle.excerpt}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-400">{featuredArticle.date}</span>
-                  <button className="group/btn flex items-center gap-2 bg-[#8B5E83] text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-[#7a5073] transition-colors">
+                  <button className="group/btn flex items-center gap-2 bg-[#e84393] text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-[#d63384] transition-colors">
                     Read Article <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                   </button>
                 </div>
@@ -83,8 +83,8 @@ const BlogPage = () => {
             <button key={category} onClick={() => setSelectedCategory(category)}
               className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
                 selectedCategory === category
-                  ? 'bg-[#8B5E83] text-white shadow-md'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-[#8B5E83]/30'
+                  ? 'bg-[#e84393] text-white shadow-md'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:border-[#e84393]/30'
               }`}>
               {category}
             </button>
@@ -98,7 +98,7 @@ const BlogPage = () => {
               <div className="relative h-48 overflow-hidden">
                 <img src={article.image} alt={article.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[11px] font-medium text-[#8B5E83]">
+                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[11px] font-medium text-[#e84393]">
                   {article.category}
                 </div>
               </div>
@@ -107,22 +107,22 @@ const BlogPage = () => {
                   <span>{article.date}</span>
                   <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {article.readTime}</span>
                 </div>
-                <h3 className="text-lg font-serif text-gray-900 mb-2 group-hover:text-[#8B5E83] transition-colors line-clamp-2">{article.title}</h3>
+                <h3 className="text-lg font-serif text-gray-900 mb-2 group-hover:text-[#e84393] transition-colors line-clamp-2">{article.title}</h3>
                 <p className="text-gray-500 text-sm mb-4 line-clamp-2 leading-relaxed">{article.excerpt}</p>
                 {article.products && (
                   <div className="mb-4 pb-4 border-b border-gray-50">
                     <div className="flex items-center gap-1.5 mb-2">
-                      <ShoppingBag className="w-3 h-3 text-[#8B5E83]" />
+                      <ShoppingBag className="w-3 h-3 text-[#e84393]" />
                       <span className="text-[10px] font-medium text-gray-500">Featured Products</span>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {article.products.map((product, idx) => (
-                        <span key={idx} className="text-[10px] bg-[#8B5E83]/5 text-[#8B5E83] px-2 py-0.5 rounded-full">{product}</span>
+                        <span key={idx} className="text-[10px] bg-[#e84393]/5 text-[#e84393] px-2 py-0.5 rounded-full">{product}</span>
                       ))}
                     </div>
                   </div>
                 )}
-                <button className="flex items-center gap-1.5 text-[#8B5E83] font-medium text-sm hover:text-[#7a5073] transition-colors group/link">
+                <button className="flex items-center gap-1.5 text-[#e84393] font-medium text-sm hover:text-[#d63384] transition-colors group/link">
                   Read More <ExternalLink className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" />
                 </button>
               </div>
@@ -134,14 +134,14 @@ const BlogPage = () => {
         <div className="mb-16 bg-white rounded-2xl p-8 md:p-10 border border-gray-100 shadow-card">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-3">
-              <Instagram className="w-6 h-6 text-[#8B5E83]" />
+              <Instagram className="w-6 h-6 text-[#e84393]" />
               <h2 className="text-2xl md:text-3xl font-serif text-gray-900">Follow Our Journey</h2>
             </div>
             <p className="text-gray-500">Daily beauty tips, self-care inspiration, and behind-the-scenes content</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
             <a href="https://instagram.com/anjola_aesthetics_ng02" target="_blank" rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 bg-[#8B5E83] text-white px-6 py-3 rounded-full font-medium hover:bg-[#7a5073] transition-colors">
+              className="flex items-center justify-center gap-2 bg-[#e84393] text-white px-6 py-3 rounded-full font-medium hover:bg-[#d63384] transition-colors">
               <Instagram className="w-5 h-5" /> Follow on Instagram
             </a>
             <a href="https://www.tiktok.com/@anjola_aesthetics_ng02" target="_blank" rel="noopener noreferrer"
@@ -157,7 +157,7 @@ const BlogPage = () => {
             ].map((img, idx) => (
               <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group cursor-pointer">
                 <img src={img} alt={`Post ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-[#8B5E83]/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <div className="absolute inset-0 bg-[#e84393]/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                   <Instagram className="w-7 h-7 text-white" />
                 </div>
               </div>
@@ -166,7 +166,7 @@ const BlogPage = () => {
         </div>
 
         {/* Newsletter */}
-        <div className="bg-gradient-to-br from-[#8B5E83] to-[#6b4560] rounded-2xl overflow-hidden shadow-luxury-lg">
+        <div className="bg-gradient-to-br from-[#e84393] via-[#a855f7] to-[#e84393] rounded-2xl overflow-hidden shadow-luxury-lg">
           <div className="grid md:grid-cols-2 gap-0">
             <div className="p-8 md:p-10 flex flex-col justify-center">
               <Mail className="w-10 h-10 text-white/60 mb-4" />
@@ -180,7 +180,7 @@ const BlogPage = () => {
                   className="w-full px-4 py-3.5 rounded-xl text-gray-800 bg-white focus:outline-none focus:ring-4 focus:ring-white/20 text-sm"
                   style={{ fontSize: '16px' }} />
                 <button type="submit"
-                  className="w-full bg-white text-[#8B5E83] py-3.5 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                  className="w-full bg-white text-[#e84393] py-3.5 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
                   Subscribe Now
                 </button>
               </form>

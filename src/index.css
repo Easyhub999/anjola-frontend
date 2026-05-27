@@ -19,7 +19,7 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #fffbf7;
+  background: #fff7f9;
   min-height: 100vh;
   color: #1f2937;
   overflow-x: hidden;
@@ -48,16 +48,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-track {
-  background: #fef7f0;
+  background: #fff0f6;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #d4a0b9 0%, #b8829e 100%);
+  background: linear-gradient(180deg, #f472b6 0%, #a855f7 100%);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #c084a0 0%, #9b6b83 100%);
+  background: linear-gradient(180deg, #ec4899 0%, #9333ea 100%);
 }
 
 /* ============================================
@@ -297,7 +297,9 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Text gradient utility */
 .text-gradient {
-  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  background: linear-gradient(135deg, #e84393 0%, #a855f7 50%, #e84393 100%);
+  background-size: 200% auto;
+  animation: text-shimmer 3s ease-in-out infinite;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -318,7 +320,7 @@ h1, h2, h3, h4, h5, h6 {
     radial-gradient(at 0% 50%, rgba(253, 235, 215, 0.3) 0px, transparent 50%),
     radial-gradient(at 80% 50%, rgba(251, 207, 232, 0.2) 0px, transparent 50%),
     radial-gradient(at 0% 100%, rgba(233, 213, 255, 0.2) 0px, transparent 50%),
-    #fffbf7;
+    #fff7f9;
 }
 
 /* Glass card */

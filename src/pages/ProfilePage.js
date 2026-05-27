@@ -41,13 +41,13 @@ const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, 
   };
 
   return (
-    <div className="min-h-screen bg-[#fffbf7] pt-8 pb-12">
+    <div className="min-h-screen bg-[#fff7f9] pt-8 pb-12">
       <div className="max-w-3xl mx-auto px-4">
         {/* Profile Header */}
         <div className="bg-white rounded-2xl shadow-card p-6 mb-6 border border-gray-100">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#8B5E83] to-[#b8829e] rounded-full flex items-center justify-center shadow-md">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#e84393] to-[#f472b6] rounded-full flex items-center justify-center shadow-md">
                 <span className="text-white text-2xl font-serif font-bold">
                   {user?.name?.charAt(0).toUpperCase() || 'U'}
                 </span>
@@ -56,7 +56,7 @@ const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, 
                 <h1 className="text-xl font-serif font-bold text-gray-900">{user?.name}</h1>
                 <p className="text-gray-500 text-sm">{user?.email}</p>
                 {user?.role === 'admin' && (
-                  <span className="inline-block mt-1 px-2.5 py-0.5 bg-[#8B5E83]/10 text-[#8B5E83] text-xs font-semibold rounded-full">Admin</span>
+                  <span className="inline-block mt-1 px-2.5 py-0.5 bg-[#e84393]/10 text-[#e84393] text-xs font-semibold rounded-full">Admin</span>
                 )}
               </div>
             </div>
@@ -75,7 +75,7 @@ const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, 
           ].map(({ id, label, icon: Icon }) => (
             <button key={id} onClick={() => setActiveTab(id)}
               className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-medium transition-all ${
-                activeTab === id ? 'bg-[#8B5E83] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                activeTab === id ? 'bg-[#e84393] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
               }`}>
               <Icon className="w-4 h-4" /> {label}
             </button>
@@ -87,7 +87,7 @@ const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, 
           <div className="space-y-4">
             {loadingOrders ? (
               <div className="bg-white rounded-2xl p-8 text-center border border-gray-100">
-                <div className="w-10 h-10 border-3 border-gray-200 border-t-[#8B5E83] rounded-full animate-spin mx-auto mb-3"></div>
+                <div className="w-10 h-10 border-3 border-gray-200 border-t-[#e84393] rounded-full animate-spin mx-auto mb-3"></div>
                 <p className="text-gray-400 text-sm">Loading orders...</p>
               </div>
             ) : orders.length === 0 ? (
@@ -98,7 +98,7 @@ const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, 
                 <h3 className="font-serif text-lg text-gray-900 mb-1">No orders yet</h3>
                 <p className="text-gray-400 text-sm mb-4">Start shopping to see your order history!</p>
                 <button onClick={() => setCurrentPage('shop')}
-                  className="bg-[#8B5E83] text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-[#7a5073] transition-colors">
+                  className="bg-[#e84393] text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-[#d63384] transition-colors">
                   Browse Products
                 </button>
               </div>
@@ -122,10 +122,10 @@ const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, 
                       {['Placed', 'Processing', 'Shipped', 'Delivered'].map((label, i) => (
                         <div key={label} className="flex-1 flex flex-col items-center">
                           <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold mb-1 ${
-                            i < step ? 'bg-[#8B5E83] text-white' : 'bg-gray-100 text-gray-400'
+                            i < step ? 'bg-[#e84393] text-white' : 'bg-gray-100 text-gray-400'
                           }`}>{i + 1}</div>
-                          <p className={`text-[9px] ${i < step ? 'text-[#8B5E83] font-medium' : 'text-gray-400'}`}>{label}</p>
-                          {i < 3 && <div className={`h-0.5 w-full mt-1 ${i < step - 1 ? 'bg-[#8B5E83]' : 'bg-gray-100'}`} />}
+                          <p className={`text-[9px] ${i < step ? 'text-[#e84393] font-medium' : 'text-gray-400'}`}>{label}</p>
+                          {i < 3 && <div className={`h-0.5 w-full mt-1 ${i < step - 1 ? 'bg-[#e84393]' : 'bg-gray-100'}`} />}
                         </div>
                       ))}
                     </div>
@@ -152,7 +152,7 @@ const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, 
                 <h3 className="font-serif text-lg text-gray-900 mb-1">Your wishlist is empty</h3>
                 <p className="text-gray-400 text-sm mb-4">Save items you love for later!</p>
                 <button onClick={() => setCurrentPage('shop')}
-                  className="bg-[#8B5E83] text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-[#7a5073] transition-colors">
+                  className="bg-[#e84393] text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-[#d63384] transition-colors">
                   Browse Products
                 </button>
               </div>
@@ -167,7 +167,7 @@ const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, 
                     </div>
                     <div className="p-3">
                       <h3 className="text-sm font-medium text-gray-900 line-clamp-1 mb-1">{product.name}</h3>
-                      <p className="text-sm font-bold text-[#8B5E83] mb-2">₦{product.price.toLocaleString()}</p>
+                      <p className="text-sm font-bold text-[#e84393] mb-2">₦{product.price.toLocaleString()}</p>
                       <button onClick={() => toggleWishlist(product)}
                         className="w-full text-xs text-red-500 hover:bg-red-50 py-2 rounded-lg transition-colors font-medium flex items-center justify-center gap-1">
                         <X className="w-3 h-3" /> Remove

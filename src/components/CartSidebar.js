@@ -18,7 +18,7 @@ const CartSidebar = ({
           {/* HEADER */}
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-serif text-gray-900 flex items-center gap-2.5">
-              <ShoppingBag className="w-5 h-5 text-[#8B5E83]" />
+              <ShoppingBag className="w-5 h-5 text-[#e84393]" />
               Your Cart
               {cart.length > 0 && (
                 <span className="text-sm font-sans text-gray-400 font-normal">({cart.reduce((sum, item) => sum + (item.quantity || 1), 0)})</span>
@@ -53,7 +53,7 @@ const CartSidebar = ({
                     : `${item._id}-${item.selectedSize || 'ns'}-${item.selectedColor || 'nc'}-${index}`;
 
                   return (
-                    <div key={cartKey} className="flex gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100 hover:border-[#8B5E83]/10 transition-colors">
+                    <div key={cartKey} className="flex gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100 hover:border-[#e84393]/10 transition-colors">
                       <img src={image} alt={item.name} className="w-20 h-20 object-cover rounded-lg" />
 
                       <div className="flex-1 min-w-0">
@@ -73,7 +73,7 @@ const CartSidebar = ({
                           </p>
                         )}
 
-                        <p className="text-[#8B5E83] font-bold text-base mb-2">
+                        <p className="text-[#e84393] font-bold text-base mb-2">
                           ₦{((item.price || 0) * itemQty).toLocaleString()}
                           {itemQty > 1 && !hasPieces && (
                             <span className="text-xs text-gray-400 font-normal ml-1">each ₦{(item.price || 0).toLocaleString()}</span>
@@ -90,7 +90,7 @@ const CartSidebar = ({
                           <span className="min-w-[1.5rem] text-center font-bold text-gray-900 text-sm">{itemQty}</span>
                           <button onClick={() => updateQuantity(item._id, 1)} disabled={isOutOfStock || itemQty >= productStock}
                             className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all text-xs
-                              ${isOutOfStock || itemQty >= productStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#8B5E83] text-white hover:bg-[#7a5073]'}`}>
+                              ${isOutOfStock || itemQty >= productStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#e84393] text-white hover:bg-[#d63384]'}`}>
                             <Plus className="w-3 h-3" strokeWidth={3} />
                           </button>
                           <button onClick={() => removeFromCart(item._id)}
@@ -117,8 +117,8 @@ const CartSidebar = ({
 
               <button
                 onClick={() => { setCurrentPage("checkout"); setShowCart(false); }}
-                className="w-full bg-[#8B5E83] text-white py-4 rounded-xl font-semibold text-base
-                  hover:bg-[#7a5073] shadow-md hover:shadow-lg transition-all duration-300
+                className="w-full bg-gradient-to-r from-[#e84393] to-[#a855f7] text-white py-4 rounded-xl font-semibold text-base
+                  hover:from-[#d63384] hover:to-[#9333ea] shadow-md hover:shadow-lg transition-all duration-300
                   flex items-center justify-center gap-2 magnetic-btn">
                 <ShoppingBag className="w-5 h-5" />
                 Checkout

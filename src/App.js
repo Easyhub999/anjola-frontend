@@ -335,7 +335,7 @@ function AppContent() {
   }
 
   return (
-    <div className="App bg-[#fffbf7] min-h-screen">
+    <div className="App bg-[#fff7f9] min-h-screen">
       <Navigation
         currentPage={currentPage} setCurrentPage={setCurrentPage}
         cart={cart} showCart={showCart} setShowCart={setShowCart}

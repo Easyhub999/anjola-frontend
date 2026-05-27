@@ -73,7 +73,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
     .slice(0, 4);
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-[#fffbf7]">
+    <div ref={containerRef} className="min-h-screen bg-[#fff7f9]">
 
       {/* SUCCESS MODAL */}
       {showSuccessModal && (
@@ -98,7 +98,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
             </p>
             <div className="space-y-3 mb-8">
               <div className="flex items-start gap-3 bg-rose-50 p-4 rounded-xl">
-                <Package className="w-5 h-5 text-[#8B5E83] mt-0.5" />
+                <Package className="w-5 h-5 text-[#e84393] mt-0.5" />
                 <div>
                   <p className="font-semibold text-gray-900 text-sm">Order Confirmed</p>
                   <p className="text-xs text-gray-500">Check your email for details</p>
@@ -114,7 +114,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
             </div>
             <button
               onClick={() => setShowSuccessModal(false)}
-              className="w-full bg-[#8B5E83] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#7a5073] transition-colors duration-300 magnetic-btn"
+              className="w-full bg-[#e84393] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#d63384] transition-colors duration-300 magnetic-btn"
             >
               Continue Shopping
             </button>
@@ -135,7 +135,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
         </div>
 
         {/* Elegant overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#fffbf7]/85 via-[#fffbf7]/60 to-[#fffbf7]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#fff7f9]/85 via-[#fff7f9]/60 to-[#fff7f9]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(139,94,131,0.08)_100%)]" />
 
         {/* Floating accent shapes */}
@@ -148,7 +148,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           {/* Subtle pre-title */}
           <div className="animate-fadeIn mb-6" style={{ animationDelay: '0.2s' }}>
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full text-[#8B5E83] text-sm font-medium tracking-wide border border-[#8B5E83]/10">
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full text-[#e84393] text-sm font-medium tracking-wide border border-[#e84393]/10">
               <Sparkles className="w-3.5 h-3.5" />
               Luxury Self-Care Essentials
             </span>
@@ -171,8 +171,8 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fadeInUp" style={{ animationDelay: '0.9s' }}>
             <button
               onClick={() => setCurrentPage("shop")}
-              className="group bg-[#8B5E83] text-white px-10 py-4 rounded-full text-lg font-medium
-                hover:bg-[#7a5073] shadow-lg hover:shadow-xl transition-all duration-400 magnetic-btn
+              className="group bg-gradient-to-r from-[#e84393] to-[#a855f7] text-white px-10 py-4 rounded-full text-lg font-medium
+                hover:from-[#d63384] hover:to-[#9333ea] shadow-lg hover:shadow-xl transition-all duration-400 magnetic-btn
                 flex items-center gap-3"
             >
               Shop Collection
@@ -183,8 +183,8 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
                 const el = document.getElementById('brand-story');
                 el?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="text-gray-600 hover:text-[#8B5E83] px-8 py-4 rounded-full text-lg font-medium
-                border border-gray-200 hover:border-[#8B5E83]/30 transition-all duration-300"
+              className="text-gray-600 hover:text-[#e84393] px-8 py-4 rounded-full text-lg font-medium
+                border border-gray-200 hover:border-[#e84393]/30 transition-all duration-300"
             >
               Our Story
             </button>
@@ -210,7 +210,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
               { icon: <Sparkles className="w-5 h-5" />, title: "Premium Quality", desc: "Handpicked products" },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-3 justify-center">
-                <div className="w-10 h-10 rounded-full bg-[#8B5E83]/8 flex items-center justify-center text-[#8B5E83] flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-[#e84393]/8 flex items-center justify-center text-[#e84393] flex-shrink-0">
                   {item.icon}
                 </div>
                 <div>
@@ -226,7 +226,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
       {/* ================= FEATURED PRODUCTS ================= */}
       <div className="max-w-7xl mx-auto px-6 py-24">
         <div className="scroll-animate text-center mb-16">
-          <span className="inline-block text-[#8B5E83] font-medium text-sm tracking-[0.2em] uppercase mb-3">
+          <span className="inline-block text-[#e84393] font-medium text-sm tracking-[0.2em] uppercase mb-3">
             Handpicked For You
           </span>
           <h2 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">
@@ -262,7 +262,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                     {/* Featured badge */}
-                    <div className="absolute top-4 left-4 bg-[#8B5E83] text-white px-3 py-1.5 rounded-full text-xs font-medium tracking-wide flex items-center gap-1.5">
+                    <div className="absolute top-4 left-4 bg-[#e84393] text-white px-3 py-1.5 rounded-full text-xs font-medium tracking-wide flex items-center gap-1.5">
                       <Star className="w-3 h-3 fill-current" />
                       Featured
                     </div>
@@ -274,12 +274,12 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
                           <span className="text-xs text-gray-400 line-through">
                             ₦{product.price.toLocaleString()}
                           </span>
-                          <span className="text-[#8B5E83] font-bold text-lg">
+                          <span className="text-[#e84393] font-bold text-lg">
                             ₦{product.salesPrice.toLocaleString()}
                           </span>
                         </div>
                       ) : (
-                        <span className="text-[#8B5E83] font-bold text-lg">
+                        <span className="text-[#e84393] font-bold text-lg">
                           ₦{product.price.toLocaleString()}
                         </span>
                       )}
@@ -294,7 +294,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
                   </div>
 
                   <div className="p-6">
-                    <h3 className="text-xl font-serif text-gray-900 mb-2 group-hover:text-[#8B5E83] transition-colors duration-300">
+                    <h3 className="text-xl font-serif text-gray-900 mb-2 group-hover:text-[#e84393] transition-colors duration-300">
                       {product.name}
                     </h3>
                     <p className="text-gray-500 text-sm mb-6 line-clamp-2 leading-relaxed">
@@ -304,8 +304,8 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
                     {qty === 0 ? (
                       <button
                         onClick={(e) => { e.stopPropagation(); addToCart(product); }}
-                        className="w-full bg-gray-900 text-white py-3 rounded-xl font-medium hover:bg-[#8B5E83]
-                          transition-colors duration-300 flex items-center justify-center gap-2 magnetic-btn"
+                        className="w-full bg-gradient-to-r from-[#e84393] to-[#a855f7] text-white py-3 rounded-xl font-medium
+                          hover:from-[#d63384] hover:to-[#9333ea] transition-all duration-300 flex items-center justify-center gap-2 magnetic-btn shadow-md hover:shadow-lg"
                       >
                         <ShoppingBag className="w-4 h-4" />
                         Add to Cart
@@ -313,7 +313,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
                     ) : (
                       <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
                         <span className="text-sm text-gray-600 font-medium flex items-center gap-2">
-                          <Heart className="w-4 h-4 text-[#8B5E83] fill-current" />
+                          <Heart className="w-4 h-4 text-[#e84393] fill-current" />
                           In cart
                         </span>
                         <div className="flex items-center gap-3">
@@ -321,10 +321,10 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
                             onClick={(e) => { e.stopPropagation(); updateQuantity(product._id, -1); }}
                             className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm hover:shadow-md transition-all text-gray-700"
                           >-</button>
-                          <span className="min-w-[1.5rem] text-center font-bold text-[#8B5E83]">{qty}</span>
+                          <span className="min-w-[1.5rem] text-center font-bold text-[#e84393]">{qty}</span>
                           <button
                             onClick={(e) => { e.stopPropagation(); addToCart(product); }}
-                            className="w-8 h-8 rounded-full bg-[#8B5E83] text-white flex items-center justify-center shadow-sm hover:shadow-md hover:bg-[#7a5073] transition-all"
+                            className="w-8 h-8 rounded-full bg-[#e84393] text-white flex items-center justify-center shadow-sm hover:shadow-md hover:bg-[#d63384] transition-all"
                           >+</button>
                         </div>
                       </div>
@@ -340,7 +340,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
         <div className="scroll-animate text-center mt-14">
           <button
             onClick={() => setCurrentPage("shop")}
-            className="group inline-flex items-center gap-2 text-[#8B5E83] hover:text-[#7a5073] font-medium text-lg border-b-2 border-[#8B5E83]/30 hover:border-[#8B5E83] pb-1 transition-all duration-300"
+            className="group inline-flex items-center gap-2 text-[#e84393] hover:text-[#d63384] font-medium text-lg border-b-2 border-[#e84393]/30 hover:border-[#e84393] pb-1 transition-all duration-300"
           >
             View All Products
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
@@ -353,7 +353,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
         <div className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-6">
             <div className="scroll-animate text-center mb-16">
-              <span className="inline-block text-[#8B5E83] font-medium text-sm tracking-[0.2em] uppercase mb-3">
+              <span className="inline-block text-[#e84393] font-medium text-sm tracking-[0.2em] uppercase mb-3">
                 Browse Collections
               </span>
               <h2 className="text-4xl md:text-5xl font-serif text-gray-900">
@@ -389,7 +389,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
       )}
 
       {/* ================= BRAND STORY ================= */}
-      <div id="brand-story" className="py-24 bg-[#fffbf7]">
+      <div id="brand-story" className="py-24 bg-[#fff7f9]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             {/* Left — Image collage */}
@@ -405,7 +405,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
                 {/* Floating accent card */}
                 <div className="absolute -bottom-6 -right-6 bg-white rounded-2xl shadow-luxury p-5 max-w-[200px]">
                   <div className="flex items-center gap-2 mb-2">
-                    <Heart className="w-4 h-4 text-[#8B5E83] fill-current" />
+                    <Heart className="w-4 h-4 text-[#e84393] fill-current" />
                     <span className="text-sm font-semibold text-gray-900">Trusted</span>
                   </div>
                   <p className="text-xs text-gray-500 leading-relaxed">
@@ -417,13 +417,13 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
 
             {/* Right — Story */}
             <div className="scroll-animate-right">
-              <span className="inline-block text-[#8B5E83] font-medium text-sm tracking-[0.2em] uppercase mb-4">
+              <span className="inline-block text-[#e84393] font-medium text-sm tracking-[0.2em] uppercase mb-4">
                 Our Story
               </span>
               <h2 className="text-4xl md:text-5xl font-serif text-gray-900 mb-6 leading-tight">
                 Beauty That Speaks
                 <br />
-                <span className="italic text-[#8B5E83]">to Your Soul</span>
+                <span className="italic text-[#e84393]">to Your Soul</span>
               </h2>
               <div className="space-y-4 text-gray-600 leading-relaxed mb-8">
                 <p>
@@ -453,8 +453,8 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
 
               <button
                 onClick={() => setCurrentPage("shop")}
-                className="group inline-flex items-center gap-3 bg-[#8B5E83] text-white px-8 py-3.5 rounded-full font-medium
-                  hover:bg-[#7a5073] shadow-md hover:shadow-lg transition-all duration-300 magnetic-btn"
+                className="group inline-flex items-center gap-3 bg-gradient-to-r from-[#e84393] to-[#a855f7] text-white px-8 py-3.5 rounded-full font-medium
+                  hover:from-[#d63384] hover:to-[#9333ea] shadow-md hover:shadow-lg transition-all duration-300 magnetic-btn"
               >
                 Explore Collection
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
@@ -468,7 +468,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
       <div className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="scroll-animate text-center mb-16">
-            <span className="inline-block text-[#8B5E83] font-medium text-sm tracking-[0.2em] uppercase mb-3">
+            <span className="inline-block text-[#e84393] font-medium text-sm tracking-[0.2em] uppercase mb-3">
               The Anjola Difference
             </span>
             <h2 className="text-4xl md:text-5xl font-serif text-gray-900">
@@ -482,27 +482,27 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
                 img: "/quality.png",
                 title: "Premium Quality",
                 desc: "Carefully selected items crafted for beauty, durability and long-lasting value.",
-                icon: <Sparkles className="w-5 h-5 text-[#8B5E83]" />
+                icon: <Sparkles className="w-5 h-5 text-[#e84393]" />
               },
               {
                 img: "/fast.png",
                 title: "Fast Delivery",
                 desc: "Swift nationwide delivery — beautifully packaged and right on time.",
-                icon: <Truck className="w-5 h-5 text-[#8B5E83]" />
+                icon: <Truck className="w-5 h-5 text-[#e84393]" />
               },
               {
                 img: "/trust.png",
                 title: "Trusted by Women",
                 desc: "Loved for elegance, reliability and consistent customer satisfaction.",
-                icon: <Heart className="w-5 h-5 text-[#8B5E83] fill-current" />
+                icon: <Heart className="w-5 h-5 text-[#e84393] fill-current" />
               },
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="bg-[#fffbf7] rounded-2xl p-8 text-center hover:-translate-y-2 hover:shadow-luxury transition-all duration-500 border border-gray-100 group"
+                className="bg-[#fff7f9] rounded-2xl p-8 text-center hover:-translate-y-2 hover:shadow-luxury transition-all duration-500 border border-gray-100 group"
               >
                 <div className="relative inline-block mb-6">
-                  <div className="absolute inset-0 bg-[#8B5E83]/10 rounded-full blur-xl scale-125 group-hover:scale-150 transition-transform duration-500"></div>
+                  <div className="absolute inset-0 bg-[#e84393]/10 rounded-full blur-xl scale-125 group-hover:scale-150 transition-transform duration-500"></div>
                   <img src={item.img} alt={item.title} className="relative w-20 h-20 mx-auto" />
                 </div>
 
@@ -521,10 +521,10 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
       </div>
 
       {/* ================= TESTIMONIALS ================= */}
-      <div className="py-24 bg-[#fffbf7]">
+      <div className="py-24 bg-[#fff7f9]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="scroll-animate text-center mb-16">
-            <span className="inline-block text-[#8B5E83] font-medium text-sm tracking-[0.2em] uppercase mb-3">
+            <span className="inline-block text-[#e84393] font-medium text-sm tracking-[0.2em] uppercase mb-3">
               Customer Love
             </span>
             <h2 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">
@@ -556,14 +556,14 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
                   hover:-translate-y-2 transition-all duration-500 border border-gray-100"
               >
                 {/* Quote mark */}
-                <div className="text-5xl font-serif text-[#8B5E83]/15 leading-none mb-4">"</div>
+                <div className="text-5xl font-serif text-[#e84393]/15 leading-none mb-4">"</div>
 
                 <p className="text-gray-600 text-base leading-relaxed mb-6 italic">
                   {t.text}
                 </p>
 
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#8B5E83] to-[#b8829e] flex items-center justify-center text-white font-bold text-sm">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#e84393] to-[#f472b6] flex items-center justify-center text-white font-bold text-sm">
                     {t.name.charAt(0)}
                   </div>
                   <div>
@@ -584,7 +584,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
       {/* ================= NEWSLETTER ================= */}
       <div className="py-24 bg-white">
         <div className="max-w-4xl mx-auto px-6">
-          <div className="scroll-animate-scale relative bg-gradient-to-br from-[#8B5E83] to-[#6b4560] rounded-3xl p-10 md:p-16 text-center overflow-hidden">
+          <div className="scroll-animate-scale relative bg-gradient-to-br from-[#e84393] via-[#a855f7] to-[#e84393] rounded-3xl p-10 md:p-16 text-center overflow-hidden">
             {/* Decorative circles */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/3 -translate-x-1/4" />
@@ -607,7 +607,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
                     focus:outline-none focus:ring-4 focus:ring-white/20 transition-all placeholder-gray-400"
                   style={{ fontSize: '16px' }}
                 />
-                <button className="bg-white text-[#8B5E83] px-8 py-4 rounded-xl font-semibold shadow-lg
+                <button className="bg-white text-[#e84393] px-8 py-4 rounded-xl font-semibold shadow-lg
                   hover:bg-gray-50 transition-all duration-300 magnetic-btn flex-shrink-0">
                   Subscribe
                 </button>

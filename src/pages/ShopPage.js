@@ -10,7 +10,7 @@ const ProductTag = ({ tag }) => {
     'best-seller': { bg: 'bg-amber-500', icon: '👑', label: 'Best Seller' },
     'hot': { bg: 'bg-rose-500', icon: '🔥', label: 'Hot' },
     'new': { bg: 'bg-emerald-500', icon: '✨', label: 'New' },
-    'recommended': { bg: 'bg-[#8B5E83]', icon: '💎', label: 'Recommended' },
+    'recommended': { bg: 'bg-[#e84393]', icon: '💎', label: 'Recommended' },
     'limited': { bg: 'bg-gray-800', icon: '⏰', label: 'Limited' },
     'trending': { bg: 'bg-rose-400', icon: '📈', label: 'Trending' },
     'sale': { bg: 'bg-red-500', icon: '🏷️', label: 'Sale' },
@@ -225,7 +225,7 @@ const ShopPage = ({
   };
 
   return (
-    <div id="shop-top" className="min-h-screen bg-[#fffbf7] pt-0 pb-16 -mt-10">
+    <div id="shop-top" className="min-h-screen bg-[#fff7f9] pt-0 pb-16 -mt-10">
       {/* Payment Success Modal */}
       {showPaymentSuccess && (
         <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 pt-32 overflow-y-auto">
@@ -252,7 +252,7 @@ const ShopPage = ({
                 </div>
               )}
               <div className="flex items-start gap-3 bg-rose-50 border border-rose-200 rounded-2xl p-4 mb-6">
-                <Mail className="w-5 h-5 text-[#8B5E83] mt-0.5 flex-shrink-0" />
+                <Mail className="w-5 h-5 text-[#e84393] mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="font-semibold text-gray-800 text-sm">Check Your Email</p>
                   <p className="text-gray-500 text-xs mt-1">A confirmation email with your order details has been sent.</p>
@@ -260,12 +260,12 @@ const ShopPage = ({
               </div>
               <div className="mb-6">
                 <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2 text-sm">
-                  <Package className="w-4 h-4 text-[#8B5E83]" /> What Happens Next?
+                  <Package className="w-4 h-4 text-[#e84393]" /> What Happens Next?
                 </h3>
                 <div className="space-y-2">
                   {["We're preparing your order", "You'll receive tracking info via email", "Delivery within 3-7 business days"].map((step, i) => (
                     <div key={i} className="flex items-center gap-3">
-                      <div className="w-6 h-6 bg-[#8B5E83] rounded-full flex items-center justify-center text-white text-xs font-bold">{i + 1}</div>
+                      <div className="w-6 h-6 bg-[#e84393] rounded-full flex items-center justify-center text-white text-xs font-bold">{i + 1}</div>
                       <p className="text-gray-600 text-sm">{step}</p>
                     </div>
                   ))}
@@ -277,7 +277,7 @@ const ShopPage = ({
                   <Home className="w-4 h-4" /> Home
                 </button>
                 <button onClick={handleCloseSuccessModal}
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-[#8B5E83] rounded-xl text-white font-semibold hover:bg-[#7a5073] transition text-sm">
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-[#e84393] rounded-xl text-white font-semibold hover:bg-[#d63384] transition text-sm">
                   <ShoppingBag className="w-4 h-4" /> Shop More
                 </button>
               </div>
@@ -289,7 +289,7 @@ const ShopPage = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* BACK BUTTON */}
         <button onClick={() => setCurrentPage("home")}
-          className="flex items-center gap-1.5 text-gray-500 hover:text-[#8B5E83] transition-colors mb-4 text-sm group">
+          className="flex items-center gap-1.5 text-gray-500 hover:text-[#e84393] transition-colors mb-4 text-sm group">
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" />
           <span>Back to Home</span>
         </button>
@@ -304,7 +304,7 @@ const ShopPage = ({
                 value={searchQuery}
                 onChange={(e) => { userChangedFilters.current = true; setSelectedCategory("all"); setSearchQuery(e.target.value); }}
                 className="w-full pl-12 pr-10 py-3.5 rounded-xl border border-gray-200 bg-white
-                  focus:outline-none focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10
+                  focus:outline-none focus:border-[#e84393] focus:ring-3 focus:ring-[#e84393]/10
                   transition-all duration-300 text-gray-700 placeholder-gray-400"
                 style={{ fontSize: '16px' }}
               />
@@ -318,14 +318,14 @@ const ShopPage = ({
           <div className="flex items-center gap-3 justify-between md:justify-end">
             <select value={sortOption} onChange={(e) => handleSortChange(e.target.value)}
               className="appearance-none border border-gray-200 bg-white text-gray-700 rounded-xl px-4 py-3 pr-10
-                focus:outline-none focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10
+                focus:outline-none focus:border-[#e84393] focus:ring-3 focus:ring-[#e84393]/10
                 transition-all duration-300 cursor-pointer text-sm font-medium">
               <option value="latest">Latest</option>
               <option value="price-asc">Price: Low to High</option>
               <option value="price-desc">Price: High to Low</option>
             </select>
             {hasActiveFilter && (
-              <button onClick={handleClearFilters} className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#8B5E83] transition font-medium">
+              <button onClick={handleClearFilters} className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#e84393] transition font-medium">
                 <X className="w-4 h-4" /> Clear
               </button>
             )}
@@ -339,8 +339,8 @@ const ShopPage = ({
               <button key={cat} onClick={() => handleCategoryChange(cat)}
                 className={`px-5 py-2.5 rounded-full capitalize text-sm font-medium whitespace-nowrap transition-all duration-300 ${
                   selectedCategory === cat
-                    ? "bg-[#8B5E83] text-white shadow-md"
-                    : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200 hover:border-[#8B5E83]/30"
+                    ? "bg-[#e84393] text-white shadow-md"
+                    : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200 hover:border-[#e84393]/30"
                 }`}>
                 {cat === "all" ? "All Products" : cat.charAt(0).toUpperCase() + cat.slice(1)}
               </button>
@@ -357,7 +357,7 @@ const ShopPage = ({
             <h3 className="text-2xl font-serif text-gray-800 mb-2">No products found</h3>
             <p className="text-gray-500 mb-6">Try adjusting your search or filters</p>
             {hasActiveFilter && (
-              <button onClick={handleClearFilters} className="px-6 py-3 bg-[#8B5E83] text-white rounded-xl hover:bg-[#7a5073] transition text-sm font-medium">
+              <button onClick={handleClearFilters} className="px-6 py-3 bg-[#e84393] text-white rounded-xl hover:bg-[#d63384] transition text-sm font-medium">
                 Clear all filters
               </button>
             )}
@@ -383,7 +383,7 @@ const ShopPage = ({
                   <div key={product._id}
                     className="group bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-card-hover
                       transition-all duration-500 cursor-pointer flex flex-col h-full border border-gray-100
-                      hover:border-[#8B5E83]/20"
+                      hover:border-[#e84393]/20"
                     onClick={() => handleOpenProduct(product)}>
 
                     {/* IMAGE */}
@@ -439,10 +439,10 @@ const ShopPage = ({
 
                     {/* CONTENT */}
                     <div className="p-3.5 flex flex-col flex-1">
-                      <span className="text-[10px] text-[#8B5E83] font-semibold uppercase tracking-wider mb-1">
+                      <span className="text-[10px] text-[#e84393] font-semibold uppercase tracking-wider mb-1">
                         {product.category}
                       </span>
-                      <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#8B5E83] transition-colors">
+                      <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#e84393] transition-colors">
                         {product.name}
                       </h3>
 
@@ -470,7 +470,7 @@ const ShopPage = ({
                         ) : hasOptions ? (
                           <button onClick={(e) => { e.stopPropagation(); handleOpenProduct(product); }}
                             className="w-full bg-gray-900 text-white px-4 py-2.5 rounded-xl text-xs font-medium
-                              hover:bg-[#8B5E83] transition-colors duration-300 flex items-center justify-center gap-2">
+                              hover:bg-[#e84393] transition-colors duration-300 flex items-center justify-center gap-2">
                             Select Options
                           </button>
                         ) : inCart ? (
@@ -482,7 +482,7 @@ const ShopPage = ({
                         ) : (
                           <button onClick={(e) => handleAddToCart(product, e)}
                             className={`w-full bg-gray-900 text-white px-4 py-2.5 rounded-xl text-xs font-medium
-                              hover:bg-[#8B5E83] transition-all duration-300 flex items-center justify-center gap-2
+                              hover:bg-[#e84393] transition-all duration-300 flex items-center justify-center gap-2
                               ${isAnimating ? 'bg-emerald-500 scale-95' : ''}`}>
                             {isAnimating ? (
                               <><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -505,7 +505,7 @@ const ShopPage = ({
               <div className="flex justify-center items-center gap-1.5 mt-12">
                 {currentPageNumber > 1 && (
                   <button onClick={() => handlePageChange(currentPageNumber - 1)}
-                    className="px-3 py-2 rounded-xl border border-gray-200 text-gray-600 hover:border-[#8B5E83] hover:text-[#8B5E83] transition text-sm">
+                    className="px-3 py-2 rounded-xl border border-gray-200 text-gray-600 hover:border-[#e84393] hover:text-[#e84393] transition text-sm">
                     ←
                   </button>
                 )}
@@ -516,8 +516,8 @@ const ShopPage = ({
                     <button key={page} onClick={() => handlePageChange(page)}
                       className={`min-w-[40px] h-[40px] rounded-xl font-medium text-sm transition-all duration-300 ${
                         page === currentPageNumber
-                          ? "bg-[#8B5E83] text-white shadow-md"
-                          : "bg-white text-gray-600 border border-gray-200 hover:border-[#8B5E83] hover:text-[#8B5E83]"
+                          ? "bg-[#e84393] text-white shadow-md"
+                          : "bg-white text-gray-600 border border-gray-200 hover:border-[#e84393] hover:text-[#e84393]"
                       }`}>
                       {page}
                     </button>
@@ -525,7 +525,7 @@ const ShopPage = ({
                 ))}
                 {currentPageNumber < totalPages && (
                   <button onClick={() => handlePageChange(currentPageNumber + 1)}
-                    className="px-3 py-2 rounded-xl border border-gray-200 text-gray-600 hover:border-[#8B5E83] hover:text-[#8B5E83] transition text-sm">
+                    className="px-3 py-2 rounded-xl border border-gray-200 text-gray-600 hover:border-[#e84393] hover:text-[#e84393] transition text-sm">
                     →
                   </button>
                 )}
@@ -546,7 +546,7 @@ const ShopPage = ({
                     <img src={product.images?.[0] || product.image || "/placeholder.png"} alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                   </div>
-                  <p className="text-xs font-medium text-gray-900 line-clamp-1 group-hover:text-[#8B5E83] transition-colors">{product.name}</p>
+                  <p className="text-xs font-medium text-gray-900 line-clamp-1 group-hover:text-[#e84393] transition-colors">{product.name}</p>
                   <p className="text-xs text-gray-500 font-semibold">₦{product.price.toLocaleString()}</p>
                 </button>
               ))}

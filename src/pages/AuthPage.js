@@ -25,13 +25,13 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fffbf7] flex items-center justify-center py-20 px-4">
+    <div className="min-h-screen bg-[#fff7f9] flex items-center justify-center py-20 px-4">
       <div className="w-full max-w-md">
         {/* Brand */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <Sparkles className="w-5 h-5 text-[#8B5E83]" />
-            <span className="text-sm font-medium text-[#8B5E83] tracking-wide">Anjola Aesthetics</span>
+            <Sparkles className="w-5 h-5 text-[#e84393]" />
+            <span className="text-sm font-medium text-[#e84393] tracking-wide">Anjola Aesthetics</span>
           </div>
           <h1 className="text-3xl font-serif text-gray-900 mb-2">
             {isLogin ? "Welcome Back" : "Join the Family"}
@@ -55,7 +55,7 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
                 <input type="text" required={!isLogin} value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10 focus:outline-none transition text-sm"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#e84393] focus:ring-3 focus:ring-[#e84393]/10 focus:outline-none transition text-sm"
                   placeholder="Enter your full name" />
               </div>
             )}
@@ -64,7 +64,7 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
               <input type="email" required value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10 focus:outline-none transition text-sm"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#e84393] focus:ring-3 focus:ring-[#e84393]/10 focus:outline-none transition text-sm"
                 placeholder="your.email@example.com" />
             </div>
 
@@ -73,7 +73,7 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
               <div className="relative">
                 <input type={showPassword ? "text" : "password"} required value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10 focus:outline-none transition text-sm"
+                  className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:border-[#e84393] focus:ring-3 focus:ring-[#e84393]/10 focus:outline-none transition text-sm"
                   placeholder="Enter your password" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
@@ -83,7 +83,7 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
             </div>
 
             <button type="submit" disabled={authLoading}
-              className="w-full bg-[#8B5E83] text-white py-3.5 rounded-xl font-semibold hover:bg-[#7a5073]
+              className="w-full bg-gradient-to-r from-[#e84393] to-[#a855f7] text-white py-3.5 rounded-xl font-semibold hover:from-[#d63384] hover:to-[#9333ea]
                 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-md hover:shadow-lg magnetic-btn">
               {authLoading ? (<><Loader className="w-5 h-5 animate-spin" /> Processing...</>) : (isLogin ? "Sign In" : "Create Account")}
             </button>
@@ -91,7 +91,7 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
 
           <div className="mt-6 text-center">
             <button onClick={() => { setIsLogin(!isLogin); setAuthError(null); }}
-              className="text-[#8B5E83] hover:text-[#7a5073] font-medium text-sm transition-colors">
+              className="text-[#e84393] hover:text-[#d63384] font-medium text-sm transition-colors">
               {isLogin ? "Don't have an account? Create one" : "Already a member? Sign in"}
             </button>
           </div>

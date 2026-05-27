@@ -28,11 +28,11 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fffbf7] pt-12 pb-12">
+    <div className="min-h-screen bg-[#fff7f9] pt-12 pb-12">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-14">
-          <span className="inline-block text-[#8B5E83] font-medium text-sm tracking-[0.2em] uppercase mb-3">
+          <span className="inline-block text-[#e84393] font-medium text-sm tracking-[0.2em] uppercase mb-3">
             Reach Out
           </span>
           <h1 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">Get In Touch</h1>
@@ -51,7 +51,7 @@ const ContactPage = () => {
                 { icon: <Phone className="w-5 h-5" />, label: "WhatsApp", value: "+234 706 594 3625" },
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-[#8B5E83]/8 flex items-center justify-center text-[#8B5E83] flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#e84393]/8 flex items-center justify-center text-[#e84393] flex-shrink-0">
                     {item.icon}
                   </div>
                   <div>
@@ -100,25 +100,25 @@ const ContactPage = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Name</label>
                   <input type="text" required value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10 focus:outline-none transition text-sm"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#e84393] focus:ring-3 focus:ring-[#e84393]/10 focus:outline-none transition text-sm"
                     placeholder="Your name" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
                   <input type="email" required value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10 focus:outline-none transition text-sm"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#e84393] focus:ring-3 focus:ring-[#e84393]/10 focus:outline-none transition text-sm"
                     placeholder="your.email@example.com" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Message</label>
                   <textarea required rows="5" value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10 focus:outline-none transition resize-none text-sm"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#e84393] focus:ring-3 focus:ring-[#e84393]/10 focus:outline-none transition resize-none text-sm"
                     placeholder="How can we help?" />
                 </div>
                 <button type="submit" disabled={loading}
-                  className="w-full bg-[#8B5E83] text-white py-3.5 rounded-xl font-semibold hover:bg-[#7a5073]
+                  className="w-full bg-gradient-to-r from-[#e84393] to-[#a855f7] text-white py-3.5 rounded-xl font-semibold hover:from-[#d63384] hover:to-[#9333ea]
                     transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 magnetic-btn">
                   {loading ? 'Sending...' : <><Send className="w-4 h-4" /> Send Message</>}
                 </button>

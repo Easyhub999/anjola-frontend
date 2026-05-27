@@ -54,15 +54,15 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fffbf7] pt-8 pb-4">
+    <div className="min-h-screen bg-[#fff7f9] pt-8 pb-4">
       <div className="max-w-6xl mx-auto px-4">
         <h1 className="text-4xl font-serif text-center mb-10 text-gray-900">Checkout</h1>
 
         {/* Delivery Info Banner */}
         <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-8 shadow-card">
           <div className="flex items-start gap-3">
-            <div className="w-9 h-9 bg-[#8B5E83]/10 rounded-full flex items-center justify-center flex-shrink-0">
-              <Truck className="w-4 h-4 text-[#8B5E83]" />
+            <div className="w-9 h-9 bg-[#e84393]/10 rounded-full flex items-center justify-center flex-shrink-0">
+              <Truck className="w-4 h-4 text-[#e84393]" />
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-2 text-sm">Delivery Information</h3>
@@ -90,7 +90,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">{label} *</label>
                   <input type={type} required value={formData[key]}
                     onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10 focus:outline-none transition text-sm"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#e84393] focus:ring-3 focus:ring-[#e84393]/10 focus:outline-none transition text-sm"
                     placeholder={placeholder} />
                 </div>
               ))}
@@ -99,7 +99,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Delivery Address *</label>
                 <textarea required rows="2" value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10 focus:outline-none transition text-sm"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#e84393] focus:ring-3 focus:ring-[#e84393]/10 focus:outline-none transition text-sm"
                   placeholder="Enter your complete delivery address" />
               </div>
 
@@ -109,7 +109,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">{label} *</label>
                     <input type="text" required value={formData[key]}
                       onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:outline-none transition text-sm"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#e84393] focus:outline-none transition text-sm"
                       placeholder={label} />
                   </div>
                 ))}
@@ -119,16 +119,16 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
               <div className="border-t border-gray-100 pt-5 mt-5">
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <input type="checkbox" checked={isGift} onChange={(e) => setIsGift(e.target.checked)}
-                    className="w-5 h-5 rounded border-gray-300 text-[#8B5E83] focus:ring-[#8B5E83]" />
+                    className="w-5 h-5 rounded border-gray-300 text-[#e84393] focus:ring-[#e84393]" />
                   <div className="flex items-center gap-2">
-                    <Gift className="w-4 h-4 text-[#8B5E83]" />
+                    <Gift className="w-4 h-4 text-[#e84393]" />
                     <span className="font-medium text-sm text-gray-700">This is a gift</span>
                   </div>
                 </label>
                 {isGift && (
                   <textarea rows="2" placeholder="Add a personal message for the recipient..." value={giftMessage}
                     onChange={(e) => setGiftMessage(e.target.value)}
-                    className="w-full mt-3 px-4 py-3 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:outline-none transition text-sm"
+                    className="w-full mt-3 px-4 py-3 border border-gray-200 rounded-xl focus:border-[#e84393] focus:outline-none transition text-sm"
                   />
                 )}
               </div>
@@ -136,10 +136,10 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
               {/* Shipping Method */}
               <div className="border-t border-gray-100 pt-5 mt-5">
                 <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                  <Truck className="w-4 h-4 text-[#8B5E83]" /> Shipping Method *
+                  <Truck className="w-4 h-4 text-[#e84393]" /> Shipping Method *
                 </label>
                 <select required value={shippingMethod} onChange={(e) => setShippingMethod(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:outline-none transition cursor-pointer bg-white text-sm"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#e84393] focus:outline-none transition cursor-pointer bg-white text-sm"
                   style={{ fontSize: '16px' }}>
                   <option value="">-- Select Shipping Method --</option>
                   {shippingOptions.map(option => (
@@ -150,7 +150,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
                   <div className="mt-3 p-3 bg-gray-50 border border-gray-100 rounded-xl">
                     <p className="text-sm font-medium text-gray-800">{selectedShipping.label}</p>
                     <p className="text-xs text-gray-500 mt-1">{selectedShipping.description}</p>
-                    <p className="text-lg font-bold text-[#8B5E83] mt-1">₦{selectedShipping.price.toLocaleString()}</p>
+                    <p className="text-lg font-bold text-[#e84393] mt-1">₦{selectedShipping.price.toLocaleString()}</p>
                   </div>
                 )}
               </div>
@@ -158,18 +158,18 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
               {/* Payment */}
               <div className="border-t border-gray-100 pt-5 mt-5">
                 <h3 className="text-sm font-medium text-gray-700 mb-3">Payment Method</h3>
-                <label className="flex items-center p-4 border-2 border-[#8B5E83]/30 bg-[#8B5E83]/5 rounded-xl cursor-pointer">
+                <label className="flex items-center p-4 border-2 border-[#e84393]/30 bg-[#e84393]/5 rounded-xl cursor-pointer">
                   <input type="radio" name="payment" value="paystack" checked={paymentMethod === 'paystack'}
-                    onChange={(e) => setPaymentMethod(e.target.value)} className="w-4 h-4 text-[#8B5E83]" />
+                    onChange={(e) => setPaymentMethod(e.target.value)} className="w-4 h-4 text-[#e84393]" />
                   <div className="ml-3 flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-[#8B5E83]" />
+                    <CreditCard className="w-4 h-4 text-[#e84393]" />
                     <span className="font-medium text-sm">Pay with Paystack</span>
                   </div>
                 </label>
               </div>
 
               <button onClick={handleProceedToPayment} disabled={checkoutLoading || !shippingMethod}
-                className="w-full bg-[#8B5E83] text-white py-4 rounded-xl font-semibold hover:bg-[#7a5073] transition-all duration-300
+                className="w-full bg-gradient-to-r from-[#e84393] to-[#a855f7] text-white py-4 rounded-xl font-semibold hover:from-[#d63384] hover:to-[#9333ea] transition-all duration-300
                   shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base magnetic-btn">
                 {checkoutLoading ? (<><Loader className="w-5 h-5 animate-spin" /> Processing...</>) : (<><Lock className="w-5 h-5" /> Pay ₦{totalAmount.toLocaleString()}</>)}
               </button>
@@ -217,7 +217,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Shipping</span>
-                  <span className="font-medium text-[#8B5E83]">{shippingCost > 0 ? `₦${shippingCost.toLocaleString()}` : 'Select method'}</span>
+                  <span className="font-medium text-[#e84393]">{shippingCost > 0 ? `₦${shippingCost.toLocaleString()}` : 'Select method'}</span>
                 </div>
                 {isGift && (
                   <div className="flex justify-between text-sm text-gray-600">

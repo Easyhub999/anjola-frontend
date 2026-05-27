@@ -20,7 +20,7 @@ const Footer = ({ setCurrentPage }) => {
             {/* Social Icons */}
             <div className="flex items-center gap-3">
               <a href="https://instagram.com/anjola_aesthetics_ng02" target="_blank" rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-[#8B5E83]/20 flex items-center justify-center text-gray-400 hover:text-[#d4a0b9] transition-all duration-300 group">
+                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-[#e84393]/20 flex items-center justify-center text-gray-400 hover:text-[#fbcfe8] transition-all duration-300 group">
                 <Instagram className="w-4 h-4 group-hover:scale-110 transition-transform" />
               </a>
               <a href="https://wa.me/2347065943625" target="_blank" rel="noopener noreferrer"
@@ -104,7 +104,7 @@ const Footer = ({ setCurrentPage }) => {
               className="group flex items-center gap-2 text-sm text-gray-600 hover:text-gray-400 transition-colors duration-300"
             >
               <span>Crafted with</span>
-              <Heart className="w-3 h-3 text-[#8B5E83] fill-current" />
+              <Heart className="w-3 h-3 text-[#e84393] fill-current" />
               <span>by</span>
               <span className="font-medium text-gray-500 group-hover:text-white transition-colors">EasyHub Tech</span>
             </a>

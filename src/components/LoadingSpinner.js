@@ -1,6 +1,6 @@
 const LoadingSpinner = () => {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#fffbf7]">
+    <div className="flex items-center justify-center min-h-screen bg-[#fff7f9]">
       <div className="text-center">
         {/* Skeleton UI preview */}
         <div className="max-w-md mx-auto px-6 space-y-6">
@@ -16,7 +16,7 @@ const LoadingSpinner = () => {
           {/* Elegant spinner */}
           <div className="relative w-16 h-16 mx-auto mb-6">
             <div className="absolute inset-0 border-3 border-gray-200 rounded-full"></div>
-            <div className="absolute inset-0 border-3 border-t-[#8B5E83] rounded-full animate-spin"></div>
+            <div className="absolute inset-0 border-3 border-t-[#e84393] rounded-full animate-spin"></div>
           </div>
 
           <p className="text-gray-400 font-medium text-sm tracking-wide">Loading your experience...</p>

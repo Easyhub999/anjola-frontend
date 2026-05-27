@@ -83,7 +83,7 @@ const Navigation = ({
   return (
     <nav className="fixed top-0 left-0 w-full z-[999]">
       {/* ELEGANT MARQUEE BANNER */}
-      <div className="w-full bg-gradient-to-r from-[#8B5E83] via-[#a0728a] to-[#8B5E83] text-white overflow-hidden py-2.5">
+      <div className="w-full bg-gradient-to-r from-[#e84393] via-[#a855f7] to-[#e84393] text-white overflow-hidden py-2.5">
         <div
           ref={marqueeRef}
           className="flex whitespace-nowrap"
@@ -129,7 +129,7 @@ const Navigation = ({
               <div className="text-[20px] font-serif font-semibold text-gray-900 tracking-tight">
                 Anjola
               </div>
-              <div className="text-[12px] font-sans font-medium text-[#8B5E83] tracking-[0.15em] uppercase -mt-0.5">
+              <div className="text-[12px] font-sans font-medium text-[#e84393] tracking-[0.15em] uppercase -mt-0.5">
                 Aesthetics
               </div>
             </div>
@@ -143,13 +143,13 @@ const Navigation = ({
                 onClick={() => setCurrentPage(item.page)}
                 className={`relative text-[15px] font-medium tracking-wide transition-colors duration-300 py-1 ${
                   currentPage === item.page
-                    ? "text-[#8B5E83]"
-                    : "text-gray-600 hover:text-[#8B5E83]"
+                    ? "text-[#e84393]"
+                    : "text-gray-600 hover:text-[#e84393]"
                 }`}
               >
                 {item.label}
                 {currentPage === item.page && (
-                  <span className="absolute left-0 -bottom-1 w-full h-[2px] bg-gradient-to-r from-[#8B5E83] to-[#c084a0] rounded-full"></span>
+                  <span className="absolute left-0 -bottom-1 w-full h-[2px] bg-gradient-to-r from-[#e84393] to-[#f9a8d4] rounded-full"></span>
                 )}
               </button>
             ))}
@@ -184,11 +184,11 @@ const Navigation = ({
             >
               <ShoppingCart className={`w-[22px] h-[22px] transition-colors duration-300 ${
                 scrolled ? 'text-gray-700' : 'text-gray-700'
-              } hover:text-[#8B5E83]`} />
+              } hover:text-[#e84393]`} />
 
               {cartTotalQty > 0 && (
                 <span
-                  className={`absolute -top-0.5 -right-0.5 bg-[#8B5E83] text-white text-[10px]
+                  className={`absolute -top-0.5 -right-0.5 bg-[#e84393] text-white text-[10px]
                     min-w-[20px] h-[20px] flex items-center justify-center rounded-full shadow-sm font-semibold
                     ${cartBump ? "cart-bump" : ""}`}
                 >
@@ -202,7 +202,7 @@ const Navigation = ({
               className="p-2 hover:bg-gray-100/80 rounded-xl transition-colors duration-300"
               onClick={() => setCurrentPage(user ? "profile" : "auth")}
             >
-              <User className="w-[22px] h-[22px] text-gray-700 hover:text-[#8B5E83] transition-colors duration-300" />
+              <User className="w-[22px] h-[22px] text-gray-700 hover:text-[#e84393] transition-colors duration-300" />
             </button>
 
             {/* MOBILE MENU BUTTON */}
@@ -233,7 +233,7 @@ const Navigation = ({
           <div className="fixed top-0 right-0 h-screen w-[80%] max-w-[320px] bg-white shadow-luxury-xl z-[1001] md:hidden overflow-y-auto animate-slideInRight">
 
             {/* HEADER */}
-            <div className="bg-gradient-to-br from-[#8B5E83] to-[#6b4560] px-6 py-7">
+            <div className="bg-gradient-to-br from-[#e84393] via-[#d63384] to-[#a855f7] px-6 py-7">
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-white/80" />
@@ -297,13 +297,13 @@ const Navigation = ({
                       }}
                       className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${
                         isActive
-                          ? "bg-[#8B5E83] text-white shadow-md"
+                          ? "bg-[#e84393] text-white shadow-md"
                           : "hover:bg-gray-50 text-gray-700"
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-lg ${isActive ? "bg-white/20" : "bg-gray-100"}`}>
-                          <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-[#8B5E83]"}`} />
+                          <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-[#e84393]"}`} />
                         </div>
                         <span className="font-medium text-sm">{item.label}</span>
                       </div>
@@ -372,7 +372,7 @@ const Navigation = ({
                     setCurrentPage("auth");
                     setShowMobileMenu(false);
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#8B5E83] text-white rounded-xl font-medium text-sm shadow-md hover:shadow-lg transition-all"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#e84393] text-white rounded-xl font-medium text-sm shadow-md hover:shadow-lg transition-all"
                 >
                   <LogIn className="w-4 h-4" />
                   Sign In / Register
