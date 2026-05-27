@@ -6,10 +6,11 @@ const QuickViewModal = ({ product, onClose, addToCart, setCurrentPage, setSelect
   const [addedToCart, setAddedToCart] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
 
+  // Scroll to top of overlay when modal opens so it's always visible
   useEffect(() => {
     if (product) {
-      document.body.style.overflow = 'hidden';
-      return () => { document.body.style.overflow = ''; };
+      const overlay = document.getElementById('quickview-overlay');
+      if (overlay) overlay.scrollTop = 0;
     }
   }, [product]);
 
@@ -39,7 +40,7 @@ const QuickViewModal = ({ product, onClose, addToCart, setCurrentPage, setSelect
   };
 
   return (
-    <div className="fixed inset-0 z-[9998] overflow-y-auto" onClick={onClose}>
+    <div id="quickview-overlay" className="fixed inset-0 z-[9998] overflow-y-auto" onClick={onClose}>
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
 
