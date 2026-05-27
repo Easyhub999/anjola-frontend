@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Search, ShoppingCart, X, ArrowLeft, CheckCircle, Mail, Package, Home, ShoppingBag, Heart, Eye } from "lucide-react";
 import { paymentsAPI } from "../api";
 import QuickViewModal from "../components/QuickViewModal";
-import SaleCountdown from "../components/SaleCountdown";
 
 const PRODUCTS_PER_PAGE = 20;
 
@@ -336,16 +335,16 @@ const ShopPage = ({
         </div>
 
         {/* CATEGORIES */}
-        <div className="relative mb-10">
-          <div className="flex gap-2.5 overflow-x-auto pb-3 scrollbar-hide">
+        <div className="relative mb-8">
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
             {dynamicCategories.map((cat) => (
               <button key={cat} onClick={() => handleCategoryChange(cat)}
-                className={`px-5 py-2.5 rounded-full capitalize text-sm font-medium whitespace-nowrap transition-all duration-300 ${
+                className={`px-4 py-2 rounded-lg capitalize text-[13px] font-medium whitespace-nowrap transition-all duration-200 ${
                   selectedCategory === cat
-                    ? "bg-[#e84393] text-white shadow-md"
-                    : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200 hover:border-[#e84393]/30"
+                    ? "bg-[#e84393]/10 text-[#e84393] border border-[#e84393]/20"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
                 }`}>
-                {cat === "all" ? "All Products" : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                {cat === "all" ? "All" : cat.charAt(0).toUpperCase() + cat.slice(1)}
               </button>
             ))}
           </div>
@@ -454,15 +453,12 @@ const ShopPage = ({
                         {/* Price */}
                         <div>
                           {product.salesPrice && product.salesPrice < product.price ? (
-                            <div className="space-y-1">
-                              <div className="flex items-baseline gap-2 flex-wrap">
-                                <span className="text-lg font-bold text-red-600">₦{product.salesPrice.toLocaleString()}</span>
-                                <span className="text-sm text-gray-400 line-through">₦{product.price.toLocaleString()}</span>
-                                <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
-                                  -{Math.round(((product.price - product.salesPrice) / product.price) * 100)}%
-                                </span>
-                              </div>
-                              <SaleCountdown />
+                            <div className="flex items-baseline gap-2 flex-wrap">
+                              <span className="text-lg font-bold text-red-600">₦{product.salesPrice.toLocaleString()}</span>
+                              <span className="text-sm text-gray-400 line-through">₦{product.price.toLocaleString()}</span>
+                              <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                                -{Math.round(((product.price - product.salesPrice) / product.price) * 100)}%
+                              </span>
                             </div>
                           ) : (
                             <span className="text-lg font-bold text-gray-900">₦{product.price.toLocaleString()}</span>
