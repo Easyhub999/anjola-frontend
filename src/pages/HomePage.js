@@ -1,11 +1,34 @@
-import React from "react";
-import { Mail, Sparkles, Heart, Gift, Star } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Sparkles, Heart, Gift, Star, ArrowRight, ShoppingBag, Truck, Shield, Package } from "lucide-react";
+
+// Scroll animation hook
+const useScrollAnimation = () => {
+  const ref = useRef(null);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+    const el = ref.current;
+    if (el) {
+      const animatedElements = el.querySelectorAll('.scroll-animate, .scroll-animate-left, .scroll-animate-right, .scroll-animate-scale, .stagger-children');
+      animatedElements.forEach((child) => observer.observe(child));
+    }
+    return () => observer.disconnect();
+  }, []);
+  return ref;
+};
 
 const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, setSelectedProduct }) => {
   const featuredProducts = products.filter((p) => p.featured && p.visible !== false).slice(0, 3);
-
-  // ✅ SUCCESS MODAL STATE
-  const [showSuccessModal, setShowSuccessModal] = React.useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const containerRef = useScrollAnimation();
 
   const getCartItemQty = (id) => {
     const found = cart.find((item) => item._id === id);
@@ -17,165 +40,183 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
     setCurrentPage("product");
   };
 
-  // ✅ CHECK FOR PAYMENT RETURN
-  React.useEffect(() => {
+  // Check for payment return
+  useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const reference = urlParams.get('reference');
-    
     if (reference) {
       setShowSuccessModal(true);
-      // Clean URL
       window.history.replaceState({}, '', '/');
     }
   }, []);
 
-  return (
-    <div className="min-h-screen">
+  // Parallax effect for hero
+  const [heroOffset, setHeroOffset] = useState(0);
+  useEffect(() => {
+    const handleScroll = () => {
+      setHeroOffset(window.scrollY * 0.3);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-      {/* ✅ SUCCESS MODAL */}
+  // Get unique categories for "Shop by Category"
+  const categories = products
+    .filter(p => p.visible !== false && p.category)
+    .reduce((acc, p) => {
+      const cat = p.category.toLowerCase().trim();
+      if (!acc.find(c => c.name === cat)) {
+        acc.push({ name: cat, image: p.images?.[0] || p.image || '/placeholder.png' });
+      }
+      return acc;
+    }, [])
+    .slice(0, 4);
+
+  return (
+    <div ref={containerRef} className="min-h-screen bg-[#fffbf7]">
+
+      {/* SUCCESS MODAL */}
       {showSuccessModal && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[10000] px-4"
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10000] px-4"
           onClick={() => setShowSuccessModal(false)}
         >
-          <div 
-            className="bg-white rounded-3xl p-8 md:p-12 max-w-md w-full shadow-2xl transform animate-fadeInUp"
+          <div
+            className="bg-white rounded-3xl p-8 md:p-12 max-w-md w-full shadow-luxury-xl animate-fadeInUp"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Success Icon */}
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
-              <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+            <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-
-            {/* Title */}
-            <h2 className="text-3xl font-serif text-gray-900 text-center mb-4">
-              Payment Successful! 🎉
+            <h2 className="text-3xl font-serif text-gray-900 text-center mb-3">
+              Payment Successful!
             </h2>
-
-            {/* Message */}
-            <p className="text-gray-600 text-center mb-6 leading-relaxed">
-              Thank you for your order! We've sent a confirmation email with your order details and tracking information.
+            <p className="text-gray-500 text-center mb-8 leading-relaxed">
+              Thank you for your order! We've sent a confirmation email with your order details.
             </p>
-
-            {/* Info boxes */}
             <div className="space-y-3 mb-8">
-              <div className="flex items-start gap-3 bg-pink-50 p-4 rounded-xl">
-                <span className="text-2xl">📧</span>
+              <div className="flex items-start gap-3 bg-rose-50 p-4 rounded-xl">
+                <Package className="w-5 h-5 text-[#8B5E83] mt-0.5" />
                 <div>
-                  <p className="font-semibold text-gray-900 text-sm">Check Your Email</p>
-                  <p className="text-xs text-gray-600">Order confirmation sent</p>
+                  <p className="font-semibold text-gray-900 text-sm">Order Confirmed</p>
+                  <p className="text-xs text-gray-500">Check your email for details</p>
                 </div>
               </div>
-
               <div className="flex items-start gap-3 bg-purple-50 p-4 rounded-xl">
-                <span className="text-2xl">🚚</span>
+                <Truck className="w-5 h-5 text-purple-600 mt-0.5" />
                 <div>
                   <p className="font-semibold text-gray-900 text-sm">Processing Your Order</p>
-                  <p className="text-xs text-gray-600">We'll ship within 2-3 business days</p>
+                  <p className="text-xs text-gray-500">Ships within 2-3 business days</p>
                 </div>
               </div>
             </div>
-
-            {/* Button */}
             <button
               onClick={() => setShowSuccessModal(false)}
-              className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-4 rounded-xl font-semibold text-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full bg-[#8B5E83] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#7a5073] transition-colors duration-300 magnetic-btn"
             >
-              <Sparkles className="w-5 h-5" />
               Continue Shopping
             </button>
           </div>
         </div>
       )}
 
-      {/* ================= HERO SECTION (KEEP RIBBON) ================= */}
-      <div className="relative h-[95vh] overflow-hidden flex items-center justify-center">
-
-        {/* Client's Ribbon Logo Background */}
-        <img
-          src="/hero-ribbon.jpg"
-          alt="Ribbon Background"
-          className="absolute inset-0 w-full h-full object-cover opacity-55 scale-[1.3] blur-[1px]
-            [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1),rgba(0,0,0,0.45),rgba(0,0,0,0))]"
-        />
-
-        <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/70 to-white/88" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.35)_100%)]" />
-
-        {/* Floating Sparkles */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute w-[500px] h-[500px] bg-pink-300/50 rounded-full blur-[110px] top-0 left-0 animate-float-slow" />
-          <div className="absolute w-[580px] h-[580px] bg-purple-300/50 rounded-full blur-[120px] bottom-0 right-0 animate-float-slow" style={{ animationDelay: '2s' }} />
-          
-          {/* Sparkle elements */}
-          {[...Array(6)].map((_, i) => (
-            <Sparkles
-              key={i}
-              className="absolute text-pink-400/30 animate-twinkle"
-              style={{
-                top: `${Math.random() * 80 + 10}%`,
-                left: `${Math.random() * 80 + 10}%`,
-                width: `${Math.random() * 20 + 15}px`,
-                height: `${Math.random() * 20 + 15}px`,
-                animationDelay: `${i * 0.5}s`
-              }}
-            />
-          ))}
+      {/* ================= CINEMATIC HERO ================= */}
+      <div className="relative h-[100vh] min-h-[600px] overflow-hidden flex items-center justify-center">
+        {/* Background with parallax */}
+        <div className="absolute inset-0" style={{ transform: `translateY(${heroOffset}px)` }}>
+          <img
+            src="/hero-ribbon.jpg"
+            alt="Ribbon Background"
+            className="absolute inset-0 w-full h-full object-cover scale-110"
+            style={{ filter: 'brightness(0.85) saturate(0.9)' }}
+          />
         </div>
 
-        <div
-          className="absolute inset-0 opacity-[0.45] mix-blend-overlay pointer-events-none"
-          style={{
-            backgroundImage: "url('https://www.transparenttextures.com/patterns/fabric-of-squares.png')",
-          }}
-        />
+        {/* Elegant overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#fffbf7]/85 via-[#fffbf7]/60 to-[#fffbf7]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(139,94,131,0.08)_100%)]" />
+
+        {/* Floating accent shapes */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute w-[400px] h-[400px] bg-[#f9a8d4]/20 rounded-full blur-[100px] -top-20 -left-20 animate-float" />
+          <div className="absolute w-[350px] h-[350px] bg-[#d8b4fe]/20 rounded-full blur-[100px] -bottom-20 -right-20 animate-float-delayed" />
+        </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 text-center px-4 animate-fadeInUp">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Heart className="w-8 h-8 text-pink-500 animate-pulse" />
-            <Sparkles className="w-6 h-6 text-purple-500 animate-spin-slow" />
+        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+          {/* Subtle pre-title */}
+          <div className="animate-fadeIn mb-6" style={{ animationDelay: '0.2s' }}>
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full text-[#8B5E83] text-sm font-medium tracking-wide border border-[#8B5E83]/10">
+              <Sparkles className="w-3.5 h-3.5" />
+              Luxury Self-Care Essentials
+            </span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-serif text-gray-900 mb-4 drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)] animate-slideInDown">
-            Elevate Your Beauty
+          {/* Main heading with text reveal */}
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif text-gray-900 mb-6 leading-[1.1] animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
+            Elevate Your
+            <br />
+            <span className="text-gradient italic">Beauty</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-700 mb-8 font-light animate-fadeIn" style={{ animationDelay: '0.3s' }}>
-            Luxury self-care products curated with love 💕
+          {/* Subtitle */}
+          <p className="text-lg md:text-xl text-gray-600 mb-10 font-light leading-relaxed max-w-2xl mx-auto animate-fadeIn" style={{ animationDelay: '0.7s' }}>
+            Curated with love — premium beauty products for the modern woman
+            who values elegance and self-care.
           </p>
 
-          <button
-            onClick={() => setCurrentPage("shop")}
-            className="group relative bg-gradient-to-r from-pink-400 to-purple-500 text-white 
-              px-12 py-4 rounded-full text-xl shadow-[0_10px_25px_rgba(0,0,0,0.25)]
-              hover:scale-110 active:scale-95 transition-all duration-300 animate-fadeIn"
-            style={{ animationDelay: '0.6s' }}
-          >
-            <span className="flex items-center gap-3">
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fadeInUp" style={{ animationDelay: '0.9s' }}>
+            <button
+              onClick={() => setCurrentPage("shop")}
+              className="group bg-[#8B5E83] text-white px-10 py-4 rounded-full text-lg font-medium
+                hover:bg-[#7a5073] shadow-lg hover:shadow-xl transition-all duration-400 magnetic-btn
+                flex items-center gap-3"
+            >
               Shop Collection
-              <Sparkles className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
-            </span>
-          </button>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+            </button>
+            <button
+              onClick={() => {
+                const el = document.getElementById('brand-story');
+                el?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-gray-600 hover:text-[#8B5E83] px-8 py-4 rounded-full text-lg font-medium
+                border border-gray-200 hover:border-[#8B5E83]/30 transition-all duration-300"
+            >
+              Our Story
+            </button>
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce-subtle">
+          <div className="w-6 h-10 border-2 border-gray-300 rounded-full flex items-start justify-center pt-2">
+            <div className="w-1.5 h-3 bg-gray-400 rounded-full animate-pulse"></div>
+          </div>
         </div>
       </div>
 
-      {/* ================= BENEFITS SECTION ================= */}
-      <div className="py-16 bg-gradient-to-r from-pink-50 via-purple-50 to-pink-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {/* ================= TRUST STRIP ================= */}
+      <div className="py-10 bg-white border-y border-gray-100">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="scroll-animate grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             {[
-              { icon: "🎁", title: "Free Gift Wrap", desc: "Beautifully packaged" },
-              { icon: "🚚", title: "Fast Shipping", desc: "2-3 business days" },
-              { icon: "💝", title: "Secure Checkout", desc: "100% protected" },
-              { icon: "✨", title: "Premium Quality", desc: "Luxury products" },
-            ].map((benefit, i) => (
-              <div key={i} className="text-center p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
-                <div className="text-4xl mb-3">{benefit.icon}</div>
-                <h4 className="font-semibold text-gray-900 mb-1">{benefit.title}</h4>
-                <p className="text-xs text-gray-600">{benefit.desc}</p>
+              { icon: <Gift className="w-5 h-5" />, title: "Gift Wrapping", desc: "Beautifully packaged" },
+              { icon: <Truck className="w-5 h-5" />, title: "Fast Shipping", desc: "2-3 business days" },
+              { icon: <Shield className="w-5 h-5" />, title: "Secure Checkout", desc: "100% protected" },
+              { icon: <Sparkles className="w-5 h-5" />, title: "Premium Quality", desc: "Handpicked products" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-3 justify-center">
+                <div className="w-10 h-10 rounded-full bg-[#8B5E83]/8 flex items-center justify-center text-[#8B5E83] flex-shrink-0">
+                  {item.icon}
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 text-sm">{item.title}</p>
+                  <p className="text-xs text-gray-500">{item.desc}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -183,133 +224,108 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
       </div>
 
       {/* ================= FEATURED PRODUCTS ================= */}
-      <div className="max-w-7xl mx-auto px-4 py-20 relative">
-        {/* Decorative elements */}
-        <div className="absolute top-10 right-10 w-32 h-32 bg-pink-200/20 rounded-full blur-2xl"></div>
-        <div className="absolute bottom-10 left-10 w-40 h-40 bg-purple-200/20 rounded-full blur-3xl"></div>
-
-        <div className="text-center mb-16 animate-fadeIn">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Star className="w-6 h-6 text-yellow-400 fill-current animate-pulse" />
-            <span className="text-pink-600 font-semibold uppercase tracking-wider text-sm">Handpicked For You</span>
-            <Star className="w-6 h-6 text-yellow-400 fill-current animate-pulse" />
-          </div>
-          <h2 className="text-5xl font-serif text-gray-900 tracking-wide mb-4">
+      <div className="max-w-7xl mx-auto px-6 py-24">
+        <div className="scroll-animate text-center mb-16">
+          <span className="inline-block text-[#8B5E83] font-medium text-sm tracking-[0.2em] uppercase mb-3">
+            Handpicked For You
+          </span>
+          <h2 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">
             Featured Products
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Discover our carefully curated selection of luxury self-care essentials
+          <p className="text-gray-500 max-w-xl mx-auto">
+            Our most loved products, carefully curated for everyday luxury
           </p>
         </div>
 
         {featuredProducts.length === 0 ? (
-          <p className="text-center text-gray-600">No featured products available</p>
+          <p className="text-center text-gray-500">No featured products available</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="stagger-children grid grid-cols-1 md:grid-cols-3 gap-8">
             {featuredProducts.map((product, idx) => {
               const qty = getCartItemQty(product._id);
 
               return (
                 <div
                   key={product._id}
-                  className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden 
-                    transform hover:-translate-y-2 transition-all duration-300 cursor-pointer
-                    border border-gray-100 hover:border-pink-200 animate-fadeInUp"
-                  style={{ animationDelay: `${idx * 0.2}s` }}
+                  className="group bg-white rounded-2xl shadow-card hover:shadow-card-hover overflow-hidden
+                    transform hover:-translate-y-2 transition-all duration-500 cursor-pointer border border-gray-100"
                   onClick={() => handleProductClick(product)}
                 >
                   <div className="relative overflow-hidden">
                     <img
                       src={product.images?.[0] || product.image || "/placeholder.png"}
                       alt={product.name}
-                      className="w-full h-72 object-cover group-hover:scale-110 transition-all duration-500"
+                      className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-700"
                     />
 
-                    {/* Overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    {/* Subtle hover overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                     {/* Featured badge */}
-                    <div className="absolute top-4 left-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1.5">
+                    <div className="absolute top-4 left-4 bg-[#8B5E83] text-white px-3 py-1.5 rounded-full text-xs font-medium tracking-wide flex items-center gap-1.5">
                       <Star className="w-3 h-3 fill-current" />
                       Featured
                     </div>
 
-                    {/* 🔥 Price badge with sales price */}
-                    <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md 
-                      shadow-lg px-4 py-2 rounded-full">
+                    {/* Price badge */}
+                    <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md shadow-lg px-4 py-2 rounded-full">
                       {product.salesPrice && product.salesPrice < product.price ? (
-                        <div className="flex flex-col items-end gap-0.5">
+                        <div className="flex items-center gap-2">
                           <span className="text-xs text-gray-400 line-through">
                             ₦{product.price.toLocaleString()}
                           </span>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-red-600 font-bold text-lg">
-                              ₦{product.salesPrice.toLocaleString()}
-                            </span>
-                            <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
-                              -{Math.round(((product.price - product.salesPrice) / product.price) * 100)}%
-                            </span>
-                          </div>
+                          <span className="text-[#8B5E83] font-bold text-lg">
+                            ₦{product.salesPrice.toLocaleString()}
+                          </span>
                         </div>
                       ) : (
-                        <span className="text-pink-600 font-bold text-lg">
+                        <span className="text-[#8B5E83] font-bold text-lg">
                           ₦{product.price.toLocaleString()}
                         </span>
                       )}
                     </div>
+
+                    {/* Quick View on hover */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <span className="bg-white/90 backdrop-blur-sm text-gray-900 px-6 py-2.5 rounded-full text-sm font-medium shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                        View Details
+                      </span>
+                    </div>
                   </div>
 
                   <div className="p-6">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-pink-600 transition-colors">
+                    <h3 className="text-xl font-serif text-gray-900 mb-2 group-hover:text-[#8B5E83] transition-colors duration-300">
                       {product.name}
                     </h3>
-
-                    <p className="text-gray-600 text-sm mb-6 line-clamp-2">
+                    <p className="text-gray-500 text-sm mb-6 line-clamp-2 leading-relaxed">
                       {product.description}
                     </p>
 
                     {qty === 0 ? (
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addToCart(product);
-                        }}
-                        className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white 
-                          py-3 rounded-xl font-medium hover:shadow-lg hover:scale-[1.02] 
-                          transition-all duration-300 flex items-center justify-center gap-2"
+                        onClick={(e) => { e.stopPropagation(); addToCart(product); }}
+                        className="w-full bg-gray-900 text-white py-3 rounded-xl font-medium hover:bg-[#8B5E83]
+                          transition-colors duration-300 flex items-center justify-center gap-2 magnetic-btn"
                       >
-                        <Gift className="w-4 h-4" />
+                        <ShoppingBag className="w-4 h-4" />
                         Add to Cart
                       </button>
                     ) : (
-                      <div className="flex items-center justify-between bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl px-4 py-3 border border-pink-200">
-                        <span className="text-sm text-gray-700 font-medium flex items-center gap-2">
-                          <Heart className="w-4 h-4 text-pink-500 fill-current" />
+                      <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
+                        <span className="text-sm text-gray-600 font-medium flex items-center gap-2">
+                          <Heart className="w-4 h-4 text-[#8B5E83] fill-current" />
                           In cart
                         </span>
-
                         <div className="flex items-center gap-3">
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              updateQuantity(product._id, -1);
-                            }}
-                            className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-md hover:shadow-lg transition-all"
-                          >
-                            -
-                          </button>
-
-                          <span className="min-w-[1.5rem] text-center font-bold text-pink-600">{qty}</span>
-
+                            onClick={(e) => { e.stopPropagation(); updateQuantity(product._id, -1); }}
+                            className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm hover:shadow-md transition-all text-gray-700"
+                          >-</button>
+                          <span className="min-w-[1.5rem] text-center font-bold text-[#8B5E83]">{qty}</span>
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              addToCart(product);
-                            }}
-                            className="w-8 h-8 rounded-full bg-pink-500 text-white flex items-center justify-center shadow-md hover:shadow-lg hover:bg-pink-600 transition-all"
-                          >
-                            +
-                          </button>
+                            onClick={(e) => { e.stopPropagation(); addToCart(product); }}
+                            className="w-8 h-8 rounded-full bg-[#8B5E83] text-white flex items-center justify-center shadow-sm hover:shadow-md hover:bg-[#7a5073] transition-all"
+                          >+</button>
                         </div>
                       </div>
                     )}
@@ -320,80 +336,182 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
           </div>
         )}
 
-        {/* View All Button */}
-        <div className="text-center mt-12">
+        {/* View All */}
+        <div className="scroll-animate text-center mt-14">
           <button
             onClick={() => setCurrentPage("shop")}
-            className="bg-white text-pink-600 border-2 border-pink-400 px-8 py-3 rounded-full font-semibold hover:bg-pink-400 hover:text-white transition-all duration-300 shadow-md hover:shadow-xl"
+            className="group inline-flex items-center gap-2 text-[#8B5E83] hover:text-[#7a5073] font-medium text-lg border-b-2 border-[#8B5E83]/30 hover:border-[#8B5E83] pb-1 transition-all duration-300"
           >
-            View All Products →
+            View All Products
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
           </button>
         </div>
       </div>
 
+      {/* ================= SHOP BY CATEGORY ================= */}
+      {categories.length > 0 && (
+        <div className="py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="scroll-animate text-center mb-16">
+              <span className="inline-block text-[#8B5E83] font-medium text-sm tracking-[0.2em] uppercase mb-3">
+                Browse Collections
+              </span>
+              <h2 className="text-4xl md:text-5xl font-serif text-gray-900">
+                Shop by Category
+              </h2>
+            </div>
+
+            <div className="stagger-children grid grid-cols-2 md:grid-cols-4 gap-5">
+              {categories.map((cat, idx) => (
+                <button
+                  key={cat.name}
+                  onClick={() => setCurrentPage("shop")}
+                  className="group relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer"
+                >
+                  <img
+                    src={cat.image}
+                    alt={cat.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <h3 className="text-white font-serif text-xl capitalize mb-1">{cat.name}</h3>
+                    <span className="text-white/70 text-sm font-medium flex items-center gap-1 group-hover:text-white transition-colors">
+                      Explore
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= BRAND STORY ================= */}
+      <div id="brand-story" className="py-24 bg-[#fffbf7]">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            {/* Left — Image collage */}
+            <div className="scroll-animate-left relative">
+              <div className="relative">
+                <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-luxury-lg">
+                  <img
+                    src="/hero-ribbon.jpg"
+                    alt="Anjola Aesthetics"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                {/* Floating accent card */}
+                <div className="absolute -bottom-6 -right-6 bg-white rounded-2xl shadow-luxury p-5 max-w-[200px]">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Heart className="w-4 h-4 text-[#8B5E83] fill-current" />
+                    <span className="text-sm font-semibold text-gray-900">Trusted</span>
+                  </div>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Loved by women across Nigeria for quality and elegance
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right — Story */}
+            <div className="scroll-animate-right">
+              <span className="inline-block text-[#8B5E83] font-medium text-sm tracking-[0.2em] uppercase mb-4">
+                Our Story
+              </span>
+              <h2 className="text-4xl md:text-5xl font-serif text-gray-900 mb-6 leading-tight">
+                Beauty That Speaks
+                <br />
+                <span className="italic text-[#8B5E83]">to Your Soul</span>
+              </h2>
+              <div className="space-y-4 text-gray-600 leading-relaxed mb-8">
+                <p>
+                  Anjola Aesthetics was born from a simple belief: every woman deserves to feel
+                  luxurious in her daily routine. We carefully select each product for its quality,
+                  beauty, and the joy it brings.
+                </p>
+                <p>
+                  From self-care essentials to aesthetic accessories, everything in our collection
+                  is curated with the same love and attention we'd give to a gift for our closest
+                  friends.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-6 mb-8">
+                {[
+                  { number: "500+", label: "Happy Customers" },
+                  { number: "50+", label: "Products" },
+                  { number: "4.9", label: "Avg. Rating" },
+                ].map((stat, i) => (
+                  <div key={i}>
+                    <p className="text-2xl md:text-3xl font-serif font-bold text-gray-900">{stat.number}</p>
+                    <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage("shop")}
+                className="group inline-flex items-center gap-3 bg-[#8B5E83] text-white px-8 py-3.5 rounded-full font-medium
+                  hover:bg-[#7a5073] shadow-md hover:shadow-lg transition-all duration-300 magnetic-btn"
+              >
+                Explore Collection
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ================= WHY CHOOSE US ================= */}
-      <div className="py-20 bg-gradient-to-b from-white via-pink-50/40 to-white relative overflow-hidden">
-        {/* Floating hearts */}
-        {[...Array(8)].map((_, i) => (
-          <Heart
-            key={i}
-            className="absolute text-pink-200/30 animate-float-slow"
-            style={{
-              top: `${Math.random() * 80 + 10}%`,
-              left: `${Math.random() * 90 + 5}%`,
-              width: `${Math.random() * 30 + 20}px`,
-              height: `${Math.random() * 30 + 20}px`,
-              animationDelay: `${i * 0.8}s`,
-              animationDuration: `${Math.random() * 5 + 8}s`
-            }}
-          />
-        ))}
+      <div className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="scroll-animate text-center mb-16">
+            <span className="inline-block text-[#8B5E83] font-medium text-sm tracking-[0.2em] uppercase mb-3">
+              The Anjola Difference
+            </span>
+            <h2 className="text-4xl md:text-5xl font-serif text-gray-900">
+              Why Choose Us
+            </h2>
+          </div>
 
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
-          <h2 className="text-5xl font-serif text-center mb-4 text-gray-900 animate-fadeIn">
-            Why Choose Us
-          </h2>
-          <p className="text-center text-gray-600 mb-16 max-w-2xl mx-auto">
-            Experience the difference of luxury self-care with our premium collection
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="stagger-children grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
                 img: "/quality.png",
                 title: "Premium Quality",
                 desc: "Carefully selected items crafted for beauty, durability and long-lasting value.",
-                icon: <Sparkles className="w-6 h-6 text-pink-500" />
+                icon: <Sparkles className="w-5 h-5 text-[#8B5E83]" />
               },
               {
                 img: "/fast.png",
                 title: "Fast Delivery",
                 desc: "Swift nationwide delivery — beautifully packaged and right on time.",
-                icon: <Gift className="w-6 h-6 text-purple-500" />
+                icon: <Truck className="w-5 h-5 text-[#8B5E83]" />
               },
               {
                 img: "/trust.png",
                 title: "Trusted by Women",
                 desc: "Loved for elegance, reliability and consistent customer satisfaction.",
-                icon: <Heart className="w-6 h-6 text-pink-500 fill-current" />
+                icon: <Heart className="w-5 h-5 text-[#8B5E83] fill-current" />
               },
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="bg-white shadow-xl rounded-2xl p-8 text-center hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-pink-200 group animate-fadeInUp"
-                style={{ animationDelay: `${idx * 0.2}s` }}
+                className="bg-[#fffbf7] rounded-2xl p-8 text-center hover:-translate-y-2 hover:shadow-luxury transition-all duration-500 border border-gray-100 group"
               >
                 <div className="relative inline-block mb-6">
-                  <div className="absolute inset-0 bg-pink-200/50 rounded-full blur-xl group-hover:blur-2xl transition-all"></div>
+                  <div className="absolute inset-0 bg-[#8B5E83]/10 rounded-full blur-xl scale-125 group-hover:scale-150 transition-transform duration-500"></div>
                   <img src={item.img} alt={item.title} className="relative w-20 h-20 mx-auto" />
                 </div>
-                
+
                 <div className="flex items-center justify-center gap-2 mb-3">
                   {item.icon}
-                  <h3 className="text-2xl font-semibold text-gray-900">{item.title}</h3>
+                  <h3 className="text-xl font-serif text-gray-900">{item.title}</h3>
                 </div>
-                
-                <p className="text-gray-600 leading-relaxed">
+
+                <p className="text-gray-500 leading-relaxed text-sm">
                   {item.desc}
                 </p>
               </div>
@@ -403,70 +521,60 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
       </div>
 
       {/* ================= TESTIMONIALS ================= */}
-      <div className="relative py-24 bg-gradient-to-br from-pink-50/40 via-white to-purple-50/40 overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute w-64 h-64 bg-pink-200/30 rounded-full blur-3xl top-10 left-10 animate-pulse-slow" />
-          <div className="absolute w-72 h-72 bg-purple-200/30 rounded-full blur-3xl bottom-10 right-20 animate-pulse-slow" style={{ animationDelay: '1s' }} />
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Star className="w-5 h-5 text-yellow-400 fill-current" />
-              <span className="text-pink-600 font-semibold uppercase tracking-wider text-sm">Testimonials</span>
-              <Star className="w-5 h-5 text-yellow-400 fill-current" />
-            </div>
-            <h2 className="text-5xl font-serif text-gray-900 mb-4">What Our Customers Say</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Join thousands of satisfied customers who trust us for their beauty needs
-            </p>
+      <div className="py-24 bg-[#fffbf7]">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="scroll-animate text-center mb-16">
+            <span className="inline-block text-[#8B5E83] font-medium text-sm tracking-[0.2em] uppercase mb-3">
+              Customer Love
+            </span>
+            <h2 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">
+              What They Say
+            </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="stagger-children grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
                 name: "Morenikeji A.",
-                text: "The quality is beyond my expectations. My tote bag is now my everyday essential.",
+                text: "The quality is beyond my expectations. My tote bag is now my everyday essential. Absolutely love the packaging too!",
                 rating: 5,
-                avatar: "M"
               },
               {
                 name: "Anuoluwapo O.",
-                text: "The under-eye patches made me look refreshed instantly. Luxury at its finest.",
+                text: "The under-eye patches made me look refreshed instantly. This is luxury at its finest. Will definitely order again.",
                 rating: 5,
-                avatar: "A"
               },
               {
                 name: "Adenike F.",
-                text: "Excellent packaging and fast delivery. The aesthetic alone made me fall in love.",
+                text: "Excellent packaging and fast delivery. The aesthetic alone made me fall in love. Perfect gifts for my friends!",
                 rating: 5,
-                avatar: "A"
               },
             ].map((t, idx) => (
               <div
                 key={idx}
-                className="bg-white/80 backdrop-blur-md shadow-xl rounded-2xl p-8 
-                hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 hover:border-pink-200 animate-fadeInUp"
-                style={{ animationDelay: `${idx * 0.2}s` }}
+                className="bg-white rounded-2xl p-8 shadow-card hover:shadow-card-hover
+                  hover:-translate-y-2 transition-all duration-500 border border-gray-100"
               >
-                {/* Avatar */}
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                    {t.avatar}
+                {/* Quote mark */}
+                <div className="text-5xl font-serif text-[#8B5E83]/15 leading-none mb-4">"</div>
+
+                <p className="text-gray-600 text-base leading-relaxed mb-6 italic">
+                  {t.text}
+                </p>
+
+                <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#8B5E83] to-[#b8829e] flex items-center justify-center text-white font-bold text-sm">
+                    {t.name.charAt(0)}
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">{t.name}</p>
-                    <div className="flex gap-1 mt-1">
+                    <p className="font-semibold text-gray-900 text-sm">{t.name}</p>
+                    <div className="flex gap-0.5 mt-0.5">
                       {[...Array(t.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                        <Star key={i} className="w-3 h-3 text-amber-400 fill-current" />
                       ))}
                     </div>
                   </div>
                 </div>
-
-                <p className="text-gray-700 text-base italic leading-relaxed">
-                  {t.text}
-                </p>
               </div>
             ))}
           </div>
@@ -474,171 +582,44 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
       </div>
 
       {/* ================= NEWSLETTER ================= */}
-      <div className="max-w-7xl mx-auto px-4 py-20">
-        <div className="relative bg-gradient-to-r from-pink-400 via-purple-400 to-pink-400 
-          rounded-3xl p-12 text-center shadow-2xl overflow-hidden"
-        >
-          {/* Pattern overlay */}
-          <div
-            className="absolute inset-0 opacity-20 bg-cover bg-center"
-            style={{
-              backgroundImage: "url('https://i.pinimg.com/736x/4a/61/2a/4a612a4957332c87a1e64da3d57c01ad.jpg')",
-            }}
-          />
+      <div className="py-24 bg-white">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="scroll-animate-scale relative bg-gradient-to-br from-[#8B5E83] to-[#6b4560] rounded-3xl p-10 md:p-16 text-center overflow-hidden">
+            {/* Decorative circles */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/3 -translate-x-1/4" />
 
-          {/* Floating sparkles */}
-          {[...Array(5)].map((_, i) => (
-            <Sparkles
-              key={i}
-              className="absolute text-white/20 animate-twinkle"
-              style={{
-                top: `${Math.random() * 80 + 10}%`,
-                left: `${Math.random() * 80 + 10}%`,
-                width: `${Math.random() * 30 + 20}px`,
-                height: `${Math.random() * 30 + 20}px`,
-                animationDelay: `${i * 0.7}s`
-              }}
-            />
-          ))}
+            <div className="relative z-10">
+              <Sparkles className="w-8 h-8 text-white/60 mx-auto mb-4" />
 
-          <div className="relative z-10">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Mail className="w-16 h-16 text-white drop-shadow-lg" />
-              <Heart className="w-10 h-10 text-white fill-current animate-pulse" />
+              <h2 className="text-3xl md:text-4xl font-serif text-white mb-4">
+                Join Our Beauty Community
+              </h2>
+              <p className="text-white/70 max-w-xl mx-auto mb-8 text-lg">
+                Get exclusive offers, restock alerts, and beauty inspiration delivered to your inbox.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+                <input
+                  type="email"
+                  placeholder="Enter your email address..."
+                  className="flex-1 px-5 py-4 rounded-xl text-gray-800 bg-white shadow-lg
+                    focus:outline-none focus:ring-4 focus:ring-white/20 transition-all placeholder-gray-400"
+                  style={{ fontSize: '16px' }}
+                />
+                <button className="bg-white text-[#8B5E83] px-8 py-4 rounded-xl font-semibold shadow-lg
+                  hover:bg-gray-50 transition-all duration-300 magnetic-btn flex-shrink-0">
+                  Subscribe
+                </button>
+              </div>
+
+              <p className="text-white/40 text-xs mt-4">
+                Join 10,000+ subscribers. No spam, unsubscribe anytime.
+              </p>
             </div>
-
-            <h2 className="text-4xl md:text-5xl font-serif mb-4 text-white drop-shadow-lg">
-              Join Our Beauty Community
-            </h2>
-
-            <p className="text-white/90 max-w-xl mx-auto mb-8 text-lg">
-              Get exclusive offers, restock alerts, discount drops and beauty inspiration 💕
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email address…"
-                className="flex-1 px-5 py-4 rounded-xl text-gray-800 shadow-xl 
-                focus:outline-none focus:ring-4 focus:ring-white/40 transition-all"
-                style={{ fontSize: '16px' }}
-              />
-
-              <button
-                className="bg-white text-pink-600 px-8 py-4 rounded-xl font-semibold shadow-xl 
-                hover:bg-gray-100 transition-all transform hover:scale-[1.05] active:scale-95 flex items-center justify-center gap-2"
-              >
-                <Sparkles className="w-5 h-5" />
-                Subscribe
-              </button>
-            </div>
-
-            <p className="text-white/70 text-xs mt-4">
-              ✨ Join 10,000+ subscribers who get the best deals first!
-            </p>
           </div>
         </div>
       </div>
-
-      {/* ================= ANIMATIONS CSS ================= */}
-      <style jsx>{`
-        @keyframes marquee {
-          0% { transform: translateX(0%); }
-          100% { transform: translateX(-50%); }
-        }
-        
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes slideInDown {
-          from {
-            opacity: 0;
-            transform: translateY(-30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes float-slow {
-          0%, 100% {
-            transform: translateY(0px) translateX(0px);
-          }
-          25% {
-            transform: translateY(-20px) translateX(10px);
-          }
-          50% {
-            transform: translateY(-10px) translateX(-10px);
-          }
-          75% {
-            transform: translateY(-15px) translateX(5px);
-          }
-        }
-        
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.2); }
-        }
-        
-        @keyframes pulse-slow {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.6; }
-        }
-        
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        .animate-marquee {
-          display: inline-flex;
-          animation: marquee 20s linear infinite;
-          width: max-content;
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 1s ease-out forwards;
-        }
-        
-        .animate-fadeInUp {
-          animation: fadeInUp 0.8s ease-out forwards;
-        }
-        
-        .animate-slideInDown {
-          animation: slideInDown 0.8s ease-out forwards;
-        }
-        
-        .animate-float-slow {
-          animation: float-slow 10s ease-in-out infinite;
-        }
-        
-        .animate-twinkle {
-          animation: twinkle 3s ease-in-out infinite;
-        }
-        
-        .animate-pulse-slow {
-          animation: pulse-slow 4s ease-in-out infinite;
-        }
-        
-        .animate-spin-slow {
-          animation: spin-slow 8s linear infinite;
-        }
-      `}</style>
-
     </div>
   );
 };

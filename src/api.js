@@ -310,6 +310,20 @@ export const ordersAPI = {
   },
 
 
+  // Get user's own orders
+  getMyOrders: async (token) => {
+    try {
+      const response = await fetch(`${API_URL}/orders/my-orders`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await handleResponse(response);
+      return data.data || data;
+    } catch (error) {
+      console.error("Get my orders error:", error);
+      throw error;
+    }
+  },
+
   // ADMIN: Update order status
   updateOrderStatus: async (orderId, data, token) => {
     try {

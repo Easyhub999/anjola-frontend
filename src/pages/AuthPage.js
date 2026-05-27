@@ -1,14 +1,11 @@
-import React, { useState } from "react";
-import { Loader } from "lucide-react";
+import { useState } from "react";
+import { Loader, Eye, EyeOff, Sparkles } from "lucide-react";
 import { authAPI } from "../api";
 
 const AuthPage = ({ setUser, setCurrentPage }) => {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState(null);
 
@@ -16,132 +13,88 @@ const AuthPage = ({ setUser, setCurrentPage }) => {
     e.preventDefault();
     setAuthLoading(true);
     setAuthError(null);
-
     try {
-      let userData;
-
-      // LOGIN
-      if (isLogin) {
-        userData = await authAPI.login(formData.email, formData.password);
-      }
-      // REGISTER
-      else {
-        userData = await authAPI.register(
-          formData.name,
-          formData.email,
-          formData.password
-        );
-      }
-
-      // Save user in global state
+      const userData = isLogin
+        ? await authAPI.login(formData.email, formData.password)
+        : await authAPI.register(formData.name, formData.email, formData.password);
       setUser(userData);
-
-      // Redirect based on role
-      if (userData?.role === "admin") {
-        setCurrentPage("admin");
-      } else {
-        setCurrentPage("home");
-      }
+      setCurrentPage(userData?.role === "admin" ? "admin" : "home");
     } catch (error) {
       setAuthError(error.message || "Authentication failed");
-    } finally {
-      setAuthLoading(false);
-    }
+    } finally { setAuthLoading(false); }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center py-20 px-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-
-        <h1 className="text-3xl font-serif text-center mb-6 text-gray-800">
-          {isLogin ? "Welcome Back" : "Join the Anjola Family"}
-        </h1>
-
-        {authError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
-            {authError}
+    <div className="min-h-screen bg-[#fffbf7] flex items-center justify-center py-20 px-4">
+      <div className="w-full max-w-md">
+        {/* Brand */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 mb-4">
+            <Sparkles className="w-5 h-5 text-[#8B5E83]" />
+            <span className="text-sm font-medium text-[#8B5E83] tracking-wide">Anjola Aesthetics</span>
           </div>
-        )}
+          <h1 className="text-3xl font-serif text-gray-900 mb-2">
+            {isLogin ? "Welcome Back" : "Join the Family"}
+          </h1>
+          <p className="text-gray-500 text-sm">
+            {isLogin ? "Sign in to your account" : "Create your account to start shopping"}
+          </p>
+        </div>
 
-        <form onSubmit={handleAuth} className="space-y-4">
-          {/* NAME FIELD - only for register */}
-          {!isLogin && (
-            <div>
-              <label className="block text-sm font-medium mb-2">Full Name</label>
-              <input
-                type="text"
-                required={!isLogin}
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg 
-                focus:outline-none focus:ring-2 focus:ring-pink-400"
-              />
+        {/* Form Card */}
+        <div className="bg-white rounded-2xl shadow-card p-8 border border-gray-100">
+          {authError && (
+            <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl mb-5 text-sm">
+              {authError}
             </div>
           )}
 
-          {/* EMAIL */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
-            <input
-              type="email"
-              required
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg 
-              focus:outline-none focus:ring-2 focus:ring-pink-400"
-            />
-          </div>
-
-          {/* PASSWORD */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Password</label>
-            <input
-              type="password"
-              required
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg 
-              focus:outline-none focus:ring-2 focus:ring-pink-400"
-            />
-          </div>
-
-          {/* SUBMIT BUTTON */}
-          <button
-            type="submit"
-            disabled={authLoading}
-            className="w-full bg-gradient-to-r from-pink-400 to-purple-400 
-            text-white py-3 rounded-lg hover:from-pink-500 hover:to-purple-500 
-            transition disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {authLoading ? (
-              <>
-                <Loader className="w-5 h-5 animate-spin" />
-                Processing...
-              </>
-            ) : isLogin ? (
-              "Sign In"
-            ) : (
-              "Create Account"
+          <form onSubmit={handleAuth} className="space-y-4">
+            {!isLogin && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
+                <input type="text" required={!isLogin} value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10 focus:outline-none transition text-sm"
+                  placeholder="Enter your full name" />
+              </div>
             )}
-          </button>
-        </form>
 
-        {/* SWITCH LOGIN <-> REGISTER */}
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-pink-600 hover:text-pink-700 font-medium"
-          >
-            {isLogin
-              ? "Don't have an account? Create one"
-              : "Already a member? Sign in"}
-          </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+              <input type="email" required value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10 focus:outline-none transition text-sm"
+                placeholder="your.email@example.com" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+              <div className="relative">
+                <input type={showPassword ? "text" : "password"} required value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10 focus:outline-none transition text-sm"
+                  placeholder="Enter your password" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" disabled={authLoading}
+              className="w-full bg-[#8B5E83] text-white py-3.5 rounded-xl font-semibold hover:bg-[#7a5073]
+                transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-md hover:shadow-lg magnetic-btn">
+              {authLoading ? (<><Loader className="w-5 h-5 animate-spin" /> Processing...</>) : (isLogin ? "Sign In" : "Create Account")}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <button onClick={() => { setIsLogin(!isLogin); setAuthError(null); }}
+              className="text-[#8B5E83] hover:text-[#7a5073] font-medium text-sm transition-colors">
+              {isLogin ? "Don't have an account? Create one" : "Already a member? Sign in"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

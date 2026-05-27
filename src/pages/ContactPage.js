@@ -1,169 +1,127 @@
-import React, { useState } from "react";
-import { Mail, Package, Instagram, Facebook, Check } from "lucide-react";
+import { useState } from "react";
+import { Mail, MapPin, Phone, Instagram, Facebook, Check, Send } from "lucide-react";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  try {
-    console.log('Submitting form:', formData); // Debug log
-
-    const response = await fetch(
-      "https://anjola-backend-1.onrender.com/api/contact",
-      {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await fetch("https://anjola-backend-1.onrender.com/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
-      }
-    );
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setSubmitted(true);
+        setFormData({ name: "", email: "", message: "" });
+        setTimeout(() => setSubmitted(false), 4000);
+      } else { alert(data.message || "Failed to send message"); }
+    } catch (error) {
+      console.error("Contact error:", error);
+      alert("Error sending message. Please try again later.");
+    } finally { setLoading(false); }
+  };
 
-    const data = await response.json();
-    console.log('Response from backend:', data); // Debug log
-
-    if (response.ok) {
-      console.log('Email sent successfully!', data); // Debug log
-      setSubmitted(true);
-      setFormData({ name: "", email: "", message: "" });
-      setTimeout(() => setSubmitted(false), 3000);
-    } else {
-      console.error('Failed:', data); // Debug log
-      alert(data.message || "Failed to send message");
-    }
-  } catch (error) {
-    console.error("Contact error:", error); // Debug log
-    alert("Error sending message. Please try again later.");
-  }
-};
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 pt-24 pb-12">
+    <div className="min-h-screen bg-[#fffbf7] pt-12 pb-12">
       <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-5xl font-serif text-center mb-12 text-gray-800">Get In Touch</h1>
+        {/* Header */}
+        <div className="text-center mb-14">
+          <span className="inline-block text-[#8B5E83] font-medium text-sm tracking-[0.2em] uppercase mb-3">
+            Reach Out
+          </span>
+          <h1 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">Get In Touch</h1>
+          <p className="text-gray-500 max-w-lg mx-auto">
+            We'd love to hear from you. Whether you have a question, feedback, or just want to say hello.
+          </p>
+        </div>
 
-        <div className="grid md:grid-cols-2 gap-12">
-          {/* LEFT SIDE — INFO */}
+        <div className="grid md:grid-cols-2 gap-10">
+          {/* LEFT — INFO */}
           <div>
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800">Contact Information</h2>
-            <div className="space-y-4">
-
-              {/* EMAIL */}
-              <div className="flex items-start gap-4">
-                <Mail className="w-6 h-6 text-pink-400 mt-1" />
-                <div>
-                  <p className="font-semibold">Email</p>
-                  <p className="text-gray-600">anjolaaestheticsng@gmail.com</p>
+            <div className="space-y-6">
+              {[
+                { icon: <Mail className="w-5 h-5" />, label: "Email", value: "anjolaaestheticsng@gmail.com" },
+                { icon: <MapPin className="w-5 h-5" />, label: "Location", value: "Abeokuta, Nigeria" },
+                { icon: <Phone className="w-5 h-5" />, label: "WhatsApp", value: "+234 706 594 3625" },
+              ].map((item, i) => (
+                <div key={i} className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-[#8B5E83]/8 flex items-center justify-center text-[#8B5E83] flex-shrink-0">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 text-sm">{item.label}</p>
+                    <p className="text-gray-500 text-sm">{item.value}</p>
+                  </div>
                 </div>
-              </div>
-
-              {/* LOCATION */}
-              <div className="flex items-start gap-4">
-                <Package className="w-6 h-6 text-pink-400 mt-1" />
-                <div>
-                  <p className="font-semibold">Location</p>
-                  <p className="text-gray-600">Abeokuta, Nigeria</p>
-                </div>
-              </div>
+              ))}
             </div>
 
-            {/* FOLLOW US */}
-            <div className="mt-8">
-              <h3 className="text-xl font-semibold mb-4 text-gray-800">Follow Us</h3>
-
-              <div className="flex gap-4">
-                {/* Instagram */}
-                <a
-                  href="https://www.instagram.com/anjola_aesthetics_ng02"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-pink-100 transition"
-                >
-                  <Instagram className="w-6 h-6 text-pink-400" />
-                </a>
-
-                {/* Facebook */}
-                <a
-                  href="https://www.facebook.com/AnjolaAestheticsNG"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-pink-100 transition"
-                >
-                  <Facebook className="w-6 h-6 text-pink-400" />
-                </a>
-
-                {/* TikTok */}
-                <a
-                  href="https://www.tiktok.com/@anjola_aesthetics_ng02"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-pink-100 transition"
-                >
-                  <svg
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    className="w-6 h-6 text-pink-400"
-                  >
-                    <path d="M12 2c.7 0 1.3.6 1.3 1.3v11.7a3 3 0 11-3-3c.4 0 .7.1 1 .2V8.7a1.3 1.3 0 10-1.3-1.3v3.3a5.7 5.7 0 103.7 5.3V6.3A1.3 1.3 0 0012 5V2z" />
-                  </svg>
-                </a>
+            {/* Socials */}
+            <div className="mt-10">
+              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-[0.15em] mb-4">Follow Us</h3>
+              <div className="flex gap-3">
+                {[
+                  { href: "https://www.instagram.com/anjola_aesthetics_ng02", icon: <Instagram className="w-5 h-5" />, color: "hover:bg-pink-50 hover:text-pink-600 hover:border-pink-200" },
+                  { href: "https://www.facebook.com/AnjolaAestheticsNG", icon: <Facebook className="w-5 h-5" />, color: "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200" },
+                  { href: "https://www.tiktok.com/@anjola_aesthetics_ng02", icon: (
+                    <svg fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
+                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                    </svg>
+                  ), color: "hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300" },
+                ].map((social, i) => (
+                  <a key={i} href={social.href} target="_blank" rel="noopener noreferrer"
+                    className={`w-11 h-11 border border-gray-200 rounded-xl flex items-center justify-center text-gray-400 transition-all duration-300 ${social.color}`}>
+                    {social.icon}
+                  </a>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* RIGHT SIDE — FORM */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          {/* RIGHT — FORM */}
+          <div className="bg-white rounded-2xl shadow-card p-8 border border-gray-100">
             {submitted ? (
               <div className="text-center py-12">
-                <Check className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                <h3 className="text-2xl font-semibold text-gray-800 mb-2">
-                  Thank You!
-                </h3>
-                <p className="text-gray-600">We'll get back to you soon.</p>
+                <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Check className="w-8 h-8 text-emerald-500" />
+                </div>
+                <h3 className="text-xl font-serif text-gray-900 mb-2">Message Sent!</h3>
+                <p className="text-gray-500 text-sm">We'll get back to you soon.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
-
                 <div>
-                  <label className="block text-sm font-medium mb-2">Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Name</label>
+                  <input type="text" required value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
-                  />
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10 focus:outline-none transition text-sm"
+                    placeholder="Your name" />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium mb-2">Email</label>
-                  <input
-                    type="email"
-                    required
-                    value={formData.email}
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                  <input type="email" required value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3	border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
-                  />
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10 focus:outline-none transition text-sm"
+                    placeholder="your.email@example.com" />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium mb-2">Message</label>
-                  <textarea
-                    required
-                    rows="4"
-                    value={formData.message}
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Message</label>
+                  <textarea required rows="5" value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
-                  />
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-[#8B5E83] focus:ring-3 focus:ring-[#8B5E83]/10 focus:outline-none transition resize-none text-sm"
+                    placeholder="How can we help?" />
                 </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-pink-400 to-purple-400 text-white py-3 rounded-lg hover:from-pink-500 hover:to-purple-500 transition"
-                >
-                  Send Message
+                <button type="submit" disabled={loading}
+                  className="w-full bg-[#8B5E83] text-white py-3.5 rounded-xl font-semibold hover:bg-[#7a5073]
+                    transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 magnetic-btn">
+                  {loading ? 'Sending...' : <><Send className="w-4 h-4" /> Send Message</>}
                 </button>
-
               </form>
             )}
           </div>

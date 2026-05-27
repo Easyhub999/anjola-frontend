@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 import Navigation from './components/Navigation';
@@ -19,11 +19,132 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import { productsAPI } from './api';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 import { Analytics } from "@vercel/analytics/react";
+import { MessageCircle, ArrowUp } from 'lucide-react';
+
+// ============================================
+// FLOATING ACTION BUTTONS COMPONENT
+// ============================================
+const FloatingButtons = () => {
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 500);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <div className="fixed bottom-6 right-6 z-[998] flex flex-col gap-3">
+      {/* Back to Top */}
+      {showBackToTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="w-12 h-12 bg-white text-gray-700 rounded-full shadow-luxury flex items-center justify-center
+            hover:shadow-luxury-lg hover:scale-105 transition-all duration-300 animate-fadeInUp border border-gray-100"
+          title="Back to top"
+        >
+          <ArrowUp className="w-5 h-5" />
+        </button>
+      )}
+
+      {/* WhatsApp */}
+      <a
+        href="https://wa.me/2347065943625?text=Hi%20Anjola%20Aesthetics!%20I%27d%20like%20to%20enquire%20about%20your%20products."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-14 h-14 bg-emerald-500 text-white rounded-full shadow-lg flex items-center justify-center
+          hover:bg-emerald-600 hover:shadow-xl hover:scale-105 transition-all duration-300 animate-fadeInUp"
+        title="Chat on WhatsApp"
+      >
+        <MessageCircle className="w-6 h-6" />
+      </a>
+    </div>
+  );
+};
+
+// ============================================
+// TOAST COMPONENT
+// ============================================
+const Toast = ({ message, onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 2500);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className="fixed top-24 right-4 z-[1100] animate-slideInRight">
+      <div className="bg-gray-900 text-white text-sm px-5 py-3.5 rounded-xl shadow-luxury-lg flex items-center gap-3 max-w-xs">
+        <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+          <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <span>{message}</span>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// RECENTLY VIEWED HOOK
+// ============================================
+const useRecentlyViewed = () => {
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('recentlyViewed');
+    if (stored) {
+      try { setRecentlyViewed(JSON.parse(stored)); } catch (e) { /* ignore */ }
+    }
+  }, []);
+
+  const addToRecentlyViewed = (product) => {
+    setRecentlyViewed(prev => {
+      const filtered = prev.filter(p => p._id !== product._id);
+      const updated = [product, ...filtered].slice(0, 8);
+      localStorage.setItem('recentlyViewed', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  return { recentlyViewed, addToRecentlyViewed };
+};
+
+// ============================================
+// WISHLIST HOOK
+// ============================================
+const useWishlist = () => {
+  const [wishlist, setWishlist] = useState([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('wishlist');
+    if (stored) {
+      try { setWishlist(JSON.parse(stored)); } catch (e) { /* ignore */ }
+    }
+  }, []);
+
+  const toggleWishlist = (product) => {
+    setWishlist(prev => {
+      const exists = prev.find(p => p._id === product._id);
+      const updated = exists
+        ? prev.filter(p => p._id !== product._id)
+        : [...prev, product];
+      localStorage.setItem('wishlist', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const isWishlisted = (id) => wishlist.some(p => p._id === id);
+
+  return { wishlist, toggleWishlist, isWishlisted };
+};
 
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [cart, setCart] = useState([]);
   const [user, setUser] = useState(null);
@@ -36,6 +157,9 @@ function AppContent() {
   const [toast, setToast] = useState(null);
   const [cartBump, setCartBump] = useState(false);
 
+  const { recentlyViewed, addToRecentlyViewed } = useRecentlyViewed();
+  const { wishlist, toggleWishlist, isWishlisted } = useWishlist();
+
   const currentPage = location.pathname.slice(1) || 'home';
 
   const setCurrentPage = function(page) {
@@ -46,7 +170,6 @@ function AppContent() {
     }
   };
 
-  // 🔥 HANDLE LOGOUT FUNCTION
   const handleLogout = () => {
     localStorage.removeItem('user');
     setUser(null);
@@ -59,28 +182,15 @@ function AppContent() {
     var storedCart = localStorage.getItem('cart');
 
     if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error(e);
-      }
+      try { setUser(JSON.parse(storedUser)); } catch (e) { console.error(e); }
     }
-
     if (storedCart) {
-      try {
-        setCart(JSON.parse(storedCart));
-      } catch (e) {
-        console.error(e);
-      }
+      try { setCart(JSON.parse(storedCart)); } catch (e) { console.error(e); }
     }
 
     var savedProduct = localStorage.getItem('selectedProduct');
     if (location.pathname === '/product' && savedProduct && !selectedProduct) {
-      try {
-        setSelectedProduct(JSON.parse(savedProduct));
-      } catch (e) {
-        console.error(e);
-      }
+      try { setSelectedProduct(JSON.parse(savedProduct)); } catch (e) { console.error(e); }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
@@ -88,7 +198,9 @@ function AppContent() {
   useEffect(function() {
     if (selectedProduct) {
       localStorage.setItem('selectedProduct', JSON.stringify(selectedProduct));
+      addToRecentlyViewed(selectedProduct);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProduct]);
 
   useEffect(function() {
@@ -104,7 +216,6 @@ function AppContent() {
         setLoading(false);
       }
     };
-
     loadProducts();
   }, []);
 
@@ -113,11 +224,9 @@ function AppContent() {
   }, [cart]);
 
   var triggerCartFeedback = function(message) {
-    var id = Date.now();
-    setToast({ id: id, message: message });
+    setToast(message);
     setCartBump(true);
     setTimeout(function() { setCartBump(false); }, 300);
-    setTimeout(function() { setToast(null); }, 2500);
   };
 
   var addToCart = function(product) {
@@ -131,20 +240,17 @@ function AppContent() {
       return;
     }
 
-    // 🔥 USE SALES PRICE IF AVAILABLE
-    var effectivePrice = product.salesPrice && product.salesPrice < product.price 
-      ? product.salesPrice 
+    var effectivePrice = product.salesPrice && product.salesPrice < product.price
+      ? product.salesPrice
       : product.price;
 
-    // Create cart item with effective price
     var cartProduct = {
       ...product,
       price: effectivePrice,
-      originalPrice: product.price, // Keep original for reference
+      originalPrice: product.price,
       onSale: product.salesPrice && product.salesPrice < product.price
     };
 
-    // For Products with price variations, use a unique key combining product ID and pieces
     var cartKey = product.selectedPieces
       ? product._id + '-' + product.selectedPieces
       : product._id;
@@ -204,16 +310,10 @@ function AppContent() {
     return (
       <div>
         <Navigation
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          cart={cart}
-          showCart={showCart}
-          setShowCart={setShowCart}
-          showMobileMenu={showMobileMenu}
-          setShowMobileMenu={setShowMobileMenu}
-          user={user}
-          cartBump={cartBump}
-          handleLogout={handleLogout}
+          currentPage={currentPage} setCurrentPage={setCurrentPage}
+          cart={cart} showCart={showCart} setShowCart={setShowCart}
+          showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu}
+          user={user} cartBump={cartBump} handleLogout={handleLogout}
         />
         <LoadingSpinner />
       </div>
@@ -224,16 +324,10 @@ function AppContent() {
     return (
       <div>
         <Navigation
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          cart={cart}
-          showCart={showCart}
-          setShowCart={setShowCart}
-          showMobileMenu={showMobileMenu}
-          setShowMobileMenu={setShowMobileMenu}
-          user={user}
-          cartBump={cartBump}
-          handleLogout={handleLogout}
+          currentPage={currentPage} setCurrentPage={setCurrentPage}
+          cart={cart} showCart={showCart} setShowCart={setShowCart}
+          showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu}
+          user={user} cartBump={cartBump} handleLogout={handleLogout}
         />
         <ErrorDisplay message={error} />
       </div>
@@ -241,44 +335,29 @@ function AppContent() {
   }
 
   return (
-    <div className="App">
+    <div className="App bg-[#fffbf7] min-h-screen">
       <Navigation
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        cart={cart}
-        showCart={showCart}
-        setShowCart={setShowCart}
-        showMobileMenu={showMobileMenu}
-        setShowMobileMenu={setShowMobileMenu}
-        user={user}
-        cartBump={cartBump}
-        handleLogout={handleLogout}
+        currentPage={currentPage} setCurrentPage={setCurrentPage}
+        cart={cart} showCart={showCart} setShowCart={setShowCart}
+        showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu}
+        user={user} cartBump={cartBump} handleLogout={handleLogout}
       />
 
       <CartSidebar
-        showCart={showCart}
-        setShowCart={setShowCart}
-        cart={cart}
-        updateQuantity={updateQuantity}
-        removeFromCart={removeFromCart}
-        getTotalPrice={getTotalPrice}
+        showCart={showCart} setShowCart={setShowCart}
+        cart={cart} updateQuantity={updateQuantity}
+        removeFromCart={removeFromCart} getTotalPrice={getTotalPrice}
         setCurrentPage={setCurrentPage}
       />
 
-      <div className={
-        currentPage === 'shop' ? 'pt-40'
-        : 'pt-24'
-      }>
+      <div className={currentPage === 'shop' ? 'pt-36' : 'pt-24'}>
         <Routes>
           <Route
             path="/"
             element={
               <HomePage
-                products={products}
-                cart={cart}
-                addToCart={addToCart}
-                updateQuantity={updateQuantity}
-                setCurrentPage={setCurrentPage}
+                products={products} cart={cart} addToCart={addToCart}
+                updateQuantity={updateQuantity} setCurrentPage={setCurrentPage}
                 setSelectedProduct={setSelectedProduct}
               />
             }
@@ -288,16 +367,13 @@ function AppContent() {
             path="/shop"
             element={
               <ShopPage
-                products={products}
-                cart={cart}
-                addToCart={addToCart}
-                updateQuantity={updateQuantity}
-                removeFromCart={removeFromCart}
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                setCurrentPage={setCurrentPage}
-                setSelectedProduct={setSelectedProduct}
+                products={products} cart={cart} addToCart={addToCart}
+                updateQuantity={updateQuantity} removeFromCart={removeFromCart}
+                searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+                setCurrentPage={setCurrentPage} setSelectedProduct={setSelectedProduct}
                 selectedProduct={selectedProduct}
+                wishlist={wishlist} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted}
+                recentlyViewed={recentlyViewed}
               />
             }
           />
@@ -307,10 +383,9 @@ function AppContent() {
             element={
               selectedProduct ? (
                 <ProductDetailPage
-                  selectedProduct={selectedProduct}
-                  addToCart={addToCart}
-                  user={user}
-                  setCurrentPage={setCurrentPage}
+                  selectedProduct={selectedProduct} addToCart={addToCart}
+                  user={user} setCurrentPage={setCurrentPage}
+                  toggleWishlist={toggleWishlist} isWishlisted={isWishlisted}
                 />
               ) : (
                 <div style={{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
@@ -321,22 +396,17 @@ function AppContent() {
           />
 
           <Route path="/blog" element={<BlogPage />} />
-          
           <Route path="/contact" element={<ContactPage />} />
-
-          <Route
-            path="/auth"
-            element={<AuthPage setUser={setUser} setCurrentPage={setCurrentPage} />}
-          />
+          <Route path="/auth" element={<AuthPage setUser={setUser} setCurrentPage={setCurrentPage} />} />
 
           <Route
             path="/profile"
             element={
               user ? (
                 <ProfilePage
-                  user={user}
-                  setUser={setUser}
-                  setCurrentPage={setCurrentPage}
+                  user={user} setUser={setUser} setCurrentPage={setCurrentPage}
+                  wishlist={wishlist} toggleWishlist={toggleWishlist}
+                  setSelectedProduct={setSelectedProduct}
                 />
               ) : (
                 <div style={{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
@@ -350,42 +420,28 @@ function AppContent() {
             path="/checkout"
             element={
               <CheckoutPage
-                cart={cart}
-                getTotalPrice={getTotalPrice}
-                clearCart={clearCart}
-                setCurrentPage={setCurrentPage}
-                user={user}
+                cart={cart} getTotalPrice={getTotalPrice}
+                clearCart={clearCart} setCurrentPage={setCurrentPage} user={user}
               />
             }
           />
 
-          <Route
-            path="/admin-analytics"
-            element={<AdminAnalyticsPage user={user} />}
-          />
-
-          <Route
-            path="/admin-orders"
-            element={<AdminOrdersPage user={user} />}
-          />
+          <Route path="/admin-analytics" element={<AdminAnalyticsPage user={user} />} />
+          <Route path="/admin-orders" element={<AdminOrdersPage user={user} />} />
           <Route
             path="/admin"
-            element={
-            <AdminPage 
-              user={user}
-              products={products}
-              setProducts={setProducts}
-            />
-            }
+            element={<AdminPage user={user} products={products} setProducts={setProducts} />}
           />
         </Routes>
       </div>
 
+      {/* Toast */}
       {toast && (
-        <div style={{position: 'fixed', top: '80px', right: '16px', backgroundColor: '#111', color: 'white', fontSize: '14px', padding: '12px 16px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', zIndex: 1000}}>
-          <span>{toast.message}</span>
-        </div>
+        <Toast message={toast} onClose={() => setToast(null)} />
       )}
+
+      {/* Floating Action Buttons */}
+      <FloatingButtons />
 
       <Footer setCurrentPage={setCurrentPage} />
     </div>
