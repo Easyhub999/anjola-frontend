@@ -1,10 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, ShoppingBag, ChevronLeft, ChevronRight, Star, Heart, ExternalLink } from 'lucide-react';
 
 const QuickViewModal = ({ product, onClose, addToCart, setCurrentPage, setSelectedProduct, isWishlisted, toggleWishlist }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (product) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [product]);
 
   if (!product) return null;
 
@@ -45,13 +53,13 @@ const QuickViewModal = ({ product, onClose, addToCart, setCurrentPage, setSelect
   };
 
   return (
-    <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[9998] flex items-end md:items-center justify-center" onClick={onClose}>
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
 
-      {/* Modal */}
+      {/* Modal — bottom sheet on mobile, centered on desktop */}
       <div
-        className="relative bg-white rounded-3xl shadow-luxury-xl max-w-3xl w-full max-h-[90vh] overflow-hidden animate-scale-in"
+        className="relative bg-white md:rounded-3xl rounded-t-3xl shadow-luxury-xl max-w-3xl w-full max-h-[85vh] overflow-y-auto animate-scale-in md:m-4"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close */}
