@@ -39,9 +39,12 @@ const QuickViewModal = ({ product, onClose, addToCart, setCurrentPage, setSelect
   };
 
   return (
-    <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[9998] overflow-y-auto" onClick={onClose}>
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+
+      {/* Centering wrapper — scrollable if modal is taller than viewport */}
+      <div className="flex min-h-full items-center justify-center p-4">
 
       {/* Modal */}
       <div
@@ -176,6 +179,7 @@ const QuickViewModal = ({ product, onClose, addToCart, setCurrentPage, setSelect
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
