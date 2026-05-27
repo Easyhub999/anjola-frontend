@@ -45,7 +45,7 @@ const QuickViewModal = ({ product, onClose, addToCart, setCurrentPage, setSelect
 
       {/* Modal */}
       <div
-        className="relative bg-white rounded-3xl shadow-luxury-xl max-w-3xl w-full max-h-[90vh] overflow-hidden animate-scale-in"
+        className="relative bg-white rounded-3xl shadow-luxury-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close */}
@@ -100,7 +100,7 @@ const QuickViewModal = ({ product, onClose, addToCart, setCurrentPage, setSelect
           </div>
 
           {/* PRODUCT INFO */}
-          <div className="p-6 md:p-8 flex flex-col overflow-y-auto max-h-[50vh] md:max-h-[80vh]">
+          <div className="p-6 md:p-8 flex flex-col">
             {product.category && (
               <span className="text-[10px] text-[#e84393] font-semibold uppercase tracking-wider mb-2">{product.category}</span>
             )}
