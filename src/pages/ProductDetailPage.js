@@ -5,7 +5,7 @@ import { Heart, Share2, ShoppingBag, Truck, Shield, Star, ChevronDown, AlertTria
 
 const ProductDetailPage = ({
   selectedProduct, setCurrentPage, user, addToCart,
-  toggleWishlist, isWishlisted
+  toggleWishlist, isWishlisted, products, setSelectedProduct
 }) => {
   const hasProduct = !!selectedProduct;
 
@@ -38,6 +38,23 @@ const ProductDetailPage = ({
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     setZoomPosition({ x, y });
+  };
+
+  // Touch swipe for mobile gallery
+  const [touchStartX, setTouchStartX] = useState(null);
+  const handleSwipeStart = (e) => setTouchStartX(e.touches[0].clientX);
+  const handleSwipeEnd = (e) => {
+    if (!touchStartX) return;
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      const currentIdx = allImages.indexOf(mainImage);
+      if (diff > 0 && currentIdx < allImages.length - 1) {
+        setMainImage(allImages[currentIdx + 1]); setImageLoaded(false);
+      } else if (diff < 0 && currentIdx > 0) {
+        setMainImage(allImages[currentIdx - 1]); setImageLoaded(false);
+      }
+    }
+    setTouchStartX(null);
   };
 
   // Stock & visibility
@@ -177,7 +194,9 @@ const ProductDetailPage = ({
               ref={imageRef}
               onMouseEnter={() => setZoomActive(true)}
               onMouseLeave={() => setZoomActive(false)}
-              onMouseMove={handleMouseMove}>
+              onMouseMove={handleMouseMove}
+              onTouchStart={handleSwipeStart}
+              onTouchEnd={handleSwipeEnd}>
               <img
                 src={mainImage} alt={selectedProduct.name}
                 onLoad={() => setImageLoaded(true)}
@@ -197,9 +216,20 @@ const ProductDetailPage = ({
                 </span>
               )}
 
-              {/* Zoom hint */}
+              {/* Swipe dot indicators (mobile) */}
+              {allImages.length > 1 && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 md:hidden">
+                  {allImages.map((img, i) => (
+                    <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${
+                      mainImage === img ? 'w-5 bg-[#e84393]' : 'w-1.5 bg-white/60'
+                    }`} />
+                  ))}
+                </div>
+              )}
+
+              {/* Zoom hint (desktop only) */}
               <div className="absolute bottom-3 right-3 bg-white/80 backdrop-blur-sm text-gray-600 px-3 py-1.5 rounded-lg text-xs
-                opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none hidden md:block">
                 Hover to zoom
               </div>
             </div>
@@ -475,8 +505,36 @@ const ProductDetailPage = ({
         </div>
       </div>
 
+      {/* YOU MIGHT ALSO LIKE */}
+      {products && products.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 mb-8">
+          <h3 className="text-2xl font-serif text-gray-900 mb-6">You Might Also Like</h3>
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+            {products
+              .filter(p => p._id !== selectedProduct._id && p.visible !== false && p.category === selectedProduct.category)
+              .slice(0, 6)
+              .concat(
+                products.filter(p => p._id !== selectedProduct._id && p.visible !== false && p.category !== selectedProduct.category).slice(0, 2)
+              )
+              .slice(0, 6)
+              .map((p) => (
+                <button key={p._id}
+                  onClick={() => { setSelectedProduct(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                  className="flex-shrink-0 w-40 text-left group">
+                  <div className="w-40 h-40 rounded-xl overflow-hidden bg-gray-100 mb-2 shadow-card group-hover:shadow-card-hover transition-shadow">
+                    <img src={p.images?.[0] || p.image || '/placeholder.png'} alt={p.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                  </div>
+                  <p className="text-xs font-medium text-gray-900 line-clamp-1 group-hover:text-[#e84393] transition-colors">{p.name}</p>
+                  <p className="text-xs font-bold text-[#e84393]">₦{(p.salesPrice && p.salesPrice < p.price ? p.salesPrice : p.price).toLocaleString()}</p>
+                </button>
+              ))}
+          </div>
+        </div>
+      )}
+
       {/* STICKY ADD TO CART */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-luxury-lg z-50 px-4 py-3 safe-area-bottom">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-luxury-lg z-[900] px-4 py-3 safe-area-bottom">
         <div className="max-w-7xl mx-auto flex items-center gap-4">
           <div className="flex-1">
             {selectedProduct.salesPrice && selectedProduct.salesPrice < selectedProduct.price && !hasPriceVariations ? (

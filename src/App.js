@@ -20,6 +20,11 @@ import { productsAPI } from './api';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 import { Analytics } from "@vercel/analytics/react";
 import { MessageCircle, ArrowUp } from 'lucide-react';
+import MobileBottomNav from './components/MobileBottomNav';
+import CustomCursor from './components/CustomCursor';
+import Confetti from './components/Confetti';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
+import ScrollProgress from './components/ScrollProgress';
 
 // ============================================
 // FLOATING ACTION BUTTONS COMPONENT
@@ -36,7 +41,7 @@ const FloatingButtons = () => {
   }, []);
 
   return (
-    <div className="fixed bottom-6 right-6 z-[998] flex flex-col gap-3">
+    <div className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-[798] flex flex-col gap-3">
       {/* Back to Top */}
       {showBackToTop && (
         <button
@@ -156,6 +161,8 @@ function AppContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState(null);
   const [cartBump, setCartBump] = useState(false);
+  const [confettiTrigger, setConfettiTrigger] = useState(0);
+  const [pageTransition, setPageTransition] = useState(false);
 
   const { recentlyViewed, addToRecentlyViewed } = useRecentlyViewed();
   const { wishlist, toggleWishlist, isWishlisted } = useWishlist();
@@ -163,12 +170,35 @@ function AppContent() {
   const currentPage = location.pathname.slice(1) || 'home';
 
   const setCurrentPage = function(page) {
-    if (page === 'home') {
-      navigate('/');
-    } else {
-      navigate('/' + page);
-    }
+    setPageTransition(true);
+    setTimeout(() => {
+      if (page === 'home') {
+        navigate('/');
+      } else {
+        navigate('/' + page);
+      }
+      setTimeout(() => setPageTransition(false), 50);
+    }, 200);
   };
+
+  // Dynamic page titles
+  useEffect(() => {
+    const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const titles = {
+      home: 'Anjola Aesthetics Ng — Luxury Self-Care',
+      shop: 'Shop | Anjola Aesthetics',
+      product: selectedProduct ? `${selectedProduct.name} | Anjola Aesthetics` : 'Product | Anjola Aesthetics',
+      blog: 'Blog | Anjola Aesthetics',
+      contact: 'Contact | Anjola Aesthetics',
+      auth: 'Sign In | Anjola Aesthetics',
+      profile: 'My Account | Anjola Aesthetics',
+      checkout: `Checkout${cartCount > 0 ? ` (${cartCount})` : ''} | Anjola Aesthetics`,
+      admin: 'Admin | Anjola Aesthetics',
+      'admin-analytics': 'Analytics | Anjola Aesthetics',
+      'admin-orders': 'Orders | Anjola Aesthetics',
+    };
+    document.title = titles[currentPage] || 'Anjola Aesthetics Ng';
+  }, [currentPage, cart, selectedProduct]);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -283,6 +313,7 @@ function AppContent() {
       : '';
 
     triggerCartFeedback(product.name + piecesText + ' added to cart');
+    setConfettiTrigger(Date.now());
   };
 
   var updateQuantity = function(id, change) {
@@ -335,7 +366,12 @@ function AppContent() {
   }
 
   return (
-    <div className="App bg-[#fff7f9] min-h-screen">
+    <div className="App bg-[#fff7f9] min-h-screen has-bottom-nav">
+      <CustomCursor />
+      <Confetti trigger={confettiTrigger} />
+      <ScrollProgress />
+      <PWAInstallPrompt />
+
       <Navigation
         currentPage={currentPage} setCurrentPage={setCurrentPage}
         cart={cart} showCart={showCart} setShowCart={setShowCart}
@@ -350,7 +386,8 @@ function AppContent() {
         setCurrentPage={setCurrentPage}
       />
 
-      <div className={currentPage === 'shop' ? 'pt-36' : 'pt-24'}>
+      <div className={`${currentPage === 'shop' ? 'pt-36' : 'pt-24'} transition-opacity duration-200 ${pageTransition ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'}`}
+        style={{ transition: 'opacity 0.2s ease, transform 0.2s ease' }}>
         <Routes>
           <Route
             path="/"
@@ -386,6 +423,7 @@ function AppContent() {
                   selectedProduct={selectedProduct} addToCart={addToCart}
                   user={user} setCurrentPage={setCurrentPage}
                   toggleWishlist={toggleWishlist} isWishlisted={isWishlisted}
+                  products={products} setSelectedProduct={setSelectedProduct}
                 />
               ) : (
                 <div style={{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
@@ -442,6 +480,12 @@ function AppContent() {
 
       {/* Floating Action Buttons */}
       <FloatingButtons />
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav
+        currentPage={currentPage} setCurrentPage={setCurrentPage}
+        cart={cart} setShowCart={setShowCart} user={user}
+      />
 
       <Footer setCurrentPage={setCurrentPage} />
     </div>

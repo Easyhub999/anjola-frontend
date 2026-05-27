@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, X, ArrowLeft, CheckCircle, Mail, Package, Home, ShoppingBag, Heart } from "lucide-react";
+import { Search, ShoppingCart, X, ArrowLeft, CheckCircle, Mail, Package, Home, ShoppingBag, Heart, Eye } from "lucide-react";
 import { paymentsAPI } from "../api";
+import QuickViewModal from "../components/QuickViewModal";
+import SaleCountdown from "../components/SaleCountdown";
 
 const PRODUCTS_PER_PAGE = 20;
 
@@ -65,6 +67,7 @@ const ShopPage = ({
   const [currentPageNumber, setCurrentPageNumber] = useState(1);
   const [sortOption, setSortOption] = useState("latest");
   const [addedToCartAnimation, setAddedToCartAnimation] = useState(null);
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
 
   useEffect(() => {
     const handlePopState = (event) => {
@@ -381,7 +384,7 @@ const ShopPage = ({
 
                 return (
                   <div key={product._id}
-                    className="group bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-card-hover
+                    className="group gradient-border-card bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-card-hover
                       transition-all duration-500 cursor-pointer flex flex-col h-full border border-gray-100
                       hover:border-[#e84393]/20"
                     onClick={() => handleOpenProduct(product)}>
@@ -428,12 +431,13 @@ const ShopPage = ({
                         </div>
                       )}
 
-                      {/* Hover overlay */}
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                        <span className="text-white text-sm font-medium bg-black/40 backdrop-blur-sm px-4 py-2 rounded-full
-                          transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                          View Details
-                        </span>
+                      {/* Hover overlay with Quick View */}
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-2">
+                        <button onClick={(e) => { e.stopPropagation(); setQuickViewProduct(product); }}
+                          className="bg-white text-gray-900 text-xs font-medium px-4 py-2 rounded-full shadow-lg
+                            transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 flex items-center gap-1.5 hover:bg-[#e84393] hover:text-white">
+                          <Eye className="w-3.5 h-3.5" /> Quick View
+                        </button>
                       </div>
                     </div>
 
@@ -450,12 +454,15 @@ const ShopPage = ({
                         {/* Price */}
                         <div>
                           {product.salesPrice && product.salesPrice < product.price ? (
-                            <div className="flex items-baseline gap-2 flex-wrap">
-                              <span className="text-lg font-bold text-red-600">₦{product.salesPrice.toLocaleString()}</span>
-                              <span className="text-sm text-gray-400 line-through">₦{product.price.toLocaleString()}</span>
-                              <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
-                                -{Math.round(((product.price - product.salesPrice) / product.price) * 100)}%
-                              </span>
+                            <div className="space-y-1">
+                              <div className="flex items-baseline gap-2 flex-wrap">
+                                <span className="text-lg font-bold text-red-600">₦{product.salesPrice.toLocaleString()}</span>
+                                <span className="text-sm text-gray-400 line-through">₦{product.price.toLocaleString()}</span>
+                                <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                                  -{Math.round(((product.price - product.salesPrice) / product.price) * 100)}%
+                                </span>
+                              </div>
+                              <SaleCountdown />
                             </div>
                           ) : (
                             <span className="text-lg font-bold text-gray-900">₦{product.price.toLocaleString()}</span>
@@ -554,6 +561,19 @@ const ShopPage = ({
           </div>
         )}
       </div>
+
+      {/* Quick View Modal */}
+      {quickViewProduct && (
+        <QuickViewModal
+          product={quickViewProduct}
+          onClose={() => setQuickViewProduct(null)}
+          addToCart={addToCart}
+          setCurrentPage={setCurrentPage}
+          setSelectedProduct={setSelectedProduct}
+          isWishlisted={isWishlisted}
+          toggleWishlist={toggleWishlist}
+        />
+      )}
     </div>
   );
 };

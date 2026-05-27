@@ -406,10 +406,30 @@ select:focus {
 }
 
 /* ============================================
-   SMOOTH BUTTON TRANSITIONS
+   SMOOTH BUTTON TRANSITIONS + RIPPLE
    ============================================ */
 button {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  transform: scale(0);
+  opacity: 0;
+  transition: none;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+button:active::after {
+  transform: scale(2.5);
+  opacity: 1;
+  transition: transform 0.5s ease-out, opacity 0.4s ease-out;
 }
 
 /* ============================================
@@ -449,6 +469,138 @@ img {
 .shadow-luxury-lg { box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12); }
 .glow-pink { box-shadow: 0 0 30px rgba(236, 72, 153, 0.2); }
 .glow-purple { box-shadow: 0 0 30px rgba(168, 85, 247, 0.2); }
+
+/* ============================================
+   ANIMATED GRADIENT BORDER CARDS
+   ============================================ */
+.gradient-border-card {
+  position: relative;
+  background: white;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.gradient-border-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #e84393, #a855f7, #e84393, #a855f7);
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  animation: gradient-spin 3s ease infinite;
+  pointer-events: none;
+}
+
+.gradient-border-card:hover::before {
+  opacity: 1;
+}
+
+@keyframes gradient-spin {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ============================================
+   CONFETTI CELEBRATION
+   ============================================ */
+.confetti-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 99999;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  animation: confetti-fall 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg) scale(0); opacity: 0; }
+}
+
+/* ============================================
+   COUNTDOWN TIMER
+   ============================================ */
+.countdown-digit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  padding: 0.25rem 0.5rem;
+  background: linear-gradient(135deg, #e84393, #a855f7);
+  color: white;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   PAGE CROSSFADE
+   ============================================ */
+.page-fade-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.page-fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.page-fade-exit {
+  opacity: 1;
+}
+
+.page-fade-exit-active {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* ============================================
+   MOBILE BOTTOM NAV SPACING
+   ============================================ */
+@media (max-width: 768px) {
+  .has-bottom-nav {
+    padding-bottom: 70px;
+  }
+}
+
+/* Scale-in animation for modals */
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleIn {
+  0% { opacity: 0; transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Slide-in from right for toasts */
+.animate-slideInRight {
+  animation: slideInFromRight 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInFromRight {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
 
 /* ============================================
    RESPONSIVE TYPOGRAPHY

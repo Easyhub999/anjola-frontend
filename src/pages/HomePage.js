@@ -1,6 +1,43 @@
 import { useEffect, useRef, useState } from "react";
 import { Sparkles, Heart, Gift, Star, ArrowRight, ShoppingBag, Truck, Shield, Package } from "lucide-react";
 
+// Animated counter that counts up when visible
+const AnimatedCounter = ({ target, suffix = '', decimals = 0 }) => {
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting && !started) setStarted(true); },
+      { threshold: 0.5 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [started]);
+
+  useEffect(() => {
+    if (!started) return;
+    const num = parseFloat(target);
+    const duration = 2000;
+    const steps = 60;
+    const increment = num / steps;
+    let current = 0;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= num) { setCount(num); clearInterval(timer); }
+      else setCount(current);
+    }, duration / steps);
+    return () => clearInterval(timer);
+  }, [started, target]);
+
+  return (
+    <span ref={ref}>
+      {decimals > 0 ? count.toFixed(decimals) : Math.floor(count)}{suffix}
+    </span>
+  );
+};
+
 // Scroll animation hook
 const useScrollAnimation = () => {
   const ref = useRef(null);
@@ -112,12 +149,21 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
                 </div>
               </div>
             </div>
-            <button
-              onClick={() => setShowSuccessModal(false)}
-              className="w-full bg-[#e84393] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#d63384] transition-colors duration-300 magnetic-btn"
-            >
-              Continue Shopping
-            </button>
+            <div className="space-y-3">
+              <a
+                href="https://wa.me/2347065943625?text=Hi%20Anjola%20Aesthetics!%20I%20just%20placed%20an%20order%20and%20would%20like%20to%20track%20it."
+                target="_blank" rel="noopener noreferrer"
+                className="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-semibold hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2"
+              >
+                Track via WhatsApp
+              </a>
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="w-full bg-gradient-to-r from-[#e84393] to-[#a855f7] text-white py-3.5 rounded-xl font-semibold hover:from-[#d63384] hover:to-[#9333ea] transition-all magnetic-btn"
+              >
+                Continue Shopping
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -440,12 +486,14 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
 
               <div className="grid grid-cols-3 gap-6 mb-8">
                 {[
-                  { number: "500+", label: "Happy Customers" },
-                  { number: "50+", label: "Products" },
-                  { number: "4.9", label: "Avg. Rating" },
+                  { target: 500, suffix: '+', decimals: 0, label: "Happy Customers" },
+                  { target: 50, suffix: '+', decimals: 0, label: "Products" },
+                  { target: 4.9, suffix: '', decimals: 1, label: "Avg. Rating" },
                 ].map((stat, i) => (
                   <div key={i}>
-                    <p className="text-2xl md:text-3xl font-serif font-bold text-gray-900">{stat.number}</p>
+                    <p className="text-2xl md:text-3xl font-serif font-bold text-gray-900">
+                      <AnimatedCounter target={stat.target} suffix={stat.suffix} decimals={stat.decimals} />
+                    </p>
                     <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
                   </div>
                 ))}
