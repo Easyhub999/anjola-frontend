@@ -75,10 +75,13 @@ const ProductDetailPage = ({
   const hasPriceVariations = hasProduct && selectedProduct.priceVariations && selectedProduct.priceVariations.length > 0;
 
   useEffect(() => {
-    if (hasPriceVariations && !selectedVariation) {
-      setSelectedVariation(selectedProduct.priceVariations[0]);
-    }
-  }, [hasPriceVariations, selectedProduct, selectedVariation]);
+    setMainImage(selectedProduct?.images?.[0] || selectedProduct?.image || '/placeholder.png');
+    setImageLoaded(false);
+    setSelectedSize(null);
+    setSelectedColor(null);
+    setSelectedVariation(selectedProduct?.priceVariations?.[0] || null);
+    setAddedToCart(false);
+  }, [selectedProduct]);
 
   // Colors
   const getColors = () => {
@@ -106,6 +109,7 @@ const ProductDetailPage = ({
 
   const handleAddToCart = () => {
     if (!hasProduct || isHidden || isOutOfStock) return;
+    if (selectedProduct.sizes?.length && !selectedSize) { alert('Please select a size'); return; }
     if (hasPriceVariations && !selectedVariation) { alert('Please select a quantity option'); return; }
     if (hasColors) {
       if (!selectedColor) { alert('Please select a color'); return; }

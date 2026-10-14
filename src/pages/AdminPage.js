@@ -354,7 +354,7 @@ const AdminPage = ({ user, products, setProducts }) => {
   // =========================================================
   const handleToggleVisibility = async (product) => {
     try {
-      const payload = { ...product, visible: !product.visible };
+      const payload = { visible: !product.visible };
       const updated = await productsAPI.updateProduct(
         product._id,
         payload,
@@ -1151,7 +1151,7 @@ const AdminProductForm = ({
         {colors.length === 0 && (
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="font-medium">Quantity in stock</label>
+              <label className="font-medium">Individual pieces in stock</label>
               <input
                 type="number"
                 min="0"
@@ -1398,7 +1398,7 @@ const ProductList = ({
         const p = reorderedProducts[i];
         await productsAPI.updateProduct(
           p._id,
-          { ...p, displayOrder: i },
+          { displayOrder: i },
           user.token
         );
       }

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { addCartItem, changeCartQuantity, removeCartItem, restoreCart } from './cart';
+import { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 import Navigation from './components/Navigation';
@@ -151,7 +152,10 @@ function AppContent() {
   const location = useLocation();
 
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => {
+    try { return restoreCart(JSON.parse(localStorage.getItem('cart') || '[]')); }
+    catch { return []; }
+  });
   const [user, setUser] = useState(null);
   const [showCart, setShowCart] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -209,14 +213,12 @@ function AppContent() {
 
   useEffect(function() {
     var storedUser = localStorage.getItem('user');
-    var storedCart = localStorage.getItem('cart');
+
 
     if (storedUser) {
       try { setUser(JSON.parse(storedUser)); } catch (e) { console.error(e); }
     }
-    if (storedCart) {
-      try { setCart(JSON.parse(storedCart)); } catch (e) { console.error(e); }
-    }
+
 
     var savedProduct = localStorage.getItem('selectedProduct');
     if (location.pathname === '/product' && savedProduct && !selectedProduct) {
@@ -270,7 +272,18 @@ function AppContent() {
       return;
     }
 
-    var effectivePrice = product.salesPrice && product.salesPrice < product.price
+    var requiresOptions = (product.sizes?.length > 0 && !product.selectedSize)
+      || (product.colors?.length > 0 && !product.selectedColor)
+      || (product.priceVariations?.length > 0 && !product.selectedPieces);
+    if (requiresOptions) {
+      setSelectedProduct(product);
+      setCurrentPage('product');
+      triggerCartFeedback('Please select the product options before adding to cart.');
+      return false;
+    }
+
+    var hasSelectedPack = product.priceVariations?.length > 0 && product.selectedPieces;
+    var effectivePrice = !hasSelectedPack && product.salesPrice != null && product.salesPrice < product.price
       ? product.salesPrice
       : product.price;
 
@@ -278,35 +291,10 @@ function AppContent() {
       ...product,
       price: effectivePrice,
       originalPrice: product.price,
-      onSale: product.salesPrice && product.salesPrice < product.price
+      onSale: !hasSelectedPack && product.salesPrice != null && product.salesPrice < product.price
     };
 
-    var cartKey = product.selectedPieces
-      ? product._id + '-' + product.selectedPieces
-      : product._id;
-
-    var exists = cart.find(function(item) {
-      var itemKey = item.selectedPieces
-        ? item._id + '-' + item.selectedPieces
-        : item._id;
-      return itemKey === cartKey;
-    });
-
-    if (exists) {
-      setCart(
-        cart.map(function(item) {
-          var itemKey = item.selectedPieces
-            ? item._id + '-' + item.selectedPieces
-            : item._id;
-          if (itemKey === cartKey) {
-            return { ...item, quantity: item.quantity + 1 };
-          }
-          return item;
-        })
-      );
-    } else {
-      setCart([...cart, { ...cartProduct, quantity: 1 }]);
-    }
+    setCart(previous => addCartItem(previous, cartProduct));
 
     var piecesText = product.selectedPieces && product.selectedPieces > 1
       ? ' (' + product.selectedPieces + ' pieces)'
@@ -316,26 +304,19 @@ function AppContent() {
     setConfettiTrigger(Date.now());
   };
 
-  var updateQuantity = function(id, change) {
-    setCart(
-      cart.map(function(item) {
-        if (item._id === id) {
-          return { ...item, quantity: Math.max(1, item.quantity + change) };
-        }
-        return item;
-      })
-    );
+  var updateQuantity = function(key, change) {
+    setCart(previous => changeCartQuantity(previous, key, change));
   };
 
-  var removeFromCart = function(id) {
-    setCart(cart.filter(function(item) { return item._id !== id; }));
+  var removeFromCart = function(key) {
+    setCart(previous => removeCartItem(previous, key));
   };
 
   var getTotalPrice = function() {
     return cart.reduce(function(t, i) { return t + i.price * i.quantity; }, 0);
   };
 
-  var clearCart = function() { setCart([]); };
+  const clearCart = useCallback(() => { setCart([]); }, []);
 
   if (loading) {
     return (
@@ -409,7 +390,7 @@ function AppContent() {
                 searchQuery={searchQuery} setSearchQuery={setSearchQuery}
                 setCurrentPage={setCurrentPage} setSelectedProduct={setSelectedProduct}
                 selectedProduct={selectedProduct}
-                wishlist={wishlist} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted}
+                clearCart={clearCart} wishlist={wishlist} toggleWishlist={toggleWishlist} isWishlisted={isWishlisted}
                 recentlyViewed={recentlyViewed}
               />
             }

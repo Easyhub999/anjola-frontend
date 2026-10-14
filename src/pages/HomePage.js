@@ -1,3 +1,4 @@
+import { cartLineKey } from '../cart';
 import { useEffect, useRef, useState } from "react";
 import { Sparkles, Heart, Gift, Star, ArrowRight, ShoppingBag, Truck, Shield, Package } from "lucide-react";
 
@@ -68,7 +69,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
   const containerRef = useScrollAnimation();
 
   const getCartItemQty = (id) => {
-    const found = cart.find((item) => item._id === id);
+    const found = cart.find((item) => cartLineKey(item) === cartLineKey({ _id: id }));
     return found ? found.quantity : 0;
   };
 
@@ -364,7 +365,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
                         </span>
                         <div className="flex items-center gap-3">
                           <button
-                            onClick={(e) => { e.stopPropagation(); updateQuantity(product._id, -1); }}
+                            onClick={(e) => { e.stopPropagation(); updateQuantity(cartLineKey(product), -1); }}
                             className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm hover:shadow-md transition-all text-gray-700"
                           >-</button>
                           <span className="min-w-[1.5rem] text-center font-bold text-[#e84393]">{qty}</span>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Loader, CreditCard, Lock, Truck, Gift } from 'lucide-react';
 import { ordersAPI, paymentsAPI } from '../api';
 
-const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
+const CheckoutPage = ({ cart, getTotalPrice, clearCart, user, setCurrentPage }) => {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [isGift, setIsGift] = useState(false);
   const [giftMessage, setGiftMessage] = useState('');
@@ -28,12 +28,14 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
   const totalAmount = getTotalPrice() + shippingCost;
 
   const handleProceedToPayment = async () => {
-    if (!formData.fullName || !formData.email || !formData.phone || !formData.address) { alert('Please fill in all required fields'); return; }
+    if (cart.length === 0) { alert('Your cart is empty'); return; }
+    if (Object.values(formData).some(value => !value.trim())) { alert('Please fill in all required fields, including city and state'); return; }
+    if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) { alert('Please enter a valid email address'); return; }
     if (!shippingMethod) { alert('Please select a shipping method'); return; }
     setCheckoutLoading(true);
     try {
       const orderData = {
-        customerInfo: { ...formData, shippingMethod: selectedShipping?.label || 'Not selected', shippingCost, isGift, giftMessage: isGift ? giftMessage : '' },
+        customerInfo: { ...formData, shippingMethodId: shippingMethod, shippingMethod: selectedShipping?.label || 'Not selected', shippingCost, isGift, giftMessage: isGift ? giftMessage : '' },
         items: cart.map(item => ({
           product: item._id, name: item.name, price: item.price, quantity: item.quantity,
           selectedSize: item.selectedSize || null, selectedColor: item.selectedColor || null,
@@ -42,12 +44,17 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
         totalAmount
       };
       const order = await ordersAPI.createOrder(orderData, user?.token);
-      const paymentData = { email: formData.email, amount: totalAmount * 100, orderId: order._id, customerInfo: formData };
+      const paymentData = { orderId: order._id };
       const paymentResponse = await paymentsAPI.initializePayment(paymentData);
       if (paymentResponse.success && paymentResponse.data.authorization_url) {
         window.location.href = paymentResponse.data.authorization_url;
       } else { throw new Error('Payment initialization failed'); }
     } catch (error) {
+      if (error.status === 401) {
+        alert('Your session has expired. Please sign in again before checking out. Your cart is saved.');
+        setCurrentPage('auth');
+        return;
+      }
       console.error('Checkout error:', error);
       alert('Failed to process order: ' + error.message);
     } finally { setCheckoutLoading(false); }
@@ -126,7 +133,7 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user }) => {
                   </div>
                 </label>
                 {isGift && (
-                  <textarea rows="2" placeholder="Add a personal message for the recipient..." value={giftMessage}
+                  <textarea maxLength={500} rows="2" placeholder="Add a personal message for the recipient..." value={giftMessage}
                     onChange={(e) => setGiftMessage(e.target.value)}
                     className="w-full mt-3 px-4 py-3 border border-gray-200 rounded-xl focus:border-[#e84393] focus:outline-none transition text-sm"
                   />

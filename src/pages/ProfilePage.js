@@ -5,19 +5,28 @@ import { authAPI, ordersAPI } from '../api';
 const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, setSelectedProduct }) => {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
+  const [ordersError, setOrdersError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
   const [activeTab, setActiveTab] = useState('orders');
 
   useEffect(() => {
+    let active = true;
     const fetchOrders = async () => {
-      if (!user?.token) { setLoadingOrders(false); return; }
+      setLoadingOrders(true);
+      setOrdersError(null);
+      setOrders([]);
       try {
+        if (!user?.token) throw Object.assign(new Error('Please sign in to view your orders.'), { status: 401 });
         const data = await ordersAPI.getMyOrders(user.token);
-        setOrders(Array.isArray(data) ? data : []);
-      } catch (e) { console.error(e); }
-      finally { setLoadingOrders(false); }
+        if (!Array.isArray(data)) throw new Error('Unable to read order history. Please try again.');
+        if (active) setOrders(data);
+      } catch (error) {
+        if (active) setOrdersError({ message: error.status === 401 ? 'Your session has expired. Please sign in again.' : 'Unable to load your orders. Please try again.', status: error.status });
+      } finally { if (active) setLoadingOrders(false); }
     };
     fetchOrders();
-  }, [user?.token]);
+    return () => { active = false; };
+  }, [user?.token, retryCount]);
 
   const handleLogout = () => {
     authAPI.logout();
@@ -90,6 +99,14 @@ const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, 
                 <div className="w-10 h-10 border-3 border-gray-200 border-t-[#e84393] rounded-full animate-spin mx-auto mb-3"></div>
                 <p className="text-gray-400 text-sm">Loading orders...</p>
               </div>
+            ) : ordersError ? (
+              <div role="alert" className="bg-white rounded-2xl p-8 text-center border border-red-200">
+                <p className="text-red-700 mb-4">{ordersError.message}</p>
+                <button onClick={() => ordersError.status === 401 ? setCurrentPage('auth') : setRetryCount(count => count + 1)}
+                  className="bg-[#e84393] text-white px-5 py-2 rounded-xl">
+                  {ordersError.status === 401 ? 'Sign in' : 'Retry'}
+                </button>
+              </div>
             ) : orders.length === 0 ? (
               <div className="bg-white rounded-2xl p-10 text-center border border-gray-100">
                 <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -116,6 +133,10 @@ const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, 
                         {order.status}
                       </span>
                     </div>
+
+                    {order.trackingNumber && (
+                      <p className="mb-4 text-sm text-gray-700 break-all">Tracking number: <strong>{order.trackingNumber}</strong></p>
+                    )}
 
                     {/* Order Timeline */}
                     <div className="flex items-center gap-1 mb-4">

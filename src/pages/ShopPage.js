@@ -1,3 +1,4 @@
+import { cartLineKey } from '../cart';
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Search, ShoppingCart, X, ArrowLeft, CheckCircle, Mail, Package, Home, ShoppingBag, Heart, Eye } from "lucide-react";
 import { paymentsAPI } from "../api";
@@ -29,7 +30,7 @@ const ProductTag = ({ tag }) => {
 const ShopPage = ({
   products, cart, addToCart, updateQuantity, removeFromCart,
   searchQuery, setSearchQuery, setCurrentPage, setSelectedProduct,
-  wishlist, toggleWishlist, isWishlisted, recentlyViewed
+  wishlist, toggleWishlist, isWishlisted, recentlyViewed, clearCart
 }) => {
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
   const [paymentData, setPaymentData] = useState(null);
@@ -45,7 +46,7 @@ const ShopPage = ({
       try {
         const response = await paymentsAPI.verifyPayment(reference);
         if (response.success) {
-          localStorage.removeItem("cart");
+          clearCart();
           setPaymentData(response.data);
           setShowPaymentSuccess(true);
           window.history.replaceState({}, "", "/shop");
@@ -60,7 +61,7 @@ const ShopPage = ({
       }
     };
     handlePaymentReturn();
-  }, []);
+  }, [clearCart]);
 
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [currentPageNumber, setCurrentPageNumber] = useState(1);
@@ -204,7 +205,7 @@ const ShopPage = ({
 
   const handleRemoveFromCart = (productId, e) => {
     e.stopPropagation();
-    removeFromCart(productId);
+    removeFromCart(cartLineKey({ _id: productId }));
   };
 
   const handleCloseSuccessModal = () => {
@@ -256,8 +257,8 @@ const ShopPage = ({
               <div className="flex items-start gap-3 bg-rose-50 border border-rose-200 rounded-2xl p-4 mb-6">
                 <Mail className="w-5 h-5 text-[#e84393] mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-semibold text-gray-800 text-sm">Check Your Email</p>
-                  <p className="text-gray-500 text-xs mt-1">A confirmation email with your order details has been sent.</p>
+                  <p className="font-semibold text-gray-800 text-sm">{paymentData?.needsReview ? 'Order Needs Review' : 'Payment Received'}</p>
+                  <p className="text-gray-500 text-xs mt-1">{paymentData?.needsReview ? 'Your payment is recorded. Please contact us with your reference so we can confirm availability or arrange a refund. Do not pay again.' : 'Your payment is recorded. Keep your reference and check your inbox for order updates.'}</p>
                 </div>
               </div>
               <div className="mb-6">
@@ -265,7 +266,7 @@ const ShopPage = ({
                   <Package className="w-4 h-4 text-[#e84393]" /> What Happens Next?
                 </h3>
                 <div className="space-y-2">
-                  {["We're preparing your order", "You'll receive tracking info via email", "Delivery within 3-7 business days"].map((step, i) => (
+                  {(paymentData?.needsReview ? ["Contact support with your payment reference", "We will confirm fulfillment or refund options"] : ["We're preparing your order", "You'll receive tracking info via email", "Delivery within 3-7 business days"]).map((step, i) => (
                     <div key={i} className="flex items-center gap-3">
                       <div className="w-6 h-6 bg-[#e84393] rounded-full flex items-center justify-center text-white text-xs font-bold">{i + 1}</div>
                       <p className="text-gray-600 text-sm">{step}</p>

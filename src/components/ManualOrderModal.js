@@ -34,34 +34,34 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
   );
 
   const addProductToOrder = (product) => {
-    const exists = orderItems.find(item => item.product === product._id);
-    if (exists) {
-      setOrderItems(orderItems.map(item =>
-        item.product === product._id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
-    } else {
-      setOrderItems([...orderItems, {
-        product: product._id,
-        name: product.name,
-        price: product.price,
-        quantity: 1
-      }]);
-    }
+    setOrderItems([...orderItems, {
+      product: product._id, name: product.name,
+      price: product.priceVariations?.[0]?.price ?? product.salesPrice ?? product.price,
+      quantity: 1, selectedColor: '', selectedSize: '',
+      selectedPieces: product.priceVariations?.[0]?.pieces ?? 1
+    }]);
     setSearchQuery('');
   };
 
-  const updateQuantity = (productId, change) => {
-    setOrderItems(orderItems.map(item =>
-      item.product === productId
+  const updateQuantity = (line, change) => {
+    setOrderItems(orderItems.map((item, index) =>
+      index === line
         ? { ...item, quantity: Math.max(1, item.quantity + change) }
         : item
     ));
   };
 
-  const removeItem = (productId) => {
-    setOrderItems(orderItems.filter(item => item.product !== productId));
+  const removeItem = (line) => {
+    setOrderItems(orderItems.filter((item, index) => index !== line));
+  };
+
+  const setOption = (line, field, value) => {
+    setOrderItems(items => items.map((item, index) => {
+      if (index !== line) return item;
+      const next = { ...item, [field]: value };
+      if (field === 'selectedPieces') next.price = products.find(p => p._id === item.product).priceVariations.find(p => p.pieces === value).price;
+      return next;
+    }));
   };
 
   const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -161,7 +161,7 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
               
               <input
                 type="email"
-                placeholder="Email"
+                placeholder="Email" required
                 value={customerInfo.email}
                 onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
                 className="border-2 border-gray-200 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
@@ -178,7 +178,7 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
 
               <input
                 type="text"
-                placeholder="City"
+                placeholder="City" required
                 value={customerInfo.city}
                 onChange={(e) => setCustomerInfo({ ...customerInfo, city: e.target.value })}
                 className="border-2 border-gray-200 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
@@ -187,7 +187,7 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
 
             <input
               type="text"
-              placeholder="State"
+              placeholder="State" required
               value={customerInfo.state}
               onChange={(e) => setCustomerInfo({ ...customerInfo, state: e.target.value })}
               className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
@@ -204,7 +204,7 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
 
             {/* Shipping Method */}
             <select
-              value={customerInfo.shippingMethod}
+              value={shippingOptions.find(option => option.label === customerInfo.shippingMethod)?.id || ''}
               onChange={(e) => {
                 const selected = shippingOptions.find(opt => opt.id === e.target.value);
                 setCustomerInfo({
@@ -278,17 +278,32 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
               </div>
             ) : (
               <div className="space-y-2">
-                {orderItems.map(item => (
-                  <div key={item.product} className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                {orderItems.map((item, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
                     <div className="flex-1">
                       <p className="font-medium text-gray-800">{item.name}</p>
+                      {['selectedSize', 'selectedColor', 'selectedPieces'].map(field => {
+                        const product = products.find(p => p._id === item.product);
+                        const options = field === 'selectedSize' ? product.sizes : field === 'selectedColor' ? product.colors : product.priceVariations;
+                        if (!options?.length) return null;
+                        return <select key={field} aria-label={`${item.name} ${field}`} required value={item[field]}
+                          onChange={e => setOption(index, field, field === 'selectedPieces' ? Number(e.target.value) : e.target.value)}
+                          className="border rounded p-2 m-1">
+                          <option value="">Choose {field === 'selectedSize' ? 'size' : field === 'selectedColor' ? 'color' : 'pack'}</option>
+                          {options.map(option => {
+                            const value = typeof option === 'string' ? option : option.name ?? option.pieces;
+                            return <option key={value} value={value}>{field === 'selectedPieces' ? `${value} pieces` : value}</option>;
+                          })}
+                        </select>;
+                      })}
+                      <p className="text-sm">Stock required: {item.quantity * item.selectedPieces} individual pieces</p>
                       <p className="text-sm text-gray-600">₦{item.price.toLocaleString()} each</p>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => updateQuantity(item.product, -1)}
+                        onClick={() => updateQuantity(index, -1)}
                         className="p-1 bg-white rounded hover:bg-gray-100"
                       >
                         <Minus className="w-4 h-4" />
@@ -296,7 +311,7 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
                       <span className="w-12 text-center font-semibold">{item.quantity}</span>
                       <button
                         type="button"
-                        onClick={() => updateQuantity(item.product, 1)}
+                        onClick={() => updateQuantity(index, 1)}
                         className="p-1 bg-white rounded hover:bg-gray-100"
                       >
                         <Plus className="w-4 h-4" />
@@ -309,7 +324,7 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
 
                     <button
                       type="button"
-                      onClick={() => removeItem(item.product)}
+                      onClick={() => removeItem(index)}
                       className="p-2 text-red-500 hover:bg-red-50 rounded"
                     >
                       <Trash2 className="w-4 h-4" />

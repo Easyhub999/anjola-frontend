@@ -7,33 +7,41 @@ const AdminOrdersPage = ({ user }) => {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [ordersError, setOrdersError] = useState(null);
+  const [trackingDrafts, setTrackingDrafts] = useState({});
   const [filterStatus, setFilterStatus] = useState('all');
 
   const fetchOrders = React.useCallback(async () => {
     try {
       setLoading(true);
+      setOrdersError(null);
       const data = await ordersAPI.getAllOrders(user.token);
-      setOrders(data.data || []);
+      if (!Array.isArray(data.data)) throw new Error('Invalid orders response');
+      setOrders(data.data);
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      setOrdersError(error.status === 401 ? 'Your session has expired. Sign in again to manage orders.' : 'Unable to load orders. Please try again.');
     } finally {
       setLoading(false);
     }
   }, [user]);
 
   useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
+    if (user?.role === 'admin') fetchOrders();
+  }, [fetchOrders, user?.role]);
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     setUpdatingStatus(true);
     try {
-      await ordersAPI.updateOrderStatus(orderId, { status: newStatus }, user.token);
+      const existing = orders.find(order => order._id === orderId);
+      const payload = { status: newStatus };
+      if (newStatus === 'shipped') payload.trackingNumber = (trackingDrafts[orderId] ?? existing?.trackingNumber ?? '').trim();
+      const response = await ordersAPI.updateOrderStatus(orderId, payload, user.token);
+      const updated = response.data;
       setOrders(orders.map(order => 
-        order._id === orderId ? { ...order, status: newStatus } : order
+        order._id === orderId ? updated : order
       ));
       if (selectedOrder && selectedOrder._id === orderId) {
-        setSelectedOrder({ ...selectedOrder, status: newStatus });
+        setSelectedOrder(updated);
       }
       alert('Order status updated successfully!');
     } catch (error) {
@@ -129,7 +137,12 @@ const AdminOrdersPage = ({ user }) => {
           ))}
         </div>
 
-        {filteredOrders.length === 0 ? (
+        {ordersError ? (
+          <div role="alert" className="bg-white rounded-lg p-8 text-center">
+            <p className="text-red-700 mb-4">{ordersError}</p>
+            <button onClick={fetchOrders} className="bg-purple-600 text-white px-5 py-2 rounded-lg">Retry</button>
+          </div>
+        ) : filteredOrders.length === 0 ? (
           <div className="bg-white rounded-lg shadow-lg p-12 text-center">
             <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-600 text-lg">No orders found</p>
@@ -163,6 +176,7 @@ const AdminOrdersPage = ({ user }) => {
                       <span className="font-semibold capitalize">{order.status}</span>
                     </div>
                     <button
+                      aria-label={`View order ${order.orderNumber}`}
                       onClick={() => setSelectedOrder(selectedOrder?._id === order._id ? null : order)}
                       className="p-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition"
                     >
@@ -170,6 +184,17 @@ const AdminOrdersPage = ({ user }) => {
                     </button>
                   </div>
                 </div>
+
+                {order.inventoryReviewReason && (
+                  <p role="alert" className="mb-4 rounded-lg bg-amber-50 border border-amber-300 p-3 text-amber-900">
+                    {order.inventoryReviewReason}
+                  </p>
+                )}
+                {order.paymentReviewReason && (
+                  <p role="alert" className="mb-4 rounded-lg bg-amber-50 border border-amber-300 p-3 text-amber-900">
+                    {order.paymentReviewReason}
+                  </p>
+                )}
 
                 <div className="grid md:grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
                   <div>
@@ -187,6 +212,12 @@ const AdminOrdersPage = ({ user }) => {
 
                 {selectedOrder?._id === order._id && (
                   <div className="border-t pt-4 mt-4">
+                    {order.customerInfo.isGift && (
+                      <div className="mb-4 p-4 bg-pink-50 rounded-lg">
+                        <h4 className="font-semibold">Gift wrapping requested</h4>
+                        <p className="whitespace-pre-wrap break-words">{order.customerInfo.giftMessage || 'No gift message provided.'}</p>
+                      </div>
+                    )}
                     <h4 className="font-semibold mb-3">Order Items</h4>
                     <div className="space-y-2 mb-4">
                       {order.items.map((item, idx) => {
@@ -248,6 +279,16 @@ const AdminOrdersPage = ({ user }) => {
                     </div>
 
                     <div className="mt-6 pt-6 border-t">
+                      <label htmlFor={`tracking-${order._id}`} className="block font-semibold mb-2">Tracking number</label>
+                      <input id={`tracking-${order._id}`} maxLength={200}
+                        value={trackingDrafts[order._id] ?? order.trackingNumber ?? ''}
+                        onChange={event => setTrackingDrafts(previous => ({ ...previous, [order._id]: event.target.value }))}
+                        disabled={updatingStatus || !['processing', 'shipped'].includes(order.status)}
+                        className="border rounded-lg px-3 py-2 mb-3 w-full" />
+                      {order.status === 'shipped' && (
+                        <button onClick={() => handleUpdateStatus(order._id, 'shipped')} disabled={updatingStatus}
+                          className="bg-purple-600 text-white px-4 py-2 rounded-lg mb-4">Save tracking number</button>
+                      )}
                       <h4 className="font-semibold mb-3">Update Order Status</h4>
                       <div className="flex flex-wrap gap-2">
                         {['pending', 'processing', 'shipped', 'delivered', 'cancelled'].map(status => (

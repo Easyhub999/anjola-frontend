@@ -1,3 +1,4 @@
+import { cartLineKey } from '../cart';
 import { ShoppingCart, X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 
 const CartSidebar = ({
@@ -41,16 +42,14 @@ const CartSidebar = ({
               </div>
             ) : (
               <div className="space-y-3">
-                {cart.map((item, index) => {
+                {cart.map((item) => {
                   const image = item?.images?.[0] || item?.image || "/placeholder.png";
                   const itemQty = item.quantity || 1;
                   const productStock = Number(item.stock ?? 999999);
                   const isOutOfStock = productStock <= 0;
                   const hasPieces = item.selectedPieces && item.selectedPieces > 1;
                   const pricePerPiece = item.pricePerPiece || item.price;
-                  const cartKey = item.selectedPieces
-                    ? `${item._id}-${item.selectedPieces}-${index}`
-                    : `${item._id}-${item.selectedSize || 'ns'}-${item.selectedColor || 'nc'}-${index}`;
+                  const cartKey = cartLineKey(item);
 
                   return (
                     <div key={cartKey} className="flex gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100 hover:border-[#e84393]/10 transition-colors">
@@ -82,18 +81,18 @@ const CartSidebar = ({
 
                         {/* Quantity Controls */}
                         <div className="flex items-center gap-2">
-                          <button onClick={() => updateQuantity(item._id, -1)} disabled={itemQty <= 1}
+                          <button aria-label="Decrease quantity" onClick={() => updateQuantity(cartKey, -1)} disabled={itemQty <= 1}
                             className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all text-xs
                               ${itemQty <= 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'}`}>
                             <Minus className="w-3 h-3" />
                           </button>
                           <span className="min-w-[1.5rem] text-center font-bold text-gray-900 text-sm">{itemQty}</span>
-                          <button onClick={() => updateQuantity(item._id, 1)} disabled={isOutOfStock || itemQty >= productStock}
+                          <button aria-label="Increase quantity" onClick={() => updateQuantity(cartKey, 1)} disabled={isOutOfStock || itemQty >= productStock}
                             className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all text-xs
                               ${isOutOfStock || itemQty >= productStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#e84393] text-white hover:bg-[#d63384]'}`}>
                             <Plus className="w-3 h-3" strokeWidth={3} />
                           </button>
-                          <button onClick={() => removeFromCart(item._id)}
+                          <button aria-label="Remove item" onClick={() => removeFromCart(cartKey)}
                             className="ml-auto text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-all">
                             <Trash2 className="w-4 h-4" />
                           </button>
