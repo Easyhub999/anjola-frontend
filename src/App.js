@@ -42,7 +42,7 @@ const FloatingButtons = () => {
   }, []);
 
   return (
-    <div className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-[798] flex flex-col gap-3">
+    <div className="anjola-floating-actions fixed right-4 md:right-6 z-[798] flex flex-col gap-3">
       {/* Back to Top */}
       {showBackToTop && (
         <button
@@ -327,7 +327,7 @@ function AppContent() {
           showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu}
           user={user} cartBump={cartBump} handleLogout={handleLogout}
         />
-        <LoadingSpinner />
+        <div className="anjola-page-content"><LoadingSpinner /></div>
       </div>
     );
   }
@@ -341,13 +341,13 @@ function AppContent() {
           showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu}
           user={user} cartBump={cartBump} handleLogout={handleLogout}
         />
-        <ErrorDisplay message={error} />
+        <div className="anjola-page-content"><ErrorDisplay message={error} /></div>
       </div>
     );
   }
 
   return (
-    <div className="App bg-[#fff7f9] min-h-screen has-bottom-nav">
+    <div className="App bg-[#fff7f9] min-h-screen">
       <CustomCursor />
       <Confetti trigger={confettiTrigger} />
       <ScrollProgress />
@@ -367,7 +367,7 @@ function AppContent() {
         setCurrentPage={setCurrentPage}
       />
 
-      <div className={`${currentPage === 'shop' ? 'pt-36' : 'pt-24'} transition-opacity duration-200 ${pageTransition ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'}`}
+      <div className={`anjola-page-content transition-opacity duration-200 ${pageTransition ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'}`}
         style={{ transition: 'opacity 0.2s ease, transform 0.2s ease' }}>
         <Routes>
           <Route

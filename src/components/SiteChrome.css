@@ -1,0 +1,99 @@
+:root { --anjola-brand-gradient: linear-gradient(110deg, #b62e78 0%, #9a3caa 55%, #7438b3 100%); }
+.anjola-site-header { position: fixed; top: 0; left: 0; width: 100%; z-index: 999; background: #fffaf6; color: #482b38; border-bottom: 1px solid #e9dce1; }
+.anjola-announcement { min-height: 32px; padding: 7px 18px; display: flex; align-items: center; justify-content: center; gap: 14px; background: var(--anjola-brand-gradient); color: #fff; font-size: 11px; letter-spacing: .05em; line-height: 18px; }
+.anjola-announcement svg { flex-shrink: 0; }
+.anjola-nav-bar { max-width: 1280px; margin: auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 22px; }
+.anjola-wordmark { display: flex; gap: 10px; align-items: center; text-align: left; flex-shrink: 0; }
+.anjola-wordmark img { border-radius: 9px; width: 40px; height: 40px; }
+.anjola-wordmark strong { font-family: 'Playfair Display', Georgia, serif; font-size: 25px; font-weight: 600; line-height: 1.1; display: block; color: #8d367e; background: var(--anjola-brand-gradient); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.anjola-wordmark small { display: block; font-size: 9px; letter-spacing: .23em; margin-top: 4px; color: #7c4d66; }
+.anjola-desktop-links, .anjola-admin-links { display: flex; gap: 26px; align-items: center; }
+.anjola-admin-links { padding-left: 22px; border-left: 1px solid #e5d7dc; gap: 17px; }
+.anjola-nav-link { font-size: 13px; position: relative; min-height: 44px; color: #66505d; }
+.anjola-nav-link:hover, .anjola-nav-link[aria-current] { color: #8c3657; }
+.anjola-nav-link[aria-current]::after { content: ''; position: absolute; left: 0; right: 0; bottom: 3px; height: 2px; background: var(--anjola-brand-gradient); }
+.anjola-admin-links .anjola-nav-link { font-size: 12px; }
+.anjola-nav-actions { display: flex; align-items: center; gap: 10px; }
+.anjola-nav-actions button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; gap: 9px; border-radius: 6px; }
+.anjola-nav-actions button:hover { background: #f3e7ef; }
+.anjola-account-button { font-size: 12px; padding: 0 8px; }
+.anjola-bag-button { padding: 0 9px; }
+.anjola-bag-count { background: var(--anjola-brand-gradient); color: white; min-width: 21px; height: 21px; border-radius: 50%; padding: 0 4px; display: inline-flex; justify-content: center; align-items: center; font-size: 10px; }
+.anjola-nav-actions .anjola-menu-toggle { display: none; }
+.anjola-site-header button:focus-visible, .anjola-site-header a:focus-visible, .anjola-bottom-nav button:focus-visible { outline: 2px solid #9a3caa; outline-offset: 4px; }
+.anjola-drawer-layer { position: fixed; inset: 0; z-index: 1001; }
+.anjola-drawer-backdrop { position: absolute; inset: 0; background: #271b2a80; }
+.anjola-drawer { position: absolute; top: 0; right: 0; bottom: 0; width: min(90vw, 370px); background: #fffaf6; overflow-y: auto; overscroll-behavior: contain; box-shadow: -15px 0 60px #23162b26; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.anjola-drawer-header { background: var(--anjola-brand-gradient); color: white; padding: 30px 24px 26px; position: relative; }
+.anjola-chrome-eyebrow { font-size: 9px; letter-spacing: .14em; line-height: 1.7; }
+.anjola-drawer-header .anjola-chrome-eyebrow { display: block; max-width: 230px; padding-right: 25px; }
+.anjola-drawer-header h2 { font-size: 29px; font-weight: 400; margin: 12px 0; }
+.anjola-drawer-header p { font-size: 12px; overflow-wrap: anywhere; }
+.anjola-drawer-header > button { position: absolute; right: 12px; top: 16px; width: 44px; height: 44px; display: grid; place-items: center; background: #ffffff18; border-radius: 50%; }
+.anjola-drawer-header > button:focus-visible { outline-color: white; }
+.anjola-drawer-content { padding: 20px; }
+.anjola-drawer-link { display: flex; align-items: center; gap: 15px; min-height: 52px; width: 100%; padding: 12px; border-radius: 4px; font-size: 14px; margin-bottom: 3px; text-align: left; }
+.anjola-drawer-link > span { flex: 1; }
+.anjola-drawer-link[aria-current] { background: #f0e2ef; color: #733476; border-left: 3px solid #ad3a9c; }
+.anjola-drawer-link:hover { background: #f5eaf1; }
+.anjola-drawer-admin { margin-top: 20px; padding-top: 18px; border-top: 1px solid #e5d7dc; }
+.anjola-drawer-admin p { padding: 0 12px 8px; color: #7c4d66; }
+.anjola-drawer-account { width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--anjola-brand-gradient); color: white; font-size: 13px; margin-top: 22px; border-radius: 4px; }
+.anjola-signout { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 44px; font-size: 12px; margin-top: 8px; }
+.anjola-drawer-footer { margin: 0 24px; padding: 22px 0; border-top: 1px solid #e5d7dc; font-size: 12px; }
+.anjola-drawer-footer p { color: #786570; margin-bottom: 8px; }
+.anjola-drawer-footer a { display: flex; align-items: center; gap: 8px; min-height: 44px; color: #753049; }
+.anjola-site-footer { background: #30202e; color: #dfd1db; padding-top: 58px; position: relative; }
+.anjola-site-footer::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #e84393, #a855f7); }
+.anjola-footer-inner { max-width: 1280px; margin: auto; padding: 0 24px; }
+.anjola-footer-grid { display: grid; grid-template-columns: 1.5fr .8fr 1fr 1.2fr; gap: 40px; padding-bottom: 46px; }
+.anjola-footer-brand .anjola-chrome-eyebrow { color: #e8b7de; }
+.anjola-footer-brand h2 { font-size: 28px; color: #fffaf6; font-weight: 400; margin: 15px 0; }
+.anjola-footer-brand h2 span { color: #ee8bd1; }
+.anjola-footer-grid p { font-size: 12px; line-height: 1.9; max-width: 300px; }
+.anjola-footer-grid h3 { font-family: 'Inter', sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: #fffaf6; margin-bottom: 18px; font-weight: 500; }
+.anjola-footer-grid nav button, .anjola-footer-grid address a { display: block; font-size: 12px; min-height: 40px; padding: 10px 0; text-align: left; }
+.anjola-footer-grid address { font-style: normal; min-width: 0; }
+.anjola-footer-grid a { overflow-wrap: anywhere; }
+.anjola-footer-grid a:hover, .anjola-footer-grid button:hover { color: #f1a9d5; }
+.anjola-footer-socials { display: flex; flex-wrap: wrap; gap: 0 15px; margin-top: 18px; }
+.anjola-footer-socials a, .anjola-footer-chat { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; font-size: 11px; }
+.anjola-footer-chat { color: #f1b7e2; margin-top: 12px; font-size: 12px; }
+.anjola-footer-payment { display: inline-block; border: 1px solid #74566e; padding: 8px 12px; margin-top: 12px; font-size: 10px; }
+.anjola-footer-bottom { display: flex; justify-content: space-between; gap: 18px; align-items: center; border-top: 1px solid #62465b; padding: 22px 0; font-size: 10px; color: #ccb8c7; }
+.anjola-footer-bottom a { display: inline-flex; gap: 5px; align-items: center; min-height: 44px; }
+.anjola-footer-bottom svg { color: #ed8fcb; }
+.anjola-site-footer a:focus-visible, .anjola-site-footer button:focus-visible { outline: 2px solid #e8b7de; outline-offset: 4px; }
+.anjola-bottom-nav { display: none; }
+.anjola-page-content { padding-top: 104px; }
+.anjola-floating-actions { bottom: 24px; }
+@media (max-width: 1099px) {
+  .anjola-desktop-links { display: none; }
+  .anjola-nav-actions .anjola-menu-toggle { display: inline-flex; }
+  .anjola-footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+}
+@media (max-width: 767px) {
+  .anjola-nav-bar { padding: 0 16px; gap: 8px; height: 64px; }
+  .anjola-announcement { font-size: 10px; letter-spacing: .02em; gap: 8px; }
+  .anjola-wordmark { gap: 8px; }
+  .anjola-wordmark strong { font-size: 23px; }
+  .anjola-wordmark img { width: 34px; height: 34px; }
+  .anjola-account-button span { display: none; }
+  .anjola-nav-actions { gap: 0; }
+  .anjola-nav-actions .anjola-account-button { display: none; }
+  .anjola-bottom-nav { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; bottom: 0; left: 0; right: 0; padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)); background: #fffaf6; color: #725b6b; border-top: 1px solid #e5d7dc; box-shadow: 0 -5px 22px #30202e08; z-index: 800; }
+  .anjola-bottom-nav button { min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10px; position: relative; }
+  .anjola-bottom-nav button[aria-current] { color: #8b337e; }
+  .anjola-bottom-nav button[aria-current]::before { content: ''; position: absolute; top: -7px; height: 3px; width: 26px; border-radius: 3px; background: var(--anjola-brand-gradient); }
+  .anjola-bottom-icon { position: relative; }
+  .anjola-bottom-count { position: absolute; top: -5px; left: 13px; min-width: 17px; height: 17px; border-radius: 50%; background: var(--anjola-brand-gradient); color: white; font-size: 8px; display: grid; place-items: center; padding: 0 3px; }
+  .anjola-page-content { padding-top: 96px; }
+  .anjola-site-footer { padding-top: 42px; padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
+  .anjola-footer-inner { padding: 0 22px; }
+  .anjola-footer-grid { gap: 30px 22px; }
+  .anjola-footer-brand { grid-column: 1 / -1; }
+  .anjola-footer-grid address { grid-column: 1 / -1; }
+  .anjola-footer-bottom { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .anjola-floating-actions { bottom: calc(78px + env(safe-area-inset-bottom, 0px)); }
+}
+@media (prefers-reduced-motion: reduce) { .anjola-site-header *, .anjola-bottom-nav *, .anjola-site-footer * { transition: none !important; animation: none !important; } }
