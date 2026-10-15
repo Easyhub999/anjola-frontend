@@ -2,6 +2,45 @@ import React, { useState, useEffect } from 'react';
 import { Package, Truck, CheckCircle, XCircle, Clock, Eye, Loader, AlertCircle } from 'lucide-react';
 import { ordersAPI } from '../api';
 
+const recordedAmount = value => typeof value === 'number' && Number.isFinite(value) && value >= 0;
+const money = value => recordedAmount(value) ? `₦${value.toLocaleString('en-NG')}` : 'Not recorded';
+
+const OrderItems = ({ items }) => {
+  if (!Array.isArray(items) || items.length === 0) {
+    return <p className="text-gray-600">No item details were recorded for this order.</p>;
+  }
+
+  return items.map((entry, index) => {
+    const item = entry || {};
+    const hasQuantity = Number.isInteger(item.quantity) && item.quantity > 0;
+    const hasPack = Number.isInteger(item.selectedPieces) && item.selectedPieces > 1;
+    const lineTotal = hasQuantity && recordedAmount(item.price) ? item.quantity * item.price : null;
+    return (
+      <div key={item._id || index} className="flex flex-wrap justify-between gap-3 p-3 bg-purple-50 rounded-lg">
+        <div className="min-w-0 flex-1 break-words">
+          <p className="font-medium">{item.name || item.product?.name || 'Product name not recorded'}</p>
+          <p className="text-sm text-gray-700 mt-1">
+            Quantity: {hasQuantity ? item.quantity : 'Not recorded'}{hasPack ? ` ${item.quantity === 1 ? 'pack' : 'packs'} of ${item.selectedPieces} pieces` : ''}
+          </p>
+          {hasPack && hasQuantity && <p className="text-sm text-gray-700">Total pieces: {item.quantity * item.selectedPieces}</p>}
+          <p className="text-sm text-gray-600">{hasPack ? 'Pack price' : 'Unit price'}: {money(item.price)}</p>
+          {hasPack && recordedAmount(item.pricePerPiece) && <p className="text-sm text-gray-600">Price per piece: {money(item.pricePerPiece)}</p>}
+          {(item.selectedSize || item.selectedColor) && (
+            <p className="text-sm text-purple-700 mt-1">
+              {item.selectedSize && <span className="mr-3">Size: <strong>{item.selectedSize}</strong></span>}
+              {item.selectedColor && <span>Color: <strong>{item.selectedColor}</strong></span>}
+            </p>
+          )}
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-gray-600">Item total</p>
+          <p className="font-bold text-purple-700">{money(lineTotal)}</p>
+        </div>
+      </div>
+    );
+  });
+};
+
 const AdminOrdersPage = ({ user }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -153,7 +192,7 @@ const AdminOrdersPage = ({ user }) => {
               <div key={order._id} className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
                 <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex flex-wrap items-center gap-3 mb-2">
                       <h3 className="text-xl font-bold text-gray-800">
                         Order #{order.orderNumber || order._id.slice(-8)}
                       </h3>
@@ -170,17 +209,22 @@ const AdminOrdersPage = ({ user }) => {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 ${getStatusColor(order.status)}`}>
                       {getStatusIcon(order.status)}
                       <span className="font-semibold capitalize">{order.status}</span>
                     </div>
                     <button
-                      aria-label={`View order ${order.orderNumber}`}
-                      onClick={() => setSelectedOrder(selectedOrder?._id === order._id ? null : order)}
-                      className="p-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition"
+                      type="button"
+                      aria-label={`${selectedOrder?._id === order._id ? 'Hide' : 'View'} items for order ${order.orderNumber || order._id.slice(-8)}`}
+                      aria-expanded={selectedOrder?._id === order._id}
+                      aria-controls={`order-details-${order._id}`}
+                      onClick={() => setSelectedOrder(previous => previous?._id === order._id ? null : order)}
+                      className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-800 font-semibold rounded-lg hover:bg-purple-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-600 focus-visible:outline-offset-2 transition"
                     >
-                      <Eye className="w-5 h-5" />
+                      <Eye className="w-5 h-5" aria-hidden="true" />
+                      {selectedOrder?._id === order._id ? 'Hide items' : 'View items'}
+                      {Array.isArray(order.items) && <span> ({order.items.length})</span>}
                     </button>
                   </div>
                 </div>
@@ -211,7 +255,7 @@ const AdminOrdersPage = ({ user }) => {
                 </div>
 
                 {selectedOrder?._id === order._id && (
-                  <div className="border-t pt-4 mt-4">
+                  <div id={`order-details-${order._id}`} role="region" aria-label={`Details for order ${order.orderNumber || order._id.slice(-8)}`} className="border-t pt-4 mt-4">
                     {order.customerInfo.isGift && (
                       <div className="mb-4 p-4 bg-pink-50 rounded-lg">
                         <h4 className="font-semibold">Gift wrapping requested</h4>
@@ -220,43 +264,7 @@ const AdminOrdersPage = ({ user }) => {
                     )}
                     <h4 className="font-semibold mb-3">Order Items</h4>
                     <div className="space-y-2 mb-4">
-                      {order.items.map((item, idx) => {
-                        const hasPieces = item.selectedPieces && item.selectedPieces > 1;
-                        const pricePerPiece = item.pricePerPiece || item.price;
-                        
-                        return (
-                          <div key={idx} className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                            <div className="flex-1">
-                              <p className="font-medium">{item.name}</p>
-                              
-                              {hasPieces ? (
-                                <div className="mt-1">
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
-                                    📦 {item.selectedPieces} pieces
-                                  </span>
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    ₦{pricePerPiece.toLocaleString()}/pc × {item.selectedPieces} = ₦{item.price.toLocaleString()}
-                                  </p>
-                                </div>
-                              ) : (
-                                <p className="text-sm text-gray-600">
-                                  Qty: {item.quantity} × ₦{item.price.toLocaleString()}
-                                </p>
-                              )}
-                              
-                              {(item.selectedSize || item.selectedColor) && (
-                                <p className="text-sm text-purple-600 mt-1">
-                                  {item.selectedSize && <span className="mr-3">Size: <strong>{item.selectedSize}</strong></span>}
-                                  {item.selectedColor && <span>Color: <strong>{item.selectedColor}</strong></span>}
-                                </p>
-                              )}
-                            </div>
-                            <p className="font-bold text-purple-600">
-                              ₦{(item.quantity * item.price).toLocaleString()}
-                            </p>
-                          </div>
-                        );
-                      })}
+                      <OrderItems items={order.items} />
                     </div>
 
                     {order.customerInfo.shippingMethod && (
@@ -275,7 +283,7 @@ const AdminOrdersPage = ({ user }) => {
 
                     <div className="flex justify-between items-center text-xl font-bold border-t pt-3">
                       <span>Total Amount:</span>
-                      <span className="text-purple-600">₦{order.totalAmount.toLocaleString()}</span>
+                      <span className="text-purple-600">{money(order.totalAmount)}</span>
                     </div>
 
                     <div className="mt-6 pt-6 border-t">

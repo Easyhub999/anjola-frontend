@@ -1,460 +1,162 @@
-import { useState, useEffect, useRef } from "react";
-import { productsAPI } from "../api";
-import BackButton from "../components/BackButton";
-import { Heart, Share2, ShoppingBag, Truck, Shield, Star, ChevronDown, AlertTriangle } from "lucide-react";
+import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { productsAPI } from '../api';
+import BackButton from '../components/BackButton';
+import { Heart, Share2, ShoppingBag, Truck, Gift, Star, ChevronDown, ChevronLeft, ChevronRight, X, Expand } from 'lucide-react';
+import { productPresentation, formatPrice } from '../productPresentation';
+import { canSelectPack, selectionPrice } from '../productSelection';
+import './ProductDetailPage.css';
 
-const ProductDetailPage = ({
-  selectedProduct, setCurrentPage, user, addToCart,
-  toggleWishlist, isWishlisted, products, setSelectedProduct
-}) => {
-  const hasProduct = !!selectedProduct;
-
-  // Scroll to top
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    requestAnimationFrame(() => window.scrollTo(0, 0));
-    const t = setTimeout(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' }), 100);
-    return () => clearTimeout(t);
-  }, [selectedProduct?._id]);
-
-  // Images
-  const allImages = hasProduct
-    ? (Array.isArray(selectedProduct.images) && selectedProduct.images.length > 0 ? selectedProduct.images : selectedProduct.image ? [selectedProduct.image] : ["/placeholder.png"])
-    : ["/placeholder.png"];
-
-  const [mainImage, setMainImage] = useState(allImages[0]);
-  const [imageLoaded, setImageLoaded] = useState(false);
+const ProductDetailPage = ({ selectedProduct: product, setCurrentPage, user, addToCart, toggleWishlist, isWishlisted, products = [], setSelectedProduct }) => {
+  const [imageIndex, setImageIndex] = useState(0);
   const [showLightbox, setShowLightbox] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
-
-  // Image zoom state
-  const [zoomActive, setZoomActive] = useState(false);
-  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
-  const imageRef = useRef(null);
-
-  const handleMouseMove = (e) => {
-    if (!imageRef.current) return;
-    const rect = imageRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setZoomPosition({ x, y });
-  };
-
-  // Touch swipe for mobile gallery
-  const [touchStartX, setTouchStartX] = useState(null);
-  const handleSwipeStart = (e) => setTouchStartX(e.touches[0].clientX);
-  const handleSwipeEnd = (e) => {
-    if (!touchStartX) return;
-    const diff = touchStartX - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) {
-      const currentIdx = allImages.indexOf(mainImage);
-      if (diff > 0 && currentIdx < allImages.length - 1) {
-        setMainImage(allImages[currentIdx + 1]); setImageLoaded(false);
-      } else if (diff < 0 && currentIdx > 0) {
-        setMainImage(allImages[currentIdx - 1]); setImageLoaded(false);
-      }
-    }
-    setTouchStartX(null);
-  };
-
-  // Stock & visibility
-  const isHidden = hasProduct && selectedProduct.visible === false;
-  const stock = hasProduct ? Number(selectedProduct.quantity ?? 0) : 0;
-  const isOutOfStock = stock <= 0;
-  const lowStock = stock > 0 && stock <= 5;
-
-  // Selections
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
-  const [addedToCart, setAddedToCart] = useState(false);
-  const [showDescription, setShowDescription] = useState(false);
-  const [showShipping, setShowShipping] = useState(false);
-  const [showReviews, setShowReviews] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState(null);
-
-  const hasPriceVariations = hasProduct && selectedProduct.priceVariations && selectedProduct.priceVariations.length > 0;
+  const [added, setAdded] = useState(false);
+  const [selectionError, setSelectionError] = useState('');
+  const [showReviews, setShowReviews] = useState(false);
+  const [reviews, setReviews] = useState(product?.reviews || []);
+  const [reviewForm, setReviewForm] = useState({ name: '', rating: 5, comment: '' });
+  const [loadingReview, setLoadingReview] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [reviewMessage, setReviewMessage] = useState('');
+  const [shareMessage, setShareMessage] = useState('');
+  const timer = useRef(null);
+  const touchX = useRef(null);
+  const lightboxRef = useRef(null);
+  const optionsRef = useRef(null);
+  const reviewRequest = useRef(0);
+  const images = product?.images?.length ? product.images : product?.image ? [product.image] : [];
+  const safeIndex = Math.min(imageIndex, Math.max(0, images.length - 1));
 
   useEffect(() => {
-    setMainImage(selectedProduct?.images?.[0] || selectedProduct?.image || '/placeholder.png');
-    setImageLoaded(false);
-    setSelectedSize(null);
-    setSelectedColor(null);
-    setSelectedVariation(selectedProduct?.priceVariations?.[0] || null);
-    setAddedToCart(false);
-  }, [selectedProduct]);
+    window.scrollTo(0, 0);
+    setImageIndex(0); setShowLightbox(false); setSelectedSize(null); setSelectedColor(null); setSelectedVariation(null);
+    setAdded(false); setSelectionError(''); setShowReviews(false); setReviews(product?.reviews || []);
+    setReviewForm({ name: '', rating: 5, comment: '' }); setErrorMsg(''); setReviewMessage(''); setLoadingReview(false); setShareMessage('');
+    return () => { clearTimeout(timer.current); reviewRequest.current += 1; };
+    // Reset selections on a different product, not on a refreshed product record.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?._id]);
 
-  // Colors
-  const getColors = () => {
-    if (!hasProduct || !selectedProduct.colors) return [];
-    return selectedProduct.colors.map(color => {
-      if (typeof color === 'string') return { name: color, quantity: 999, isOldFormat: true };
-      return { name: color.name, quantity: color.quantity || 0, isOldFormat: false };
-    });
-  };
+  useEffect(() => {
+    document.body.classList.add('has-product-detail');
+    return () => document.body.classList.remove('has-product-detail');
+  }, []);
 
-  const colors = getColors();
-  const hasColors = colors.length > 0;
-  const isSelectedColorInStock = () => {
-    if (!selectedColor) return true;
-    const colorObj = colors.find(c => c.name === selectedColor);
-    return colorObj ? colorObj.quantity > 0 : true;
-  };
-
-  const getDisplayPrice = () => selectedVariation ? selectedVariation.price : (hasProduct ? selectedProduct.price : 0);
-  const getPricePerPiece = () => selectedVariation ? Math.round(selectedVariation.price / selectedVariation.pieces) : (hasProduct ? selectedProduct.price : 0);
-  const getSavings = () => {
-    if (!selectedVariation || !hasProduct || selectedVariation.pieces <= 1) return 0;
-    return selectedProduct.price * selectedVariation.pieces - selectedVariation.price;
-  };
-
-  const handleAddToCart = () => {
-    if (!hasProduct || isHidden || isOutOfStock) return;
-    if (selectedProduct.sizes?.length && !selectedSize) { alert('Please select a size'); return; }
-    if (hasPriceVariations && !selectedVariation) { alert('Please select a quantity option'); return; }
-    if (hasColors) {
-      if (!selectedColor) { alert('Please select a color'); return; }
-      if (!isSelectedColorInStock()) { alert('Selected color is out of stock'); return; }
-    }
-    const cartItem = {
-      ...selectedProduct, selectedSize, selectedColor,
-      selectedPieces: selectedVariation ? selectedVariation.pieces : 1,
-      pricePerPiece: getPricePerPiece(),
-      price: getDisplayPrice(),
+  useEffect(() => {
+    if (!showLightbox) return;
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    lightboxRef.current?.querySelector('button')?.focus();
+    const keydown = event => {
+      if (event.key === 'Escape') { event.preventDefault(); setShowLightbox(false); }
+      if (images.length > 1 && ['ArrowLeft', 'ArrowRight'].includes(event.key)) {
+        event.preventDefault(); setImageIndex(index => (index + (event.key === 'ArrowRight' ? 1 : -1) + images.length) % images.length);
+      }
+      if (event.key === 'Tab') {
+        const buttons = [...lightboxRef.current.querySelectorAll('button')];
+        const first = buttons[0]; const last = buttons[buttons.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
     };
-    addToCart(cartItem);
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
-  };
+    document.addEventListener('keydown', keydown);
+    return () => { document.body.style.overflow = previousOverflow; document.removeEventListener('keydown', keydown); if (previousFocus?.isConnected) previousFocus.focus(); };
+  }, [showLightbox, images.length]);
 
-  // Share
-  const handleShare = async () => {
-    const shareData = {
-      title: selectedProduct.name,
-      text: `Check out ${selectedProduct.name} on Anjola Aesthetics!`,
-      url: window.location.href,
-    };
-    if (navigator.share) {
-      try { await navigator.share(shareData); } catch (e) { /* cancelled */ }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
-    }
-  };
-
-  // Lightbox
-  const openLightbox = (index) => { setLightboxIndex(index); setShowLightbox(true); document.body.style.overflow = 'hidden'; };
-  const closeLightbox = () => { setShowLightbox(false); document.body.style.overflow = 'unset'; };
-  const navigateLightbox = (direction) => {
-    setLightboxIndex(direction === 'next' ? (lightboxIndex + 1) % allImages.length : (lightboxIndex - 1 + allImages.length) % allImages.length);
-  };
-
-  // Reviews
-  const [reviewForm, setReviewForm] = useState({ name: "", rating: 5, comment: "" });
-  const [loadingReview, setLoadingReview] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-
-  const handleReviewSubmit = async (e) => {
-    e.preventDefault();
-    if (!hasProduct) return;
-    if (!reviewForm.name.trim() || !reviewForm.comment.trim()) { setErrorMsg("Please enter your name and a comment."); return; }
+  const handleReviewSubmit = async event => {
+    event.preventDefault();
+    if (!reviewForm.name.trim() || !reviewForm.comment.trim()) { setErrorMsg('Please enter your name and a comment.'); return; }
+    const request = ++reviewRequest.current;
+    setLoadingReview(true); setErrorMsg(''); setReviewMessage('');
     try {
-      setLoadingReview(true); setErrorMsg("");
-      const updated = await productsAPI.addReview(selectedProduct._id, {
-        name: reviewForm.name.trim(), rating: Number(reviewForm.rating), comment: reviewForm.comment.trim()
-      }, user?.token);
-      if (updated?.reviews) selectedProduct.reviews = updated.reviews;
-      setReviewForm({ name: "", rating: 5, comment: "" });
-      alert("Review submitted!");
-    } catch (err) { setErrorMsg(err.message || "Failed to submit review"); }
-    finally { setLoadingReview(false); }
+      const updated = await productsAPI.addReview(product._id, { name: reviewForm.name.trim(), rating: Number(reviewForm.rating), comment: reviewForm.comment.trim() }, user?.token);
+      if (request !== reviewRequest.current) return;
+      if (updated?.reviews) setReviews(updated.reviews);
+      setReviewForm({ name: '', rating: 5, comment: '' }); setReviewMessage('Thank you. Your review was submitted.');
+    } catch (error) { if (request === reviewRequest.current) setErrorMsg(error.message || 'Unable to submit review. Please try again.'); }
+    finally { if (request === reviewRequest.current) setLoadingReview(false); }
   };
 
-  const averageRating = hasProduct && selectedProduct.reviews?.length > 0
-    ? (selectedProduct.reviews.reduce((sum, rev) => sum + rev.rating, 0) / selectedProduct.reviews.length).toFixed(1) : null;
+  if (!product) return <div className="pd-empty"><p>Choose a product to see its details.</p><button onClick={() => setCurrentPage('shop')}>Back to shop</button></div>;
+  const presentation = productPresentation(product);
+  const pricing = selectionPrice(product, selectedVariation);
+  const packs = product.priceVariations || [];
+  const colors = (product.colors || []).map(color => typeof color === 'string' ? { name: color } : color);
+  const minimumPieces = packs.length ? Math.min(...packs.map(pack => pack.pieces)) : 1;
+  const requiredPieces = selectedVariation?.pieces || minimumPieces;
+  const complete = (!product.sizes?.length || Boolean(selectedSize)) && (!colors.length || Boolean(selectedColor)) && (!packs.length || Boolean(selectedVariation));
+  const selectionAvailable = canSelectPack(product, requiredPieces, selectedColor);
+  const wishlisted = isWishlisted?.(product._id) || false;
+  const missing = [product.sizes?.length && !selectedSize && 'size', colors.length && !selectedColor && 'color', packs.length && !selectedVariation && 'pack'].filter(Boolean);
+  const unitText = pricing.starting ? 'Starting price per pack' : packs.length ? `Price for ${pricing.pieces} ${pricing.pieces === 1 ? 'piece' : 'pieces'}` : 'Price per item';
+  const addLabel = !presentation.available ? 'Currently unavailable' : !selectionAvailable ? 'Selection unavailable' : added ? 'Added to bag' : !complete ? 'Choose options' : 'Add to bag';
+  const clearFeedback = () => { setSelectionError(''); setAdded(false); };
+  const add = () => {
+    if (!presentation.available || !selectionAvailable) return;
+    if (!complete) {
+      setSelectionError(`Please choose your ${missing.join(', ')}.`);
+      optionsRef.current?.scrollIntoView({ behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+      optionsRef.current?.querySelector('button:not([disabled])')?.focus({ preventScroll: true });
+      return;
+    }
+    if (addToCart({ ...product, selectedSize, selectedColor, selectedPieces: selectedVariation?.pieces || 1, pricePerPiece: pricing.perPiece, price: pricing.price }) === false) return;
+    setAdded(true); setSelectionError(''); clearTimeout(timer.current); timer.current = setTimeout(() => setAdded(false), 2000);
+  };
+  const share = async () => {
+    try {
+      // Product routing currently uses local state; do not advertise /product as a shareable product link.
+      const text = `Take a look at ${product.name} on Anjola Aesthetics: ${window.location.origin}/shop`;
+      if (navigator.share) await navigator.share({ title: product.name, text, url: `${window.location.origin}/shop` });
+      else { await navigator.clipboard.writeText(text); setShareMessage('Product name and shop link copied.'); }
+    } catch (error) { if (error.name !== 'AbortError') setShareMessage('Unable to share. You can find this product by name in the shop.'); }
+  };
+  const move = delta => { if (images.length > 1) setImageIndex((safeIndex + delta + images.length) % images.length); };
+  const related = products.filter(p => p._id !== product._id && p.visible !== false).sort((a, b) => Number(b.category === product.category) - Number(a.category === product.category)).slice(0, 6);
 
-  const wishlisted = isWishlisted && hasProduct ? isWishlisted(selectedProduct._id) : false;
-
-  if (!hasProduct) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fff7f9]">
-        <div className="text-center">
-          <div className="w-12 h-12 border-3 border-gray-200 border-t-[#e84393] rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400 text-sm">Loading product...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-[#fff7f9] pb-32">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-        <div className="py-4"><BackButton setCurrentPage={setCurrentPage} /></div>
-
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14">
-          {/* LEFT: IMAGES */}
-          <div className="space-y-4">
-            {/* Main Image with Zoom */}
-            <div className="relative group rounded-2xl overflow-hidden bg-white shadow-card"
-              ref={imageRef}
-              onMouseEnter={() => setZoomActive(true)}
-              onMouseLeave={() => setZoomActive(false)}
-              onMouseMove={handleMouseMove}
-              onTouchStart={handleSwipeStart}
-              onTouchEnd={handleSwipeEnd}>
-              <img
-                src={mainImage} alt={selectedProduct.name}
-                onLoad={() => setImageLoaded(true)}
-                onClick={() => openLightbox(allImages.indexOf(mainImage))}
-                className={`w-full aspect-square object-cover cursor-zoom-in transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                style={zoomActive ? { transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`, transform: 'scale(1.8)' } : {}}
-              />
-              {!imageLoaded && <div className="absolute inset-0 skeleton"></div>}
-
-              {/* Badges */}
-              {isOutOfStock && (
-                <span className="absolute top-4 left-4 bg-gray-800 text-white px-3 py-1.5 rounded-full text-xs font-medium">Out of Stock</span>
-              )}
-              {lowStock && !isOutOfStock && (
-                <span className="absolute top-4 left-4 bg-amber-500 text-white px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" /> Only {stock} left!
-                </span>
-              )}
-
-              {/* Swipe dot indicators (mobile) */}
-              {allImages.length > 1 && (
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 md:hidden">
-                  {allImages.map((img, i) => (
-                    <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${
-                      mainImage === img ? 'w-5 bg-[#e84393]' : 'w-1.5 bg-white/60'
-                    }`} />
-                  ))}
-                </div>
-              )}
-
-              {/* Zoom hint (desktop only) */}
-              <div className="absolute bottom-3 right-3 bg-white/80 backdrop-blur-sm text-gray-600 px-3 py-1.5 rounded-lg text-xs
-                opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none hidden md:block">
-                Hover to zoom
-              </div>
-            </div>
-
-            {/* Thumbnails */}
-            {allImages.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                {allImages.map((img, i) => (
-                  <button key={i} onClick={() => { setMainImage(img); setImageLoaded(false); }}
-                    className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden transition-all duration-300 ${
-                      mainImage === img ? 'ring-2 ring-[#e84393] shadow-md' : 'ring-1 ring-gray-200 hover:ring-[#e84393]/50'
-                    }`}>
-                    <img src={img} alt={`Thumbnail ${i + 1}`} className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
+  return <div className="pd-page">
+    <div className="pd-container"><BackButton setCurrentPage={setCurrentPage} />
+      <div className="pd-layout">
+        <div className="pd-gallery">
+          <div className="pd-main-photo" onTouchStart={event => { touchX.current = event.touches[0].clientX; }} onTouchEnd={event => { if (touchX.current !== null) { const delta = touchX.current - event.changedTouches[0].clientX; if (Math.abs(delta) > 50) move(delta > 0 ? 1 : -1); } touchX.current = null; }}>
+            {images.length ? <button onClick={() => setShowLightbox(true)} aria-label={`Enlarge ${product.name}`}><img src={images[safeIndex]} alt={`${product.name}, view ${safeIndex + 1}`} /><span className="pd-zoom-hint"><Expand size={15} /> Enlarge</span></button> : <ShoppingBag size={50} strokeWidth={1} />}
+            {!presentation.available && <span className="pd-unavailable">Currently unavailable</span>}
           </div>
-
-          {/* RIGHT: PRODUCT INFO */}
-          <div className="space-y-5">
-            {/* Name + Actions */}
-            <div className="flex items-start justify-between gap-4">
-              <h1 className="text-3xl sm:text-4xl font-serif text-gray-900 leading-tight">{selectedProduct.name}</h1>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {toggleWishlist && (
-                  <button onClick={() => toggleWishlist(selectedProduct)}
-                    className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-300 ${
-                      wishlisted ? 'bg-red-50 border-red-200 text-red-500' : 'bg-white border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200'
-                    }`}>
-                    <Heart className={`w-5 h-5 ${wishlisted ? 'fill-current' : ''}`} />
-                  </button>
-                )}
-                <button onClick={handleShare}
-                  className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-400 hover:text-[#e84393] hover:border-[#e84393]/30 transition-all duration-300">
-                  <Share2 className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Rating */}
-            {averageRating && (
-              <div className="flex items-center gap-2">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`w-4 h-4 ${i < Math.round(averageRating) ? 'text-amber-400 fill-current' : 'text-gray-200'}`} />
-                  ))}
-                </div>
-                <span className="text-gray-500 text-sm">{averageRating} ({selectedProduct.reviews?.length} reviews)</span>
-              </div>
-            )}
-
-            {/* Price */}
-            <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
-              <p className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">
-                {hasPriceVariations && selectedVariation ? `Price for ${selectedVariation.pieces} ${selectedVariation.pieces === 1 ? 'piece' : 'pieces'}` : 'Price'}
-              </p>
-              {selectedProduct.salesPrice && selectedProduct.salesPrice < selectedProduct.price && !hasPriceVariations ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl text-gray-400 line-through">₦{selectedProduct.price.toLocaleString()}</span>
-                    <span className="bg-red-500 text-white px-2.5 py-1 rounded-full text-xs font-bold">
-                      SAVE {Math.round(((selectedProduct.price - selectedProduct.salesPrice) / selectedProduct.price) * 100)}%
-                    </span>
-                  </div>
-                  <span className="text-3xl font-bold text-red-600">₦{selectedProduct.salesPrice.toLocaleString()}</span>
-                  <p className="text-sm text-emerald-600 font-medium">You save ₦{(selectedProduct.price - selectedProduct.salesPrice).toLocaleString()}</p>
-                </div>
-              ) : (
-                <>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-3xl font-bold text-gray-900">₦{getDisplayPrice().toLocaleString()}</span>
-                    {hasPriceVariations && selectedVariation && selectedVariation.pieces > 1 && (
-                      <span className="text-sm text-gray-500">(₦{getPricePerPiece().toLocaleString()}/pc)</span>
-                    )}
-                  </div>
-                  {getSavings() > 0 && <p className="text-sm text-emerald-600 font-medium mt-1">You save ₦{getSavings().toLocaleString()}</p>}
-                </>
-              )}
-            </div>
-
-            {/* Stock Status */}
-            <div className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium ${
-              isOutOfStock ? 'bg-red-50 text-red-600' : lowStock ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-600'
-            }`}>
-              {isOutOfStock ? 'Out of stock' : lowStock ? `Hurry! Only ${stock} left in stock` : 'In stock — Ships within 2-3 business days'}
-            </div>
-
-            {/* Price Variations */}
-            {hasPriceVariations && (
-              <div className="space-y-3">
-                <h3 className="font-semibold text-gray-800 text-sm">Select Quantity</h3>
-                <div className="grid grid-cols-4 gap-2">
-                  {selectedProduct.priceVariations.map((variation, i) => {
-                    const isSelected = selectedVariation?.pieces === variation.pieces;
-                    const pricePerPc = Math.round(variation.price / variation.pieces);
-                    const savings = (selectedProduct.price * variation.pieces) - variation.price;
-                    return (
-                      <button key={i} onClick={() => setSelectedVariation(variation)}
-                        className={`relative p-2.5 rounded-xl text-center transition-all duration-300 ${
-                          isSelected ? 'bg-[#e84393] text-white shadow-md ring-2 ring-[#e84393]/30' : 'bg-white text-gray-700 border border-gray-200 hover:border-[#e84393]/30'
-                        }`}>
-                        {variation.label && (
-                          <span className={`absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] px-1.5 py-0.5 rounded-full whitespace-nowrap ${
-                            isSelected ? 'bg-amber-400 text-amber-900' : 'bg-amber-100 text-amber-700'
-                          }`}>{variation.label}</span>
-                        )}
-                        <div className={`font-bold text-sm ${variation.label ? 'mt-1' : ''}`}>{variation.pieces}pcs</div>
-                        <div className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-[#e84393]'}`}>₦{(variation.price / 1000).toFixed(0)}k</div>
-                        <div className={`text-[9px] ${isSelected ? 'text-white/70' : 'text-gray-500'}`}>₦{pricePerPc.toLocaleString()}/pc</div>
-                        {savings > 0 && <div className={`text-[9px] font-semibold ${isSelected ? 'text-amber-200' : 'text-emerald-600'}`}>Save ₦{(savings / 1000).toFixed(0)}k</div>}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Sizes */}
-            {selectedProduct.sizes?.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="font-semibold text-gray-800 text-sm">Size {selectedSize && <span className="text-[#e84393] font-normal">— {selectedSize}</span>}</h3>
-                <div className="flex gap-2 flex-wrap">
-                  {selectedProduct.sizes.map((size, i) => (
-                    <button key={i} onClick={() => setSelectedSize(selectedSize === size ? null : size)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                        selectedSize === size ? 'bg-[#e84393] text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:border-[#e84393]/30'
-                      }`}>{size}</button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Colors */}
-            {hasColors && (
-              <div className="space-y-2">
-                <h3 className="font-semibold text-gray-800 text-sm">Color {selectedColor && <span className="text-[#e84393] font-normal">— {selectedColor}</span>}</h3>
-                <div className="flex gap-2 flex-wrap">
-                  {colors.map((color, i) => {
-                    const isSelected = selectedColor === color.name;
-                    const isInStock = color.quantity > 0;
-                    return (
-                      <button key={i} onClick={() => isInStock && setSelectedColor(selectedColor === color.name ? null : color.name)}
-                        disabled={!isInStock}
-                        className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                          isSelected ? 'bg-[#e84393] text-white shadow-sm' : isInStock ? 'bg-white text-gray-700 border border-gray-200 hover:border-[#e84393]/30' : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
-                        }`}>
-                        {color.name}
-                        {!isInStock && <span className="ml-1 text-xs">(Sold out)</span>}
-                        {isInStock && !color.isOldFormat && color.quantity <= 3 && (
-                          <span className={`ml-1 text-xs ${isSelected ? 'text-white/70' : 'text-amber-600'}`}>({color.quantity} left)</span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Trust Badges */}
-            <div className="grid grid-cols-3 gap-4 py-5 border-t border-gray-100">
-              {[
-                { icon: <Shield className="w-4 h-4" />, label: "Quality Assured" },
-                { icon: <Truck className="w-4 h-4" />, label: "Fast Shipping" },
-                { icon: <ShoppingBag className="w-4 h-4" />, label: "Secure Checkout" },
-              ].map((badge, i) => (
-                <div key={i} className="flex flex-col items-center text-center gap-1.5">
-                  <div className="w-9 h-9 rounded-full bg-[#e84393]/8 flex items-center justify-center text-[#e84393]">{badge.icon}</div>
-                  <p className="text-[10px] text-gray-500 font-medium">{badge.label}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Accordions */}
-            <div className="space-y-2 border-t border-gray-100 pt-4">
-              {/* Description */}
-              <div className="border border-gray-100 rounded-xl overflow-hidden">
-                <button onClick={() => setShowDescription(!showDescription)}
-                  className="w-full flex items-center justify-between px-4 py-3.5 bg-white hover:bg-gray-50 transition-colors">
-                  <span className="font-semibold text-gray-800 text-sm">Description</span>
-                  <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${showDescription ? 'rotate-180' : ''}`} />
-                </button>
-                {showDescription && (
-                  <div className="px-4 py-4 bg-gray-50 border-t border-gray-100">
-                    <div className="text-gray-600 leading-relaxed text-sm whitespace-pre-line">{selectedProduct.description}</div>
-                  </div>
-                )}
-              </div>
-
-              {/* Shipping */}
-              <div className="border border-gray-100 rounded-xl overflow-hidden">
-                <button onClick={() => setShowShipping(!showShipping)}
-                  className="w-full flex items-center justify-between px-4 py-3.5 bg-white hover:bg-gray-50 transition-colors">
-                  <span className="font-semibold text-gray-800 text-sm">Shipping Info</span>
-                  <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${showShipping ? 'rotate-180' : ''}`} />
-                </button>
-                {showShipping && (
-                  <div className="px-4 py-4 bg-gray-50 border-t border-gray-100">
-                    <ul className="text-gray-600 text-sm space-y-2">
-                      {["Delivery days: Tuesday & Saturday", "Within Abeokuta: 24-48 hours", "Nationwide: 3-7 business days", "Tracking sent via email"].map((item, i) => (
-                        <li key={i} className="flex items-center gap-2">
-                          <span className="w-1 h-1 bg-[#e84393] rounded-full"></span>{item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-
+          {images.length > 1 && <><div className="pd-gallery-navigation"><button aria-label="Previous product photo" onClick={() => move(-1)}><ChevronLeft size={20} /></button><span aria-live="polite">{safeIndex + 1} / {images.length}</span><button aria-label="Next product photo" onClick={() => move(1)}><ChevronRight size={20} /></button></div><div className="pd-thumbnails">{images.map((src, index) => <button key={`${src}-${index}`} aria-label={`Show view ${index + 1}`} aria-pressed={safeIndex === index} onClick={() => setImageIndex(index)}><img src={src} alt="" loading="lazy" /></button>)}</div></>}
+        </div>
+        <div className="pd-info">
+          <p className="pd-eyebrow">{product.category}</p>
+          <div className="pd-title"><h1>{product.name}</h1><div>{toggleWishlist && <button aria-label={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'} aria-pressed={wishlisted} onClick={() => toggleWishlist(product)}><Heart size={20} fill={wishlisted ? 'currentColor' : 'none'} /></button>}<button onClick={share} aria-label="Share product"><Share2 size={19} /></button></div></div>
+          {shareMessage && <p className="pd-feedback" role="status">{shareMessage}</p>}
+          {reviews.length > 0 && <button className="pd-rating" onClick={() => setShowReviews(true)}><Star size={15} />{(reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)} · {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}</button>}
+          <div className="pd-price-panel"><span>{unitText}</span><p>{pricing.starting && <small>From </small>}{formatPrice(pricing.price)}{pricing.onSale && <del>{formatPrice(product.price)}</del>}</p>{selectedVariation && selectedVariation.pieces > 1 && <span>Approx. {formatPrice(Math.round(pricing.perPiece * 100) / 100)} per piece</span>}{pricing.savings > 0 && <div className="pd-savings">Save {formatPrice(pricing.savings)}{packs.length ? ' compared with individual packs' : ''}</div>}</div>
+          <p className="pd-stock">{!presentation.available ? 'Currently unavailable' : !selectionAvailable ? 'Not enough stock for this selection. Choose another option.' : 'Available to order'} · Delivery calculated at checkout</p>
+          <div ref={optionsRef} className="pd-options">
+            {packs.length > 0 && <fieldset><legend>Choose your pack {selectedVariation && <span>· {selectedVariation.pieces} pieces</span>}</legend><div className="pd-pack-grid">{packs.map(pack => <button key={pack.pieces} aria-pressed={selectedVariation?.pieces === pack.pieces} disabled={!canSelectPack(product, pack.pieces, selectedColor)} onClick={() => { setSelectedVariation(pack); clearFeedback(); }}><strong>{pack.pieces} {pack.pieces === 1 ? 'piece' : 'pieces'}</strong><span>{formatPrice(pack.price)}</span>{pack.label && <small>{pack.label}</small>}{!canSelectPack(product, pack.pieces, selectedColor) && <small>Unavailable</small>}</button>)}</div></fieldset>}
+            {product.sizes?.length > 0 && <fieldset><legend>Choose your size</legend><div className="pd-option-row">{product.sizes.map(size => <button key={size} aria-pressed={selectedSize === size} onClick={() => { setSelectedSize(selectedSize === size ? null : size); clearFeedback(); }}>{size}</button>)}</div></fieldset>}
+            {colors.length > 0 && <fieldset><legend>Choose your color {selectedColor && <button className="pd-clear-color" onClick={() => { setSelectedColor(null); clearFeedback(); }}>Clear color</button>}</legend><div className="pd-option-row">{colors.map(color => <button key={color.name} aria-pressed={selectedColor === color.name} disabled={!canSelectPack(product, requiredPieces, color.name)} onClick={() => { setSelectedColor(selectedColor === color.name ? null : color.name); clearFeedback(); }}>{color.name}{!canSelectPack(product, requiredPieces, color.name) && <small>Unavailable for this pack</small>}</button>)}</div></fieldset>}
+          </div>
+          {selectionError && <p className="pd-feedback" role="alert">{selectionError}</p>}
+          <div className="pd-inline-buy"><button className="pd-buy" disabled={!presentation.available || !selectionAvailable} onClick={add}>{addLabel}<ShoppingBag size={18} /></button><p role="status">{added ? `${product.name} added to your bag.` : complete && packs.length ? `One pack contains ${pricing.pieces} pieces.` : missing.length ? `Select ${missing.join(', ')} to continue.` : 'Ready when you are.'}</p></div>
+          <div className="pd-help-notes"><p><Gift size={17} /> Add a gift message at checkout.</p><p><Truck size={17} /> Select delivery for your location at checkout.</p></div>
+          <details className="pd-details" open><summary>Description</summary><p>{product.description || 'Contact Anjola for more information about this product.'}</p></details>
+          <details className="pd-details"><summary>Delivery & gifting</summary><p>Available delivery options and charges are shown at checkout. Contact Anjola to confirm timing for your location or a special occasion before ordering.</p><button onClick={() => setCurrentPage('contact')}>Ask about this product</button></details>
+          <div className="pd-reviews">
               {/* Reviews */}
               <div className="border border-gray-100 rounded-xl overflow-hidden">
-                <button onClick={() => setShowReviews(!showReviews)}
+                <button aria-expanded={showReviews} aria-controls="product-reviews" onClick={() => setShowReviews(!showReviews)}
                   className="w-full flex items-center justify-between px-4 py-3.5 bg-white hover:bg-gray-50 transition-colors">
-                  <span className="font-semibold text-gray-800 text-sm">Reviews ({selectedProduct.reviews?.length || 0})</span>
+                  <span className="font-semibold text-gray-800 text-sm">Reviews ({reviews?.length || 0})</span>
                   <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${showReviews ? 'rotate-180' : ''}`} />
                 </button>
                 {showReviews && (
-                  <div className="px-4 py-4 bg-gray-50 border-t border-gray-100 max-h-96 overflow-y-auto">
-                    {selectedProduct.reviews?.length > 0 ? (
+                  <div id="product-reviews" className="pd-reviews-panel">
+                    {reviews?.length > 0 ? (
                       <div className="space-y-4">
-                        {selectedProduct.reviews.map((rev, i) => (
+                        {reviews.map((rev, i) => (
                           <div key={i} className="bg-white p-4 rounded-xl">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-2">
@@ -479,12 +181,12 @@ const ProductDetailPage = ({
                     {/* Review Form */}
                     <div className="mt-4 pt-4 border-t border-gray-200">
                       <h4 className="font-semibold text-gray-800 text-sm mb-3">Write a Review</h4>
-                      {errorMsg && <p className="text-red-500 text-xs mb-2">{errorMsg}</p>}
+                      {errorMsg && <p role="alert" className="text-red-500 text-xs mb-2">{errorMsg}</p>}
                       <form onSubmit={handleReviewSubmit} className="space-y-3">
-                        <input type="text" placeholder="Your name" value={reviewForm.name}
+                        <input aria-label="Your name" type="text" placeholder="Your name" value={reviewForm.name}
                           onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
                           className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:border-[#e84393] focus:ring-1 focus:ring-[#e84393]/10 outline-none" />
-                        <select value={reviewForm.rating} onChange={(e) => setReviewForm({ ...reviewForm, rating: Number(e.target.value) })}
+                        <select aria-label="Review rating" value={reviewForm.rating} onChange={(e) => setReviewForm({ ...reviewForm, rating: Number(e.target.value) })}
                           className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:border-[#e84393] outline-none">
                           <option value={5}>5 Stars — Excellent</option>
                           <option value={4}>4 Stars — Very Good</option>
@@ -492,7 +194,7 @@ const ProductDetailPage = ({
                           <option value={2}>2 Stars — Fair</option>
                           <option value={1}>1 Star — Poor</option>
                         </select>
-                        <textarea placeholder="Your review..." rows={3} value={reviewForm.comment}
+                        <textarea aria-label="Your review" placeholder="Your review..." rows={3} value={reviewForm.comment}
                           onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
                           className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:border-[#e84393] outline-none resize-none" />
                         <button type="submit" disabled={loadingReview}
@@ -504,113 +206,14 @@ const ProductDetailPage = ({
                   </div>
                 )}
               </div>
-            </div>
+            {reviewMessage && <p className="pd-feedback" role="status">{reviewMessage}</p>}
           </div>
         </div>
       </div>
-
-      {/* YOU MIGHT ALSO LIKE */}
-      {products && products.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 mb-8">
-          <h3 className="text-2xl font-serif text-gray-900 mb-6">You Might Also Like</h3>
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-            {products
-              .filter(p => p._id !== selectedProduct._id && p.visible !== false && p.category === selectedProduct.category)
-              .slice(0, 6)
-              .concat(
-                products.filter(p => p._id !== selectedProduct._id && p.visible !== false && p.category !== selectedProduct.category).slice(0, 2)
-              )
-              .slice(0, 6)
-              .map((p) => (
-                <button key={p._id}
-                  onClick={() => { setSelectedProduct(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                  className="flex-shrink-0 w-40 text-left group">
-                  <div className="w-40 h-40 rounded-xl overflow-hidden bg-gray-100 mb-2 shadow-card group-hover:shadow-card-hover transition-shadow">
-                    <img src={p.images?.[0] || p.image || '/placeholder.png'} alt={p.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                  </div>
-                  <p className="text-xs font-medium text-gray-900 line-clamp-1 group-hover:text-[#e84393] transition-colors">{p.name}</p>
-                  <p className="text-xs font-bold text-[#e84393]">₦{(p.salesPrice && p.salesPrice < p.price ? p.salesPrice : p.price).toLocaleString()}</p>
-                </button>
-              ))}
-          </div>
-        </div>
-      )}
-
-      {/* STICKY ADD TO CART */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-luxury-lg z-[900] px-4 py-3 safe-area-bottom">
-        <div className="max-w-7xl mx-auto flex items-center gap-4">
-          <div className="flex-1">
-            {selectedProduct.salesPrice && selectedProduct.salesPrice < selectedProduct.price && !hasPriceVariations ? (
-              <>
-                <p className="text-xs text-gray-400 line-through">₦{selectedProduct.price.toLocaleString()}</p>
-                <p className="text-xl font-bold text-red-600">₦{selectedProduct.salesPrice.toLocaleString()}</p>
-              </>
-            ) : (
-              <>
-                <p className="text-xs text-gray-400">Total Price</p>
-                <p className="text-xl font-bold text-gray-900">₦{getDisplayPrice().toLocaleString()}</p>
-                {hasPriceVariations && selectedVariation && selectedVariation.pieces > 1 && (
-                  <p className="text-[10px] text-gray-500">{selectedVariation.pieces} pieces</p>
-                )}
-              </>
-            )}
-          </div>
-          {isHidden || isOutOfStock ? (
-            <button disabled className="flex-1 bg-gray-200 text-gray-400 py-4 rounded-xl font-semibold text-center cursor-not-allowed">
-              {isHidden ? 'Unavailable' : 'Out of Stock'}
-            </button>
-          ) : (
-            <button onClick={handleAddToCart}
-              disabled={hasColors && selectedColor && !isSelectedColorInStock()}
-              className={`flex-1 py-4 rounded-xl font-bold text-center shadow-md active:scale-[0.98] transition-all ${
-                hasColors && selectedColor && !isSelectedColorInStock()
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-[#e84393] to-[#a855f7] text-white hover:from-[#d63384] hover:to-[#9333ea] shadow-[#e84393]/20 hover:shadow-lg'
-              }`}>
-              {addedToCart ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                  Added!
-                </span>
-              ) : (
-                <span className="flex items-center justify-center gap-2">
-                  <ShoppingBag className="w-5 h-5" /> Add to Cart
-                </span>
-              )}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* LIGHTBOX */}
-      {showLightbox && (
-        <div className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center p-4" onClick={closeLightbox}>
-          <button onClick={closeLightbox} className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-all z-10">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-          </button>
-          {allImages.length > 1 && (
-            <div className="absolute top-4 left-4 bg-white/10 text-white px-3 py-1.5 rounded-full text-sm">{lightboxIndex + 1} / {allImages.length}</div>
-          )}
-          <div className="relative max-w-4xl max-h-[85vh] w-full h-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-            <img src={allImages[lightboxIndex]} alt={`${selectedProduct.name} - ${lightboxIndex + 1}`} className="max-w-full max-h-full object-contain rounded-lg" />
-          </div>
-          {allImages.length > 1 && (
-            <>
-              <button onClick={(e) => { e.stopPropagation(); navigateLightbox('prev'); }}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); navigateLightbox('next'); }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-              </button>
-            </>
-          )}
-        </div>
-      )}
+      {related.length > 0 && <section className="pd-related" aria-labelledby="related-title"><p className="pd-eyebrow">KEEP EXPLORING</p><h2 id="related-title">Something else you might love.</h2><div>{related.map(item => <button key={item._id} onClick={() => setSelectedProduct(item)}>{item.images?.[0] || item.image ? <img src={item.images?.[0] || item.image} alt="" loading="lazy" /> : <ShoppingBag size={40} />}<span>{item.name}</span><small>{productPresentation(item).hasPacks ? 'From ' : ''}{formatPrice(productPresentation(item).price)}</small></button>)}</div></section>}
     </div>
-  );
+    {createPortal(<div className="pd-mobile-buy"><div><small>{pricing.starting ? 'From / pack' : packs.length ? `${pricing.pieces}-piece pack` : 'Price per item'}</small><strong>{formatPrice(pricing.price)}</strong></div><button className="pd-buy" disabled={!presentation.available || !selectionAvailable} onClick={add}>{addLabel}</button></div>, document.body)}
+    {showLightbox && createPortal(<div className="pd-lightbox" ref={lightboxRef} role="dialog" aria-modal="true" aria-label={`${product.name} gallery`} onClick={event => { if (event.target === event.currentTarget) setShowLightbox(false); }}><button className="pd-lightbox-close" aria-label="Close gallery" onClick={() => setShowLightbox(false)}><X size={24} /></button><img src={images[safeIndex]} alt={`${product.name}, view ${safeIndex + 1}`} /><div className="pd-lightbox-controls">{images.length > 1 && <button aria-label="Previous enlarged photo" onClick={() => move(-1)}><ChevronLeft size={24} /></button>}<span aria-live="polite">{safeIndex + 1} / {images.length}</span>{images.length > 1 && <button aria-label="Next enlarged photo" onClick={() => move(1)}><ChevronRight size={24} /></button>}</div></div>, document.body)}
+  </div>;
 };
-
 export default ProductDetailPage;
