@@ -148,9 +148,11 @@ test('checkout with expired credentials stops before payment and sends the custo
   for (const [placeholder, value] of [['08012345678', '08000000000'], ['Enter your complete delivery address', 'Address'], ['City', 'Abeokuta'], ['State', 'Ogun']]) {
     fireEvent.change(screen.getByPlaceholderText(placeholder), { target: { value } });
   }
-  fireEvent.change(screen.getByRole('combobox'), { target: { value: 'abeokuta' } });
+  fireEvent.click(screen.getByRole('radio', { name: /Within Abeokuta/ }));
   fireEvent.click(screen.getByRole('button', { name: /Pay ₦/ }));
-  await waitFor(() => expect(navigate).toHaveBeenCalledWith('auth'));
+  expect(await screen.findByRole('alert')).toHaveTextContent('Your session has expired');
+  fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+  expect(navigate).toHaveBeenCalledWith('auth');
   expect(paymentsAPI.initializePayment).not.toHaveBeenCalled();
 });
 
