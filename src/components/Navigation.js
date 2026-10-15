@@ -1,3 +1,4 @@
+import PageLink from './PageLink';
 import { useEffect, useRef, useState } from 'react';
 import { ShoppingBag, User, Menu, X, Sparkles, Home, BookOpen, MessageCircle, Package, BarChart3, ClipboardList, LogIn, LogOut, ArrowUpRight, Pause, Play } from 'lucide-react';
 import './SiteChrome.css';
@@ -48,9 +49,11 @@ const Navigation = ({ currentPage, setCurrentPage, cart, showCart, setShowCart, 
   const go = page => { setShowMobileMenu(false); setCurrentPage(page); };
   const renderLinks = (items, mobile = false) => items.map(item => {
     const Icon = item.icon;
-    return <button key={item.page} onClick={() => go(item.page)} aria-current={currentPage === item.page ? 'page' : undefined} className={mobile ? 'anjola-drawer-link' : 'anjola-nav-link'}>
+    const Tag = menuItems.includes(item) ? PageLink : 'button';
+    const action = Tag === PageLink ? { page: item.page, navigate: go } : { onClick: () => go(item.page) };
+    return <Tag key={item.page} {...action} aria-current={currentPage === item.page ? 'page' : undefined} className={mobile ? 'anjola-drawer-link' : 'anjola-nav-link'}>
       {mobile && <Icon size={19} strokeWidth={1.5} />}<span>{item.label}</span>{mobile && <ArrowUpRight size={16} />}
-    </button>;
+    </Tag>;
   });
 
   return <header className="anjola-site-header">
@@ -66,10 +69,10 @@ const Navigation = ({ currentPage, setCurrentPage, cart, showCart, setShowCart, 
       </button>
     </div>
     <nav className="anjola-nav-bar" aria-label="Main navigation">
-      <button className="anjola-wordmark" onClick={() => go('home')} aria-label="Anjola Aesthetics home">
+      <PageLink className="anjola-wordmark" page="home" navigate={go} aria-label="Anjola Aesthetics home">
         <img src="/anjola-favicon-v2.png" alt="" width="40" height="40" />
         <span><strong>Anjola</strong><small>AESTHETICS</small></span>
-      </button>
+      </PageLink>
       <div className="anjola-desktop-links">{renderLinks(menuItems)}{user?.role === 'admin' && <div className="anjola-admin-links">{renderLinks(adminItems)}</div>}</div>
       <div className="anjola-nav-actions">
         <button className="anjola-account-button" onClick={() => go(user ? 'profile' : 'auth')} aria-label={user ? 'My account' : 'Sign in'}><User size={21} strokeWidth={1.5} /><span>{user ? 'Account' : 'Sign in'}</span></button>

@@ -1,1 +1,11 @@
-/*    /index.html   200
+/shop /seo/shop.html 200
+/blog /seo/blog.html 200
+/contact /seo/contact.html 200
+/auth /seo/auth.html 200
+/profile /seo/profile.html 200
+/checkout /seo/checkout.html 200
+/admin /seo/admin.html 200
+/admin-orders /seo/admin-orders.html 200
+/admin-analytics /seo/admin-analytics.html 200
+/product /seo/product.html 200
+/* /index.html 200

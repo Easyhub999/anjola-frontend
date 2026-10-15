@@ -34,7 +34,7 @@ const LoadingSpinner = () => {
         <h2 className="text-2xl font-serif text-gray-900 mb-1 tracking-tight">
           Anjola <span className="text-gradient">Aesthetics</span>
         </h2>
-        <p className="text-gray-400 text-xs tracking-[0.2em] uppercase mb-10">Luxury Self-Care</p>
+        <p className="text-gray-400 text-xs tracking-[0.2em] uppercase mb-10">Gifts · Lifestyle · Everyday joys</p>
 
         {/* Animated loading bar */}
         <div className="w-48 h-1 bg-gray-200 rounded-full mx-auto overflow-hidden">

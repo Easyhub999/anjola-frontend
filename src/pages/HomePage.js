@@ -69,12 +69,12 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
           <div className="anjola-hero-copy">
             <p className="anjola-eyebrow">ANJOLA AESTHETICS · THE EVERYDAY EDIT</p>
             <h1 id="home-title">Beautiful finds.<br /><em>Thoughtful gifts.</em><br />Little joys.</h1>
-            <p className="anjola-hero-description">For your space, your routine, and the people you love. Explore gifts, self-care favourites, and accessories that make everyday moments feel special.</p>
+            <p className="anjola-hero-description">For your space, your routine, and the people you love. Explore gift boxes, home essentials, drinkware, bags, and accessories that make everyday moments feel special.</p>
             <div className="anjola-hero-actions">
               <button className="anjola-primary" onClick={() => browseCollection()}>Explore the collection <ArrowRight size={18} /></button>
               {giftProduct && <button className="anjola-secondary" onClick={() => handleProductClick(giftProduct)}>Discover a gift <Gift size={17} /></button>}
             </div>
-            <div className="anjola-hero-note"><span /> Gifting · Lifestyle · Self-care · Accessories</div>
+            <div className="anjola-hero-note"><span /> Gifting · Home · Drinkware · Accessories</div>
           </div>
           <div className="anjola-hero-display">
             <span className="anjola-display-caption">A FEW OF OUR FAVOURITE THINGS</span>

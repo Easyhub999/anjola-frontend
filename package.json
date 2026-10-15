@@ -19,7 +19,7 @@
   },
   "scripts": {
     "start": "craco start",
-    "build": "craco build",
+    "build": "craco build && node scripts/build-seo.cjs",
     "test": "craco test",
     "eject": "react-scripts eject"
   },

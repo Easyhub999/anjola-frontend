@@ -1,3 +1,4 @@
+import { applyPageMetadata, pageMetadata } from './siteMetadata';
 import { addCartItem, changeCartQuantity, removeCartItem, restoreCart } from './cart';
 import { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
@@ -185,24 +186,9 @@ function AppContent() {
     }, 200);
   };
 
-  // Dynamic page titles
   useEffect(() => {
-    const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const titles = {
-      home: 'Anjola Aesthetics Ng — Luxury Self-Care',
-      shop: 'Shop | Anjola Aesthetics',
-      product: selectedProduct ? `${selectedProduct.name} | Anjola Aesthetics` : 'Product | Anjola Aesthetics',
-      blog: 'Blog | Anjola Aesthetics',
-      contact: 'Contact | Anjola Aesthetics',
-      auth: 'Sign In | Anjola Aesthetics',
-      profile: 'My Account | Anjola Aesthetics',
-      checkout: `Checkout${cartCount > 0 ? ` (${cartCount})` : ''} | Anjola Aesthetics`,
-      admin: 'Admin | Anjola Aesthetics',
-      'admin-analytics': 'Analytics | Anjola Aesthetics',
-      'admin-orders': 'Orders | Anjola Aesthetics',
-    };
-    document.title = titles[currentPage] || 'Anjola Aesthetics Ng';
-  }, [currentPage, cart, selectedProduct]);
+    applyPageMetadata(pageMetadata(location.pathname, selectedProduct));
+  }, [location.pathname, selectedProduct]);
 
   const handleLogout = () => {
     localStorage.removeItem('user');

@@ -1,7 +1,7 @@
 {
   "short_name": "Anjola",
   "name": "Anjola Aesthetics Ng",
-  "description": "Luxury self-care essentials curated with love for the modern woman",
+  "description": "Shop gift boxes, bathroom essentials, drinkware, cosmetic and tote bags, fashion accessories and foot care at Anjola Aesthetics Ng, Nigeria.",
   "icons": [
     {
       "src": "logo192.png?v=3",
@@ -21,6 +21,9 @@
   "theme_color": "#e84393",
   "background_color": "#fff7f9",
   "orientation": "portrait",
-  "categories": ["shopping", "beauty", "lifestyle"],
+  "categories": [
+    "shopping",
+    "lifestyle"
+  ],
   "lang": "en-NG"
 }

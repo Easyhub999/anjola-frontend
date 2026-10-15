@@ -37,7 +37,7 @@ const ContactPage = () => {
           </span>
           <h1 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">Get In Touch</h1>
           <p className="text-gray-500 max-w-lg mx-auto">
-            We'd love to hear from you. Whether you have a question, feedback, or just want to say hello.
+            Choosing a gift or checking on an order? Talk to us about products, gift packaging, delivery, or a little help finding the right thing.
           </p>
         </div>
 

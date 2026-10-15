@@ -12,7 +12,7 @@ function Header({ user = null, navigate = jest.fn(), logout = jest.fn(), bag = j
 test('header preserves shop, account and bag actions with accessible names', () => {
   const navigate = jest.fn(); const bag = jest.fn();
   render(<Header navigate={navigate} bag={bag} />);
-  fireEvent.click(screen.getByRole('button', { name: 'Shop' }));
+  fireEvent.click(screen.getByRole('link', { name: 'Shop' }));
   expect(navigate).toHaveBeenCalledWith('shop');
   fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
   expect(navigate).toHaveBeenCalledWith('auth');
@@ -65,7 +65,7 @@ test('bottom navigation opens the bag and routes guests to sign-in', () => {
 
 test('footer navigation and contact links have working destinations', () => {
   const navigate = jest.fn(); render(<Footer setCurrentPage={navigate} />);
-  fireEvent.click(screen.getByRole('button', { name: 'Shop the collection' }));
+  fireEvent.click(screen.getByRole('link', { name: 'Shop the collection' }));
   expect(navigate).toHaveBeenCalledWith('shop');
   expect(screen.getByRole('link', { name: 'anjolaaestheticsng@gmail.com' })).toHaveAttribute('href', 'mailto:anjolaaestheticsng@gmail.com');
   expect(screen.getByRole('link', { name: '+234 706 594 3625' })).toHaveAttribute('href', 'tel:+2347065943625');

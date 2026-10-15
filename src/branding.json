@@ -1,0 +1,23 @@
+{
+  "name": "Anjola Aesthetics Ng",
+  "url": "https://anjolaaestheticsng.com",
+  "tagline": "Gifts, lifestyle & everyday joys",
+  "description": "Shop gift boxes, bathroom essentials, drinkware, cosmetic and tote bags, fashion accessories and foot care at Anjola Aesthetics Ng, Nigeria.",
+  "image": "/anjola-social-v4.png",
+  "imageAlt": "Anjola Aesthetics Ng — beautiful finds for everyday living and thoughtful giving",
+  "pages": {
+    "/": { "title": "Anjola Aesthetics Ng | Gifts & Lifestyle Essentials", "description": "Shop gift boxes, bathroom essentials, drinkware, cosmetic and tote bags, fashion accessories and foot care at Anjola Aesthetics Ng, Nigeria." },
+    "/shop": { "title": "Shop Gifts, Bags & Home Essentials | Anjola Aesthetics Ng", "description": "Explore curated gift boxes, gift packaging, bathroom essentials, drinkware, cosmetic bags, tote bags, accessories and foot care. Find your next everyday favourite." },
+    "/blog": { "title": "Gifting & Everyday Living Journal | Anjola Aesthetics Ng", "description": "Thoughtful gifting ideas, bathroom organisation and everyday bag inspiration. Explore practical guides from the Anjola Aesthetics Ng journal." },
+    "/contact": { "title": "Contact Anjola Aesthetics Ng | Gifting & Order Help", "description": "Contact Anjola Aesthetics Ng in Abeokuta, Nigeria for help with gifts, products, packaging, delivery and orders. Reach us by email or WhatsApp." }
+  },
+  "privatePages": {
+    "/auth": "Sign In",
+    "/profile": "My Account",
+    "/checkout": "Checkout",
+    "/admin": "Admin",
+    "/admin-orders": "Orders",
+    "/admin-analytics": "Analytics",
+    "/product": "Product"
+  }
+}

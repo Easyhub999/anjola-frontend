@@ -1,6 +1,46 @@
 {
   "rewrites": [
     {
+      "source": "/shop",
+      "destination": "/seo/shop.html"
+    },
+    {
+      "source": "/blog",
+      "destination": "/seo/blog.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/seo/contact.html"
+    },
+    {
+      "source": "/auth",
+      "destination": "/seo/auth.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/seo/profile.html"
+    },
+    {
+      "source": "/checkout",
+      "destination": "/seo/checkout.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/seo/admin.html"
+    },
+    {
+      "source": "/admin-orders",
+      "destination": "/seo/admin-orders.html"
+    },
+    {
+      "source": "/admin-analytics",
+      "destination": "/seo/admin-analytics.html"
+    },
+    {
+      "source": "/product",
+      "destination": "/seo/product.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }

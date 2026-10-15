@@ -896,7 +896,7 @@ const AdminProductForm = ({
           </label>
           <input
             type="text"
-            placeholder="gifts, valentines, accessories, skincare"
+            placeholder="gifts, bathroom essentials, drinkware, bags, accessories, foot care"
             value={searchCategoriesText}
             onChange={(e) => setSearchCategoriesText(e.target.value)}
             className="w-full border px-4 py-3 rounded-lg mt-1"

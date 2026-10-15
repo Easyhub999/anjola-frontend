@@ -9,7 +9,7 @@
 .anjola-wordmark small { display: block; font-size: 9px; letter-spacing: .23em; margin-top: 4px; color: #7c4d66; }
 .anjola-desktop-links, .anjola-admin-links { display: flex; gap: 26px; align-items: center; }
 .anjola-admin-links { padding-left: 22px; border-left: 1px solid #e5d7dc; gap: 17px; }
-.anjola-nav-link { font-size: 13px; position: relative; min-height: 44px; color: #66505d; }
+.anjola-nav-link { display: inline-flex; align-items: center; font-size: 13px; position: relative; min-height: 44px; color: #66505d; }
 .anjola-nav-link:hover, .anjola-nav-link[aria-current] { color: #8c3657; }
 .anjola-nav-link[aria-current]::after { content: ''; position: absolute; left: 0; right: 0; bottom: 3px; height: 2px; background: var(--anjola-brand-gradient); }
 .anjola-admin-links .anjola-nav-link { font-size: 12px; }
@@ -52,7 +52,7 @@
 .anjola-footer-brand h2 span { color: #ee8bd1; }
 .anjola-footer-grid p { font-size: 12px; line-height: 1.9; max-width: 300px; }
 .anjola-footer-grid h3 { font-family: 'Inter', sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: #fffaf6; margin-bottom: 18px; font-weight: 500; }
-.anjola-footer-grid nav button, .anjola-footer-grid address a { display: block; font-size: 12px; min-height: 40px; padding: 10px 0; text-align: left; }
+.anjola-footer-grid nav a, .anjola-footer-grid address a { display: block; font-size: 12px; min-height: 40px; padding: 10px 0; text-align: left; }
 .anjola-footer-grid address { font-style: normal; min-width: 0; }
 .anjola-footer-grid a { overflow-wrap: anywhere; }
 .anjola-footer-grid a:hover, .anjola-footer-grid button:hover { color: #f1a9d5; }

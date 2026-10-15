@@ -1,0 +1,25 @@
+.anjola-journal { background: #fffaf7; color: #422b40; padding: 65px max(20px, calc((100vw - 1160px) / 2)) 75px; }
+.journal-heading { max-width: 660px; margin-bottom: 35px; }
+.journal-heading h1 { font-family: 'Playfair Display', serif; font-size: clamp(38px, 5vw, 65px); line-height: 1.12; margin: 18px 0; letter-spacing: -1.5px; }
+.journal-heading h1 em { color: #995682; }
+.journal-heading > p:last-child { color: #75626a; line-height: 1.8; }
+.journal-filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
+.journal-filters button { border: 1px solid #e8d8e1; background: white; padding: 10px 22px; border-radius: 30px; font-size: 13px; }
+.journal-filters button[aria-pressed=true] { background: #65425f; border-color: #65425f; color: white; }
+.journal-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; align-items: start; }
+.journal-card { border: 1px solid #ecdee5; border-radius: 22px; background: white; padding: 28px; }
+.journal-card-top { display: flex; align-items: center; justify-content: space-between; gap: 15px; color: #995682; margin-bottom: 28px; }
+.journal-card-top span { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+.journal-card h2 { font-family: 'Playfair Display', serif; font-size: 26px; line-height: 1.3; margin-bottom: 15px; }
+.journal-card p { font-size: 14px; line-height: 1.85; color: #75626a; margin-bottom: 16px; }
+.journal-card summary { cursor: pointer; padding: 12px 0; border-top: 1px solid #f0e7ec; font-size: 13px; color: #78416a; font-weight: 600; }
+.journal-card details > div { padding-top: 12px; }
+.journal-card a, .journal-follow a { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
+.journal-follow { margin-top: 50px; padding: 40px; border-radius: 24px; background: linear-gradient(120deg, #f5d8eb, #e8def5); display: flex; justify-content: space-between; gap: 30px; align-items: center; }
+.journal-follow h2 { font-family: 'Playfair Display', serif; font-size: 32px; margin: 10px 0; }
+.journal-follow p { max-width: 540px; line-height: 1.8; }
+.journal-follow > div:last-child { display: flex; flex-direction: column; gap: 14px; flex-shrink: 0; }
+.journal-follow a { padding: 12px 18px; background: white; border-radius: 30px; }
+.anjola-journal :focus-visible { outline: 3px solid #995682; outline-offset: 4px; }
+@media(max-width: 960px) { .journal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .journal-follow { align-items: start; flex-direction: column; } }
+@media(max-width: 560px) { .anjola-journal { padding-top: 40px; } .journal-grid { grid-template-columns: 1fr; } .journal-card, .journal-follow { padding: 24px; } }
