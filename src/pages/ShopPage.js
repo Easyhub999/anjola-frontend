@@ -1,3 +1,5 @@
+import './ShopPage.css';
+import { productPresentation, formatPrice } from '../productPresentation';
 import { cartLineKey } from '../cart';
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Search, ShoppingCart, X, ArrowLeft, CheckCircle, Mail, Package, Home, ShoppingBag, Heart, Eye } from "lucide-react";
@@ -5,27 +7,6 @@ import { paymentsAPI } from "../api";
 import QuickViewModal from "../components/QuickViewModal";
 
 const PRODUCTS_PER_PAGE = 20;
-
-// Product Tag Component
-const ProductTag = ({ tag }) => {
-  const tagStyles = {
-    'best-seller': { bg: 'bg-amber-500', icon: '👑', label: 'Best Seller' },
-    'hot': { bg: 'bg-rose-500', icon: '🔥', label: 'Hot' },
-    'new': { bg: 'bg-emerald-500', icon: '✨', label: 'New' },
-    'recommended': { bg: 'bg-[#e84393]', icon: '💎', label: 'Recommended' },
-    'limited': { bg: 'bg-gray-800', icon: '⏰', label: 'Limited' },
-    'trending': { bg: 'bg-rose-400', icon: '📈', label: 'Trending' },
-    'sale': { bg: 'bg-red-500', icon: '🏷️', label: 'Sale' },
-    'popular': { bg: 'bg-blue-500', icon: '⭐', label: 'Popular' }
-  };
-  const style = tagStyles[tag] || tagStyles['new'];
-  return (
-    <div className={`${style.bg} text-white px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold shadow-sm flex items-center gap-1`}>
-      <span>{style.icon}</span>
-      <span>{style.label}</span>
-    </div>
-  );
-};
 
 const ShopPage = ({
   products, cart, addToCart, updateQuantity, removeFromCart,
@@ -153,8 +134,8 @@ const ShopPage = ({
       });
     }
     list.sort((a, b) => {
-      if (sortOption === "price-asc") return (a.price || 0) - (b.price || 0);
-      if (sortOption === "price-desc") return (b.price || 0) - (a.price || 0);
+      if (sortOption === "price-asc") return productPresentation(a).price - productPresentation(b).price;
+      if (sortOption === "price-desc") return productPresentation(b).price - productPresentation(a).price;
       const aOrder = typeof a.displayOrder === 'number' ? a.displayOrder : 99999;
       const bOrder = typeof b.displayOrder === 'number' ? b.displayOrder : 99999;
       if (aOrder !== bOrder) return aOrder - bOrder;
@@ -198,7 +179,7 @@ const ShopPage = ({
 
   const handleAddToCart = (product, e) => {
     e.stopPropagation();
-    addToCart(product);
+    if (addToCart(product) === false) return;
     setAddedToCartAnimation(product._id);
     setTimeout(() => setAddedToCartAnimation(null), 1000);
   };
@@ -228,7 +209,7 @@ const ShopPage = ({
   };
 
   return (
-    <div id="shop-top" className="min-h-screen bg-[#fff7f9] pt-0 pb-16 -mt-10">
+    <div id="shop-top" className="anjola-shop">
       {/* Payment Success Modal */}
       {showPaymentSuccess && (
         <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 pt-32 overflow-y-auto">
@@ -297,59 +278,17 @@ const ShopPage = ({
           <span>Back to Home</span>
         </button>
 
-        {/* SEARCH + SORT */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-          <div className="w-full md:max-w-md">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-              <input
-                type="text" placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => { userChangedFilters.current = true; setSelectedCategory("all"); setSearchQuery(e.target.value); }}
-                className="w-full pl-12 pr-10 py-3.5 rounded-xl border border-gray-200 bg-white
-                  focus:outline-none focus:border-[#e84393] focus:ring-3 focus:ring-[#e84393]/10
-                  transition-all duration-300 text-gray-700 placeholder-gray-400"
-                style={{ fontSize: '16px' }}
-              />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
-                  <X className="w-5 h-5" />
-                </button>
-              )}
-            </div>
+        <div className="shop-heading"><p className="shop-eyebrow">THE ANJOLA COLLECTION</p><h1>Find your kind of lovely.</h1><p>Thoughtful gifts, everyday favourites, and a little something just for you.</p></div>
+        <div className="shop-toolbar">
+          <div className="shop-search"><label className="sr-only" htmlFor="shop-search">Search products</label><Search size={19} />
+            <input id="shop-search" type="search" placeholder="Find a gift, a bag, a little joy…" value={searchQuery} onChange={e => { userChangedFilters.current = true; setSearchQuery(e.target.value); }} />
+            {searchQuery && <button aria-label="Clear search" onClick={() => setSearchQuery('')}><X size={18} /></button>}
           </div>
-          <div className="flex items-center gap-3 justify-between md:justify-end">
-            <select value={sortOption} onChange={(e) => handleSortChange(e.target.value)}
-              className="appearance-none border border-gray-200 bg-white text-gray-700 rounded-xl px-4 py-3 pr-10
-                focus:outline-none focus:border-[#e84393] focus:ring-3 focus:ring-[#e84393]/10
-                transition-all duration-300 cursor-pointer text-sm font-medium">
-              <option value="latest">Latest</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-            </select>
-            {hasActiveFilter && (
-              <button onClick={handleClearFilters} className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#e84393] transition font-medium">
-                <X className="w-4 h-4" /> Clear
-              </button>
-            )}
-          </div>
+          <div className="shop-category-select"><label htmlFor="shop-category">Collection</label><select id="shop-category" value={selectedCategory} onChange={e => handleCategoryChange(e.target.value)}>{dynamicCategories.map(cat => <option key={cat} value={cat}>{cat === 'all' ? 'All products' : cat}</option>)}</select></div>
+          <div className="shop-sort"><label htmlFor="shop-sort">Sort by</label><select id="shop-sort" value={sortOption} onChange={e => handleSortChange(e.target.value)}><option value="latest">Featured order</option><option value="price-asc">Price: low to high</option><option value="price-desc">Price: high to low</option></select></div>
         </div>
-
-        {/* CATEGORIES */}
-        <div className="relative mb-8">
-          <div className="flex gap-2.5 overflow-x-auto pb-3 scrollbar-hide">
-            {dynamicCategories.map((cat) => (
-              <button key={cat} onClick={() => handleCategoryChange(cat)}
-                className={`flex-shrink-0 px-5 py-2.5 rounded-full capitalize text-sm font-medium transition-all duration-200 ${
-                  selectedCategory === cat
-                    ? "bg-[#e84393] text-white shadow-sm"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}>
-                {cat === "all" ? "All Products" : cat.charAt(0).toUpperCase() + cat.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
+        <nav className="shop-category-links" aria-label="Product collections">{dynamicCategories.map(cat => <button key={cat} aria-pressed={selectedCategory === cat} onClick={() => handleCategoryChange(cat)}>{cat === 'all' ? 'All products' : cat}</button>)}</nav>
+        <div className="shop-results-summary"><p role="status">{processedProducts.length} {processedProducts.length === 1 ? 'find' : 'finds'}{selectedCategory !== 'all' ? ` in ${selectedCategory}` : ' to explore'}</p>{hasActiveFilter && <button onClick={handleClearFilters}>Reset filters <X size={14} /></button>}</div>
 
         {/* PRODUCTS */}
         {processedProducts.length === 0 ? (
@@ -367,140 +306,29 @@ const ShopPage = ({
           </div>
         ) : (
           <>
-            {/* Product count */}
-            <p className="text-sm text-gray-400 mb-6">{processedProducts.length} product{processedProducts.length !== 1 ? 's' : ''}</p>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 mb-12">
-              {currentProducts.map((product, index) => {
+            <div className="shop-product-grid">
+              {currentProducts.map(product => {
+                const { price, hasPacks, onSale, available, hasOptions } = productPresentation(product);
                 const inCart = isInCart(product._id);
-                const stock = typeof product.quantity === "number" ? product.quantity : product.inStock === false ? 0 : 999999;
-                const isOutOfStock = stock <= 0;
-                const hasOptions = (Array.isArray(product.sizes) && product.sizes.length > 0) ||
-                  (Array.isArray(product.colors) && product.colors.length > 0) ||
-                  (Array.isArray(product.priceVariations) && product.priceVariations.length > 0);
-                const isAnimating = addedToCartAnimation === product._id;
-                const wishlisted = isWishlisted && isWishlisted(product._id);
-                const lowStock = stock > 0 && stock <= 5;
-
-                return (
-                  <div key={product._id}
-                    className="group gradient-border-card bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-card-hover
-                      transition-all duration-500 cursor-pointer flex flex-col h-full border border-gray-100
-                      hover:border-[#e84393]/20"
-                    onClick={() => handleOpenProduct(product)}>
-
-                    {/* IMAGE */}
-                    <div className="relative overflow-hidden bg-gray-50 h-48 sm:h-56">
-                      <img src={product.images?.[0] || product.image || "/placeholder.png"} alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
-
-                      {/* Tag */}
-                      {product.tag && !isOutOfStock && (
-                        <div className="absolute top-3 left-3 z-10"><ProductTag tag={product.tag} /></div>
-                      )}
-
-                      {isOutOfStock && (
-                        <div className="absolute top-3 left-3 bg-gray-800/90 text-white px-3 py-1 rounded-full text-xs font-medium">
-                          Out of Stock
-                        </div>
-                      )}
-
-                      {inCart && !isOutOfStock && (
-                        <div className="absolute top-3 right-3 bg-emerald-500/90 text-white px-2 py-1 rounded-full text-[10px] font-medium flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                          In Cart
-                        </div>
-                      )}
-
-                      {/* Wishlist button */}
-                      {toggleWishlist && (
-                        <button onClick={(e) => { e.stopPropagation(); toggleWishlist(product); }}
-                          className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center
-                            opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 shadow-sm"
-                          style={{ display: inCart ? 'none' : undefined }}>
-                          <Heart className={`w-4 h-4 ${wishlisted ? 'text-red-500 fill-current' : 'text-gray-600'}`} />
-                        </button>
-                      )}
-
-                      {/* Stock urgency */}
-                      {lowStock && !isOutOfStock && (
-                        <div className="absolute bottom-2 left-2 bg-amber-500/90 text-white px-2 py-0.5 rounded-full text-[9px] font-semibold">
-                          Only {stock} left
-                        </div>
-                      )}
-
-                      {/* Hover overlay with Quick View */}
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-2">
-                        <button onClick={(e) => { e.stopPropagation(); setQuickViewProduct(product); }}
-                          className="bg-white text-gray-900 text-xs font-medium px-4 py-2 rounded-full shadow-lg
-                            transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 flex items-center gap-1.5 hover:bg-[#e84393] hover:text-white">
-                          <Eye className="w-3.5 h-3.5" /> Quick View
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* CONTENT */}
-                    <div className="p-3.5 flex flex-col flex-1">
-                      <span className="text-[10px] text-[#e84393] font-semibold uppercase tracking-wider mb-1">
-                        {product.category}
-                      </span>
-                      <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#e84393] transition-colors">
-                        {product.name}
-                      </h3>
-
-                      <div className="mt-auto space-y-2.5">
-                        {/* Price */}
-                        <div>
-                          {product.salesPrice && product.salesPrice < product.price ? (
-                            <div className="flex items-baseline gap-2 flex-wrap">
-                              <span className="text-lg font-bold text-red-600">₦{product.salesPrice.toLocaleString()}</span>
-                              <span className="text-sm text-gray-400 line-through">₦{product.price.toLocaleString()}</span>
-                              <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
-                                -{Math.round(((product.price - product.salesPrice) / product.price) * 100)}%
-                              </span>
-                            </div>
-                          ) : (
-                            <span className="text-lg font-bold text-gray-900">₦{product.price.toLocaleString()}</span>
-                          )}
-                        </div>
-
-                        {/* Button */}
-                        {isOutOfStock ? (
-                          <button disabled className="w-full bg-gray-100 text-gray-400 px-4 py-2.5 rounded-xl text-xs font-medium cursor-not-allowed">
-                            Unavailable
-                          </button>
-                        ) : hasOptions ? (
-                          <button onClick={(e) => { e.stopPropagation(); handleOpenProduct(product); }}
-                            className="w-full bg-gray-900 text-white px-4 py-2.5 rounded-xl text-xs font-medium
-                              hover:bg-[#e84393] transition-colors duration-300 flex items-center justify-center gap-2">
-                            Select Options
-                          </button>
-                        ) : inCart ? (
-                          <button onClick={(e) => handleRemoveFromCart(product._id, e)}
-                            className="w-full bg-gray-100 text-gray-600 px-4 py-2.5 rounded-xl text-xs font-medium
-                              hover:bg-red-50 hover:text-red-600 transition-colors duration-300">
-                            Remove
-                          </button>
-                        ) : (
-                          <button onClick={(e) => handleAddToCart(product, e)}
-                            className={`w-full bg-gray-900 text-white px-4 py-2.5 rounded-xl text-xs font-medium
-                              hover:bg-[#e84393] transition-all duration-300 flex items-center justify-center gap-2
-                              ${isAnimating ? 'bg-emerald-500 scale-95' : ''}`}>
-                            {isAnimating ? (
-                              <><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg> Added!</>
-                            ) : (
-                              <><ShoppingCart className="w-3.5 h-3.5" /> Add to Cart</>
-                            )}
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                const wishlisted = isWishlisted?.(product._id) || false;
+                return <article key={product._id} className="shop-product-card" aria-label={product.name}>
+                  <div className="shop-card-media">
+                    <button className="shop-product-image" onClick={() => handleOpenProduct(product)} aria-label={`View ${product.name}`}>
+                      {product.images?.[0] || product.image ? <img src={product.images?.[0] || product.image} alt={product.name} loading="lazy" /> : <ShoppingBag size={40} />}
+                    </button>
+                    {(!available || onSale || product.tag) && <span className="shop-product-badge">{!available ? 'Sold out' : onSale ? 'On sale' : product.tag.replace(/-/g, ' ')}</span>}
+                    {toggleWishlist && <button className="shop-wishlist" aria-label={`${wishlisted ? 'Remove' : 'Save'} ${product.name} ${wishlisted ? 'from' : 'to'} wishlist`} aria-pressed={wishlisted} onClick={() => toggleWishlist(product)}><Heart size={19} fill={wishlisted ? 'currentColor' : 'none'} /></button>}
+                    <button className="shop-quickview" aria-label={`Quick view ${product.name}`} onClick={() => setQuickViewProduct(product)}><Eye size={15} />Quick view</button>
                   </div>
-                );
+                  <div className="shop-card-copy">
+                    <p className="shop-product-category">{product.category}</p>
+                    <h2><button onClick={() => handleOpenProduct(product)}>{product.name}</button></h2>
+                    <p className="shop-price">{hasPacks && <span>From </span>}{formatPrice(price)}{onSale && <del>{formatPrice(product.price)}</del>}</p>
+                    {hasPacks && <p className="shop-pack-note">Price per pack · options available</p>}
+                    {inCart && <span className="shop-in-bag">In your bag</span>}
+                    {!available ? <button disabled className="shop-card-action">Currently unavailable</button> : hasOptions ? <button className="shop-card-action" onClick={() => handleOpenProduct(product)}>Choose options <ShoppingBag size={16} /></button> : inCart ? <button className="shop-card-action shop-remove" onClick={e => handleRemoveFromCart(product._id, e)}>Remove from bag <X size={15} /></button> : <button className="shop-card-action" onClick={e => handleAddToCart(product, e)}>{addedToCartAnimation === product._id ? 'Added to bag' : 'Add to bag'} <ShoppingCart size={16} /></button>}
+                  </div>
+                </article>;
               })}
             </div>
 
@@ -508,7 +336,7 @@ const ShopPage = ({
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-1.5 mt-12">
                 {currentPageNumber > 1 && (
-                  <button onClick={() => handlePageChange(currentPageNumber - 1)}
+                  <button aria-label="Previous page" onClick={() => handlePageChange(currentPageNumber - 1)}
                     className="px-3 py-2 rounded-xl border border-gray-200 text-gray-600 hover:border-[#e84393] hover:text-[#e84393] transition text-sm">
                     ←
                   </button>
@@ -517,7 +345,7 @@ const ShopPage = ({
                   page === '...' ? (
                     <span key={`ellipsis-${index}`} className="px-2 py-2 text-gray-400 text-sm">...</span>
                   ) : (
-                    <button key={page} onClick={() => handlePageChange(page)}
+                    <button key={page} aria-label={`Page ${page}`} aria-current={page === currentPageNumber ? 'page' : undefined} onClick={() => handlePageChange(page)}
                       className={`min-w-[40px] h-[40px] rounded-xl font-medium text-sm transition-all duration-300 ${
                         page === currentPageNumber
                           ? "bg-[#e84393] text-white shadow-md"
@@ -528,7 +356,7 @@ const ShopPage = ({
                   )
                 ))}
                 {currentPageNumber < totalPages && (
-                  <button onClick={() => handlePageChange(currentPageNumber + 1)}
+                  <button aria-label="Next page" onClick={() => handlePageChange(currentPageNumber + 1)}
                     className="px-3 py-2 rounded-xl border border-gray-200 text-gray-600 hover:border-[#e84393] hover:text-[#e84393] transition text-sm">
                     →
                   </button>
@@ -543,15 +371,15 @@ const ShopPage = ({
           <div className="mt-20 pt-10 border-t border-gray-100">
             <h3 className="text-xl font-serif text-gray-900 mb-6">Recently Viewed</h3>
             <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-              {recentlyViewed.slice(0, 6).map((product) => (
+              {recentlyViewed.map(item => visibleProducts.find(p => p._id === item._id)).filter(Boolean).slice(0, 6).map((product) => (
                 <button key={product._id} onClick={() => handleOpenProduct(product)}
                   className="flex-shrink-0 w-36 text-left group">
                   <div className="w-36 h-36 rounded-xl overflow-hidden bg-gray-100 mb-2">
                     <img src={product.images?.[0] || product.image || "/placeholder.png"} alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                   </div>
                   <p className="text-xs font-medium text-gray-900 line-clamp-1 group-hover:text-[#e84393] transition-colors">{product.name}</p>
-                  <p className="text-xs text-gray-500 font-semibold">₦{product.price.toLocaleString()}</p>
+                  <p className="text-xs text-gray-500 font-semibold">{productPresentation(product).hasPacks ? 'From ' : ''}{formatPrice(productPresentation(product).price)}</p>
                 </button>
               ))}
             </div>
