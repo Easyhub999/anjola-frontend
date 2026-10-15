@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/product/:id",
+      "destination": "/api/product?id=:id"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
       "source": "/shop",
       "destination": "/seo/shop.html"
     },
@@ -41,7 +49,7 @@
       "destination": "/seo/product.html"
     },
     {
-      "source": "/(.*)",
+      "source": "/:path((?!api/).*)",
       "destination": "/"
     }
   ],
@@ -55,5 +63,15 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/product.js": {
+      "includeFiles": "build/seo/product.html",
+      "maxDuration": 30
+    },
+    "api/sitemap.js": {
+      "maxDuration": 30
+    }
+  },
+  "buildCommand": "npm run build"
 }

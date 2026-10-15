@@ -1,5 +1,6 @@
 import './HomePage.css';
 import { cartLineKey } from '../cart';
+import { productPath } from '../productLinks';
 import { useEffect, useRef } from "react";
 import { Gift, ArrowRight, ShoppingBag, Truck, Shield, MessageCircle } from "lucide-react";
 
@@ -19,9 +20,11 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
     return found ? found.quantity : 0;
   };
 
-  const handleProductClick = (product) => {
+  const handleProductClick = (product, event) => {
+    if (event && (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return;
+    event?.preventDefault();
     setSelectedProduct(product);
-    setCurrentPage("product");
+    setCurrentPage(productPath(product).slice(1));
   };
 
   // The shop owns payment verification. A URL parameter alone cannot confirm payment.
@@ -72,22 +75,22 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
             <p className="anjola-hero-description">For your space, your routine, and the people you love. Explore gift boxes, home essentials, drinkware, bags, and accessories that make everyday moments feel special.</p>
             <div className="anjola-hero-actions">
               <button className="anjola-primary" onClick={() => browseCollection()}>Explore the collection <ArrowRight size={18} /></button>
-              {giftProduct && <button className="anjola-secondary" onClick={() => handleProductClick(giftProduct)}>Discover a gift <Gift size={17} /></button>}
+              {giftProduct && <a className="anjola-secondary" href={productPath(giftProduct)} onClick={event => handleProductClick(giftProduct, event)}>Discover a gift <Gift size={17} /></a>}
             </div>
             <div className="anjola-hero-note"><span /> Gifting · Home · Drinkware · Accessories</div>
           </div>
           <div className="anjola-hero-display">
             <span className="anjola-display-caption">A FEW OF OUR FAVOURITE THINGS</span>
             {heroProduct ? (
-              <button className="anjola-main-product" onClick={() => handleProductClick(heroProduct)} aria-label={`Explore ${heroProduct.name}`}>
+              <a className="anjola-main-product" href={productPath(heroProduct)} onClick={event => handleProductClick(heroProduct, event)} aria-label={`Explore ${heroProduct.name}`}>
                 <img src={productImage(heroProduct)} alt={heroProduct.name} fetchpriority="high" />
                 <span className="anjola-product-caption"><span><small>{giftProduct ? 'THE GIFT EDIT' : 'IN THE COLLECTION'}</small><strong>{heroProduct.name}</strong></span><ArrowRight size={22} /></span>
-              </button>
+              </a>
             ) : <div className="anjola-hero-placeholder"><ShoppingBag size={40} strokeWidth={1} /><p>Your next lovely find<br />starts here.</p><button className="anjola-secondary" onClick={() => browseCollection()}>Browse the shop <ArrowRight size={18} /></button></div>}
-            {accentProduct && <button className="anjola-accent-product" onClick={() => handleProductClick(accentProduct)} aria-label={`Explore ${accentProduct.name}`}>
+            {accentProduct && <a className="anjola-accent-product" href={productPath(accentProduct)} onClick={event => handleProductClick(accentProduct, event)} aria-label={`Explore ${accentProduct.name}`}>
               <img src={productImage(accentProduct)} alt={accentProduct.name} />
               <span>{accentProduct.name}<ArrowRight size={16} /></span>
-            </button>}
+            </a>}
             <span className="anjola-display-footnote">Something for you. Something for someone special.</span>
           </div>
         </div>
@@ -131,13 +134,13 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
               const price = packs.length ? Math.min(...packs.map(pack => pack.price)) : onSale ? product.salesPrice : product.price;
               const soldOut = !hasPurchasableStock(product);
               return <article key={product._id} className="anjola-featured-card">
-                <button className="anjola-card-image" onClick={() => handleProductClick(product)} aria-label={`View ${product.name}`}>
+                <a className="anjola-card-image" href={productPath(product)} onClick={event => handleProductClick(product, event)} aria-label={`View ${product.name}`}>
                   {productImage(product) ? <img src={productImage(product)} alt={product.name} loading="lazy" /> : <ShoppingBag size={40} strokeWidth={1} />}
                   {(soldOut || onSale) && <span className="anjola-card-badge">{soldOut ? 'Sold out' : 'On sale'}</span>}
-                </button>
+                </a>
                 <div className="anjola-card-body">
                   <p className="anjola-card-category">{product.category}</p>
-                  <h3><button onClick={() => handleProductClick(product)}>{product.name}</button></h3>
+                  <h3><a href={productPath(product)} onClick={event => handleProductClick(product, event)}>{product.name}</a></h3>
                   <p className="anjola-card-price">{packs.length > 0 && <span>From </span>}₦{Number(price).toLocaleString('en-NG')}{onSale && <del>₦{Number(product.price).toLocaleString('en-NG')}</del>}</p>
                   {packs.length > 0 && <p className="anjola-pack-note">Price per pack · choose your pack size</p>}
                   {!needsOptions && qty > 0 && !soldOut ? <div className="anjola-card-quantity">
@@ -157,10 +160,10 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
 
       {giftProduct && <section className="anjola-gift-section" aria-labelledby="gift-title">
         <div className="anjola-gift-inner">
-          <button className="anjola-gift-image" onClick={() => handleProductClick(giftProduct)} aria-label={`See gift details for ${giftProduct.name}`}>
+          <a className="anjola-gift-image" href={productPath(giftProduct)} onClick={event => handleProductClick(giftProduct, event)} aria-label={`See gift details for ${giftProduct.name}`}>
             <span className="anjola-gift-image-label">A LITTLE SOMETHING, CHOSEN WITH LOVE</span>
             <img src={productImage(giftProduct)} alt={giftProduct.name} loading="lazy" />
-          </button>
+          </a>
           <div className="anjola-gift-copy">
             <p className="anjola-eyebrow">THE GIFT SPOTLIGHT</p>
             <h2 id="gift-title">For the moments<br /><em>worth making special.</em></h2>
@@ -170,7 +173,7 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
               <p className="anjola-gift-price">{giftProduct.priceVariations?.length ? 'From ' : ''}₦{Number(giftProduct.priceVariations?.length ? Math.min(...giftProduct.priceVariations.map(pack => pack.price)) : giftProduct.salesPrice != null && giftProduct.salesPrice < giftProduct.price ? giftProduct.salesPrice : giftProduct.price).toLocaleString('en-NG')}</p>
               <p>See product details for contents, sizes, and available options.</p>
             </div>
-            <button className="anjola-primary" onClick={() => handleProductClick(giftProduct)}>Take a closer look <ArrowRight size={18} /></button>
+            <a className="anjola-primary" href={productPath(giftProduct)} onClick={event => handleProductClick(giftProduct, event)}>Take a closer look <ArrowRight size={18} /></a>
             <span className="anjola-gift-note"><Gift size={16} /> Add your personal message at checkout.</span>
           </div>
         </div>
@@ -179,10 +182,10 @@ const HomePage = ({ products, cart, addToCart, updateQuantity, setCurrentPage, s
       <section id="brand-story" className="anjola-story-section" aria-labelledby="story-title">
         <div className="anjola-story-inner">
             <div className="anjola-story-visual">
-              {storyProduct ? <button className="anjola-story-product" onClick={() => handleProductClick(storyProduct)} aria-label={`Discover ${storyProduct.name}`}>
+              {storyProduct ? <a className="anjola-story-product" href={productPath(storyProduct)} onClick={event => handleProductClick(storyProduct, event)} aria-label={`Discover ${storyProduct.name}`}>
                 <img src={productImage(storyProduct)} alt={storyProduct.name} loading="lazy" />
                 <span>Meet your next everyday favourite <ArrowRight size={18} /></span>
-              </button> : <div className="anjola-story-placeholder"><Gift size={48} strokeWidth={1} /><p>For everyday living.<br />For thoughtful giving.</p></div>}
+              </a> : <div className="anjola-story-placeholder"><Gift size={48} strokeWidth={1} /><p>For everyday living.<br />For thoughtful giving.</p></div>}
               <p className="anjola-story-caption">THE ANJOLA WAY / BEAUTY IN THE EVERYDAY</p>
             </div>
 

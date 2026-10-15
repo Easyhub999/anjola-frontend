@@ -137,6 +137,12 @@ export const authAPI = {
 // ==========================================
 
 export const productsAPI = {
+  getProduct: async (id, options = {}) => {
+    const response = await fetch(`${API_URL}/products/${encodeURIComponent(id)}`, { signal: options.signal });
+    const result = await handleResponse(response);
+    return result.data;
+  },
+
 
   // Get all products
   getAllProducts: async (filters = {}) => {

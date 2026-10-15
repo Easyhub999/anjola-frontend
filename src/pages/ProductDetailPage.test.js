@@ -6,7 +6,7 @@ import { selectionPrice } from '../productSelection';
 jest.mock('../api', () => ({ productsAPI: { addReview: jest.fn() } }));
 const product = { _id: 'gift', name: 'Gift set', price: 1000, salesPrice: 700, quantity: 8, sizes: ['M'], colors: [{ name: 'Pink', quantity: 2 }, { name: 'White', quantity: 6 }], priceVariations: [{ pieces: 1, price: 900 }, { pieces: 3, price: 2400 }, { pieces: 9, price: 6000 }], images: ['/one.jpg', '/two.jpg'], description: 'A thoughtful gift.', reviews: [] };
 const props = () => ({ selectedProduct: product, products: [], setCurrentPage: jest.fn(), setSelectedProduct: jest.fn(), addToCart: jest.fn() });
-beforeEach(() => { window.scrollTo = jest.fn(); Element.prototype.scrollIntoView = jest.fn(); jest.clearAllMocks(); });
+beforeEach(() => { window.scrollTo = jest.fn(); Element.prototype.scrollIntoView = jest.fn(); jest.clearAllMocks(); delete navigator.share; delete navigator.clipboard; });
 
 test('pack and color choices enforce piece stock and send exact selected pack price', () => {
   const p = props(); render(<ProductDetailPage {...p} />);
@@ -79,4 +79,32 @@ test('review submission updates displayed reviews without mutating the product p
   await waitFor(() => expect(screen.getByText('Thank you. Your review was submitted.')).toBeInTheDocument());
   expect(screen.getByText('Lovely')).toBeInTheDocument();
   expect(product.reviews).toEqual([]);
+});
+
+test('native sharing sends this product’s permanent URL', async () => {
+  navigator.share = jest.fn().mockResolvedValue();
+  render(<ProductDetailPage {...props()} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Share product' }));
+  await waitFor(() => expect(navigator.share).toHaveBeenCalledWith({ title: 'Gift set', text: 'Take a look at Gift set on Anjola Aesthetics.', url: 'https://anjolaaestheticsng.com/product/gift' }));
+});
+
+test('clipboard sharing copies a direct product link and reports failures honestly', async () => {
+  navigator.clipboard = { writeText: jest.fn().mockResolvedValue() };
+  render(<ProductDetailPage {...props()} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Share product' }));
+  expect(await screen.findByText('Product link copied.')).toBeInTheDocument();
+  expect(navigator.clipboard.writeText).toHaveBeenCalledWith('https://anjolaaestheticsng.com/product/gift');
+  navigator.clipboard.writeText.mockRejectedValue(new Error('Clipboard unavailable'));
+  fireEvent.click(screen.getByRole('button', { name: 'Share product' }));
+  expect(await screen.findByText('Unable to share. Copy the product link from your browser address bar.')).toBeInTheDocument();
+});
+
+test('related products update the URL as well as the selected item', () => {
+  const p = props(); const related = { ...product, _id: 'other', name: 'Other gift' };
+  render(<ProductDetailPage {...p} products={[product, related]} />);
+  const link = screen.getByRole('link', { name: /Other gift/ });
+  expect(link).toHaveAttribute('href', '/product/other');
+  fireEvent.click(link);
+  expect(p.setSelectedProduct).toHaveBeenCalledWith(related);
+  expect(p.setCurrentPage).toHaveBeenCalledWith('product/other');
 });

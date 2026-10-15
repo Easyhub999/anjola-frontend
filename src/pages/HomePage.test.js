@@ -16,19 +16,20 @@ const products = [
 test('hero and story feature available catalog items and open their actual details', () => {
   const setSelectedProduct = jest.fn(); const setCurrentPage = jest.fn();
   const { container } = render(<HomePage products={products} cart={[]} setSelectedProduct={setSelectedProduct} setCurrentPage={setCurrentPage} />);
-  fireEvent.click(screen.getByRole('button', { name: 'Explore Care gift box' }));
+  expect(screen.getByRole('link', { name: 'Explore Care gift box' })).toHaveAttribute('href', '/product/gift');
+  fireEvent.click(screen.getByRole('link', { name: 'Explore Care gift box' }));
   expect(setSelectedProduct).toHaveBeenLastCalledWith(products[2]);
-  expect(setCurrentPage).toHaveBeenLastCalledWith('product');
-  fireEvent.click(screen.getByRole('button', { name: 'Discover Cosmetic bag' }));
+  expect(setCurrentPage).toHaveBeenLastCalledWith('product/gift');
+  fireEvent.click(screen.getByRole('link', { name: 'Discover Cosmetic bag' }));
   expect(setSelectedProduct).toHaveBeenLastCalledWith(products[4]);
   expect(container.querySelector('img[src="/hero-ribbon.jpg"]')).toBeNull();
-  expect(screen.queryByRole('button', { name: 'Explore Hidden gift' })).not.toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: 'Explore Sold gift' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: 'Explore Hidden gift' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: 'Explore Sold gift' })).not.toBeInTheDocument();
 });
 test('empty catalog keeps shopping available without advertising a nonexistent gift', () => {
   const setCurrentPage = jest.fn();
   render(<HomePage products={[]} cart={[]} setCurrentPage={setCurrentPage} />);
-  expect(screen.queryByRole('button', { name: /Discover a gift/ })).not.toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: /Discover a gift/ })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: /Explore the collection/ }));
   expect(setCurrentPage).toHaveBeenCalledWith('shop');
 });
@@ -69,9 +70,9 @@ test('gift spotlight uses the catalog price and opens product details', () => {
   const spotlight = screen.getByRole('region', { name: /For the moments/ });
   expect(spotlight).toHaveTextContent('Care gift box');
   expect(spotlight).toHaveTextContent('₦12,000');
-  fireEvent.click(screen.getByRole('button', { name: 'Take a closer look' }));
+  fireEvent.click(screen.getByRole('link', { name: 'Take a closer look' }));
   expect(setSelectedProduct).toHaveBeenLastCalledWith(products[2]);
-  expect(setCurrentPage).toHaveBeenLastCalledWith('product');
+  expect(setCurrentPage).toHaveBeenLastCalledWith('product/gift');
   expect(screen.queryByText('Avg. Rating')).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Subscribe' })).not.toBeInTheDocument();
 });
@@ -101,6 +102,6 @@ test('gift spotlight excludes products without enough color stock for any pack',
     priceVariations: [{ pieces: 3, price: 2400 }], colors: [{ name: 'Pink', quantity: 2 }, { name: 'White', quantity: 2 }] };
   render(<HomePage products={[unavailable]} cart={[]} setCurrentPage={jest.fn()} />);
   expect(screen.queryByRole('region', { name: /For the moments/ })).not.toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: /Explore Care gift box/ })).not.toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: /Explore Care gift box/ })).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Currently unavailable' })).toBeDisabled();
 });

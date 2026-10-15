@@ -37,22 +37,24 @@ test('category and search combine and reset together', () => {
 });
 
 test('card purchase actions preserve direct adds and option selection', () => {
-  const addToCart = jest.fn(); const setSelectedProduct = jest.fn();
-  render(<Shop addToCart={addToCart} setSelectedProduct={setSelectedProduct} toggleWishlist={jest.fn()} />);
+  const addToCart = jest.fn(); const setSelectedProduct = jest.fn(); const setCurrentPage = jest.fn();
+  render(<Shop addToCart={addToCart} setSelectedProduct={setSelectedProduct} setCurrentPage={setCurrentPage} toggleWishlist={jest.fn()} />);
   fireEvent.click(within(screen.getByRole('article', { name: 'Tote bag' })).getByRole('button', { name: 'Add to bag' }));
   expect(addToCart).toHaveBeenCalledWith(products[2]);
   fireEvent.click(within(screen.getByRole('article', { name: 'Gift pack' })).getByRole('button', { name: 'Choose options' }));
   expect(setSelectedProduct).toHaveBeenCalledWith(products[0]);
+  expect(setCurrentPage).toHaveBeenCalledWith('product/pack');
   expect(screen.getByRole('button', { name: 'Save Tote bag to wishlist' })).toBeInTheDocument();
 });
 
 test('quick view shows the pack price, routes option selection, and restores focus on close', () => {
-  const setSelectedProduct = jest.fn();
-  render(<Shop setSelectedProduct={setSelectedProduct} />);
+  const setSelectedProduct = jest.fn(); const setCurrentPage = jest.fn();
+  render(<Shop setSelectedProduct={setSelectedProduct} setCurrentPage={setCurrentPage} />);
   const trigger = screen.getByRole('button', { name: 'Quick view Gift pack' });
   trigger.focus(); fireEvent.click(trigger);
   const dialog = screen.getByRole('dialog', { name: 'Gift pack' });
   expect(dialog).toHaveTextContent('From ₦2,700');
+  expect(within(dialog).getByRole('link', { name: 'View full details' })).toHaveAttribute('href', '/product/pack');
   expect(within(dialog).getByRole('button', { name: 'Close quick view' })).toHaveFocus();
   expect(document.body.style.overflow).toBe('hidden');
   fireEvent.keyDown(document.activeElement, { key: 'Escape' });
@@ -62,6 +64,7 @@ test('quick view shows the pack price, routes option selection, and restores foc
   fireEvent.click(trigger);
   fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Choose options' }));
   expect(setSelectedProduct).toHaveBeenCalledWith(products[0]);
+  expect(setCurrentPage).toHaveBeenCalledWith('product/pack');
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
 
@@ -79,4 +82,33 @@ test('verified payment return still clears the cart and opens the confirmation',
   expect(await screen.findByText('Payment Successful!')).toBeInTheDocument();
   expect(paymentsAPI.verifyPayment).toHaveBeenCalledWith('test-payment');
   expect(clearCart).toHaveBeenCalledTimes(1);
+});
+
+test('product cards and recently viewed items expose permanent links without intercepting new-tab clicks', () => {
+  const setSelectedProduct = jest.fn(); const setCurrentPage = jest.fn();
+  render(<Shop setSelectedProduct={setSelectedProduct} setCurrentPage={setCurrentPage} recentlyViewed={[products[1]]} />);
+  const imageLink = screen.getByRole('link', { name: 'View Rose tumbler' });
+  expect(imageLink).toHaveAttribute('href', '/product/sale');
+  expect(screen.getByRole('link', { name: 'Rose tumbler' })).toHaveAttribute('href', '/product/sale');
+  expect(screen.getByRole('link', { name: /Rose tumbler Rose tumbler/ })).toHaveAttribute('href', '/product/sale');
+  // Prevent JSDOM navigation only after React handles the event.
+  const preventNavigation = event => event.preventDefault();
+  document.addEventListener('click', preventNavigation);
+  fireEvent.click(imageLink, { ctrlKey: true });
+  fireEvent.click(imageLink, { metaKey: true });
+  document.removeEventListener('click', preventNavigation);
+  expect(setSelectedProduct).not.toHaveBeenCalled();
+  expect(setCurrentPage).not.toHaveBeenCalled();
+  fireEvent.click(imageLink);
+  expect(setSelectedProduct).toHaveBeenCalledWith(products[1]);
+  expect(setCurrentPage).toHaveBeenCalledWith('product/sale');
+});
+
+test('quick-view details navigate to the individual product and close the dialog', () => {
+  const setCurrentPage = jest.fn();
+  render(<Shop setCurrentPage={setCurrentPage} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Quick view Tote bag' }));
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('link', { name: 'View full details' }));
+  expect(setCurrentPage).toHaveBeenCalledWith('product/bag');
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });

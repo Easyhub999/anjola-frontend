@@ -5,6 +5,7 @@ import BackButton from '../components/BackButton';
 import { Heart, Share2, ShoppingBag, Truck, Gift, Star, ChevronDown, ChevronLeft, ChevronRight, X, Expand } from 'lucide-react';
 import { productPresentation, formatPrice } from '../productPresentation';
 import { canSelectPack, selectionPrice } from '../productSelection';
+import { productPath, productUrl } from '../productLinks';
 import './ProductDetailPage.css';
 
 const ProductDetailPage = ({ selectedProduct: product, setCurrentPage, user, addToCart, toggleWishlist, isWishlisted, products = [], setSelectedProduct }) => {
@@ -108,11 +109,16 @@ const ProductDetailPage = ({ selectedProduct: product, setCurrentPage, user, add
   };
   const share = async () => {
     try {
-      // Product routing currently uses local state; do not advertise /product as a shareable product link.
-      const text = `Take a look at ${product.name} on Anjola Aesthetics: ${window.location.origin}/shop`;
-      if (navigator.share) await navigator.share({ title: product.name, text, url: `${window.location.origin}/shop` });
-      else { await navigator.clipboard.writeText(text); setShareMessage('Product name and shop link copied.'); }
-    } catch (error) { if (error.name !== 'AbortError') setShareMessage('Unable to share. You can find this product by name in the shop.'); }
+      const url = productUrl(product);
+      if (navigator.share) await navigator.share({ title: product.name, text: `Take a look at ${product.name} on Anjola Aesthetics.`, url });
+      else { await navigator.clipboard.writeText(url); setShareMessage('Product link copied.'); }
+    } catch (error) { if (error.name !== 'AbortError') setShareMessage('Unable to share. Copy the product link from your browser address bar.'); }
+  };
+  const openRelatedProduct = (item, event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    setSelectedProduct(item);
+    setCurrentPage(productPath(item).slice(1));
   };
   const move = delta => { if (images.length > 1) setImageIndex((safeIndex + delta + images.length) % images.length); };
   const related = products.filter(p => p._id !== product._id && p.visible !== false).sort((a, b) => Number(b.category === product.category) - Number(a.category === product.category)).slice(0, 6);
@@ -210,7 +216,7 @@ const ProductDetailPage = ({ selectedProduct: product, setCurrentPage, user, add
           </div>
         </div>
       </div>
-      {related.length > 0 && <section className="pd-related" aria-labelledby="related-title"><p className="pd-eyebrow">KEEP EXPLORING</p><h2 id="related-title">Something else you might love.</h2><div>{related.map(item => <button key={item._id} onClick={() => setSelectedProduct(item)}>{item.images?.[0] || item.image ? <img src={item.images?.[0] || item.image} alt="" loading="lazy" /> : <ShoppingBag size={40} />}<span>{item.name}</span><small>{productPresentation(item).hasPacks ? 'From ' : ''}{formatPrice(productPresentation(item).price)}</small></button>)}</div></section>}
+      {related.length > 0 && <section className="pd-related" aria-labelledby="related-title"><p className="pd-eyebrow">KEEP EXPLORING</p><h2 id="related-title">Something else you might love.</h2><div>{related.map(item => <a key={item._id} href={productPath(item)} onClick={event => openRelatedProduct(item, event)}>{item.images?.[0] || item.image ? <img src={item.images?.[0] || item.image} alt="" loading="lazy" /> : <ShoppingBag size={40} />}<span>{item.name}</span><small>{productPresentation(item).hasPacks ? 'From ' : ''}{formatPrice(productPresentation(item).price)}</small></a>)}</div></section>}
     </div>
     {createPortal(<div className="pd-mobile-buy"><div><small>{pricing.starting ? 'From / pack' : packs.length ? `${pricing.pieces}-piece pack` : 'Price per item'}</small><strong>{formatPrice(pricing.price)}</strong></div><button className="pd-buy" disabled={!presentation.available || !selectionAvailable} onClick={add}>{addLabel}</button></div>, document.body)}
     {showLightbox && createPortal(<div className="pd-lightbox" ref={lightboxRef} role="dialog" aria-modal="true" aria-label={`${product.name} gallery`} onClick={event => { if (event.target === event.currentTarget) setShowLightbox(false); }}><button className="pd-lightbox-close" aria-label="Close gallery" onClick={() => setShowLightbox(false)}><X size={24} /></button><img src={images[safeIndex]} alt={`${product.name}, view ${safeIndex + 1}`} /><div className="pd-lightbox-controls">{images.length > 1 && <button aria-label="Previous enlarged photo" onClick={() => move(-1)}><ChevronLeft size={24} /></button>}<span aria-live="polite">{safeIndex + 1} / {images.length}</span>{images.length > 1 && <button aria-label="Next enlarged photo" onClick={() => move(1)}><ChevronRight size={24} /></button>}</div></div>, document.body)}

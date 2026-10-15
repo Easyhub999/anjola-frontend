@@ -1,5 +1,6 @@
 import './ShopPage.css';
 import { productPresentation, formatPrice } from '../productPresentation';
+import { productPath } from '../productLinks';
 import { cartLineKey } from '../cart';
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Search, ShoppingCart, X, ArrowLeft, CheckCircle, Mail, Package, Home, ShoppingBag, Heart, Eye } from "lucide-react";
@@ -151,10 +152,12 @@ const ShopPage = ({
   const currentProducts = processedProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
   const isInCart = (id) => cart.some((item) => item._id === id);
 
-  const handleOpenProduct = (product) => {
+  const handleOpenProduct = (product, event) => {
+    if (event && (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return;
+    event?.preventDefault();
     localStorage.setItem("cameFromShop", "true");
     setSelectedProduct(product);
-    setCurrentPage("product");
+    setCurrentPage(productPath(product).slice(1));
   };
 
   const handlePageChange = useCallback((page) => {
@@ -313,16 +316,16 @@ const ShopPage = ({
                 const wishlisted = isWishlisted?.(product._id) || false;
                 return <article key={product._id} className="shop-product-card" aria-label={product.name}>
                   <div className="shop-card-media">
-                    <button className="shop-product-image" onClick={() => handleOpenProduct(product)} aria-label={`View ${product.name}`}>
+                    <a className="shop-product-image" href={productPath(product)} onClick={event => handleOpenProduct(product, event)} aria-label={`View ${product.name}`}>
                       {product.images?.[0] || product.image ? <img src={product.images?.[0] || product.image} alt={product.name} loading="lazy" /> : <ShoppingBag size={40} />}
-                    </button>
+                    </a>
                     {(!available || onSale || product.tag) && <span className="shop-product-badge">{!available ? 'Sold out' : onSale ? 'On sale' : product.tag.replace(/-/g, ' ')}</span>}
                     {toggleWishlist && <button className="shop-wishlist" aria-label={`${wishlisted ? 'Remove' : 'Save'} ${product.name} ${wishlisted ? 'from' : 'to'} wishlist`} aria-pressed={wishlisted} onClick={() => toggleWishlist(product)}><Heart size={19} fill={wishlisted ? 'currentColor' : 'none'} /></button>}
                     <button className="shop-quickview" aria-label={`Quick view ${product.name}`} onClick={() => setQuickViewProduct(product)}><Eye size={15} />Quick view</button>
                   </div>
                   <div className="shop-card-copy">
                     <p className="shop-product-category">{product.category}</p>
-                    <h2><button onClick={() => handleOpenProduct(product)}>{product.name}</button></h2>
+                    <h2><a href={productPath(product)} onClick={event => handleOpenProduct(product, event)}>{product.name}</a></h2>
                     <p className="shop-price">{hasPacks && <span>From </span>}{formatPrice(price)}{onSale && <del>{formatPrice(product.price)}</del>}</p>
                     {hasPacks && <p className="shop-pack-note">Price per pack · options available</p>}
                     {inCart && <span className="shop-in-bag">In your bag</span>}
@@ -372,7 +375,7 @@ const ShopPage = ({
             <h3 className="text-xl font-serif text-gray-900 mb-6">Recently Viewed</h3>
             <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
               {recentlyViewed.map(item => visibleProducts.find(p => p._id === item._id)).filter(Boolean).slice(0, 6).map((product) => (
-                <button key={product._id} onClick={() => handleOpenProduct(product)}
+                <a key={product._id} href={productPath(product)} onClick={event => handleOpenProduct(product, event)}
                   className="flex-shrink-0 w-36 text-left group">
                   <div className="w-36 h-36 rounded-xl overflow-hidden bg-gray-100 mb-2">
                     <img src={product.images?.[0] || product.image || "/placeholder.png"} alt={product.name}
@@ -380,7 +383,7 @@ const ShopPage = ({
                   </div>
                   <p className="text-xs font-medium text-gray-900 line-clamp-1 group-hover:text-[#e84393] transition-colors">{product.name}</p>
                   <p className="text-xs text-gray-500 font-semibold">{productPresentation(product).hasPacks ? 'From ' : ''}{formatPrice(productPresentation(product).price)}</p>
-                </button>
+                </a>
               ))}
             </div>
           </div>

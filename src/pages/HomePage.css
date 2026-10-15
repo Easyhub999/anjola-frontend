@@ -36,7 +36,7 @@
 .anjola-story-product span { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 18px 4px 6px; font-size: 12px; color: #753049; }
 .anjola-story-caption { font-size: 9px; letter-spacing: .18em; color: #75545d; margin-top: 20px; }
 .anjola-story-placeholder { display: grid; place-content: center; gap: 24px; min-height: 360px; color: #753049; }
-.anjola-hero button:focus-visible, .anjola-story-visual button:focus-visible { outline: 3px solid #753049; outline-offset: 5px; }
+.anjola-hero button:focus-visible, .anjola-hero a:focus-visible, .anjola-story-visual a:focus-visible { outline: 3px solid #753049; outline-offset: 5px; }
 @media (max-width: 767px) {
   .anjola-hero { padding: 34px 22px 24px; }
   .anjola-hero-inner { grid-template-columns: 1fr; gap: 26px; }
@@ -80,7 +80,7 @@
 .anjola-card-body { padding-top: 18px; display: flex; flex: 1; flex-direction: column; align-items: stretch; }
 .anjola-card-category { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: #80636f; margin-bottom: 8px; }
 .anjola-card-body h3 { font-size: 19px; line-height: 1.4; margin-bottom: 10px; }
-.anjola-card-body h3 button { text-align: left; }
+.anjola-card-body h3 a { text-align: left; }
 .anjola-card-price { font-size: 15px; font-weight: 600; margin-bottom: 5px; }
 .anjola-card-price span { font-size: 12px; font-weight: 400; }
 .anjola-card-price del { font-size: 12px; color: #75626a; font-weight: 400; margin-left: 9px; }
@@ -92,7 +92,7 @@
 .anjola-card-quantity button:disabled { opacity: .4; cursor: not-allowed; }
 .anjola-featured-footer { margin-top: 38px; text-align: center; }
 .anjola-empty-selection { padding: 24px 0; color: #75626a; }
-.anjola-collections button:focus-visible, .anjola-featured button:focus-visible { outline: 3px solid #753049; outline-offset: 4px; }
+.anjola-collections button:focus-visible, .anjola-featured button:focus-visible, .anjola-featured a:focus-visible { outline: 3px solid #753049; outline-offset: 4px; }
 @media (max-width: 900px) { .anjola-featured-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px 18px; } }
 @media (max-width: 600px) {
   .anjola-collections, .anjola-featured { padding: 42px 20px; }
@@ -113,7 +113,7 @@
 .anjola-service-strip small { display: block; font-size: 10px; font-weight: 400; color: #75626a; margin-top: 4px; }
 .anjola-gift-section { padding: 76px 24px; background: #f2e2df; }
 .anjola-gift-inner, .anjola-story-inner { max-width: 1160px; margin: auto; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 76px; }
-.anjola-gift-image { background: #fffaf6; padding: 24px; text-align: left; width: 100%; }
+.anjola-gift-image { display: block; background: #fffaf6; padding: 24px; text-align: left; width: 100%; }
 .anjola-gift-image-label { display: block; font-size: 9px; letter-spacing: .16em; color: #80636f; margin-bottom: 24px; }
 .anjola-gift-image img { width: 100%; aspect-ratio: 1; object-fit: contain; }
 .anjola-gift-copy .anjola-eyebrow, .anjola-story-copy .anjola-eyebrow { margin-bottom: 18px; }
@@ -142,7 +142,7 @@
 .anjola-contact-band p:not(.anjola-eyebrow) { font-size: 13px; line-height: 1.8; color: #e5d1d8; }
 .anjola-contact-link { display: inline-flex; align-items: center; justify-content: center; gap: 12px; padding: 16px 24px; min-height: 48px; background: #fff9f4; color: #572137; border-radius: 4px; font-size: 13px; font-weight: 600; flex-shrink: 0; }
 .anjola-contact-link:hover { background: #f2e2df; }
-.anjola-gift-section button:focus-visible, .anjola-story-copy button:focus-visible, .anjola-help-section button:focus-visible { outline: 3px solid #753049; outline-offset: 5px; }
+.anjola-gift-section a:focus-visible, .anjola-story-copy button:focus-visible, .anjola-help-section button:focus-visible { outline: 3px solid #753049; outline-offset: 5px; }
 .anjola-contact-link:focus-visible { outline: 3px solid #fff9f4; outline-offset: 5px; }
 @media (max-width: 767px) {
   .anjola-service-strip { gap: 20px; flex-wrap: wrap; justify-content: flex-start; padding: 22px; }
@@ -159,6 +159,6 @@
 .anjola-home h2, .anjola-home h3, .anjola-category-title, .anjola-accent-product span { overflow-wrap: anywhere; }
 .anjola-gift-note svg { flex-shrink: 0; }
 @media (prefers-reduced-motion: reduce) {
-  .anjola-home button, .anjola-home img { transition: none; }
-  .anjola-home button:hover img { transform: none; }
+  .anjola-home button, .anjola-home a, .anjola-home img { transition: none; }
+  .anjola-home button:hover img, .anjola-home a:hover img { transform: none; }
 }

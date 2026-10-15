@@ -1,7 +1,7 @@
 import { applyPageMetadata, pageMetadata } from './siteMetadata';
 import { addCartItem, changeCartQuantity, removeCartItem, restoreCart } from './cart';
 import { useState, useEffect, useCallback } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 import Navigation from './components/Navigation';
 import CartSidebar from './components/CartSidebar';
@@ -17,7 +17,8 @@ import ProfilePage from './pages/ProfilePage';
 import CheckoutPage from './pages/CheckoutPage';
 import AdminPage from './pages/AdminPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
-import ProductDetailPage from './pages/ProductDetailPage';
+import ProductRoute from './pages/ProductRoute';
+import { productPath } from './productLinks';
 import { productsAPI } from './api';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 import { Analytics } from "@vercel/analytics/react";
@@ -148,6 +149,14 @@ const useWishlist = () => {
   return { wishlist, toggleWishlist, isWishlisted };
 };
 
+function LegacyProductRedirect() {
+  let product;
+  try { product = JSON.parse(localStorage.getItem('selectedProduct')); } catch { /* ignore unavailable storage */ }
+  return /^[a-f\d]{24}$/i.test(product?._id || '')
+    ? <Navigate to={productPath(product)} replace />
+    : <main className="pd-empty"><h1>Find your next everyday favourite.</h1><p>Choose an item from the collection to see its details.</p><a href="/shop">Explore the collection</a></main>;
+}
+
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -172,7 +181,9 @@ function AppContent() {
   const { recentlyViewed, addToRecentlyViewed } = useRecentlyViewed();
   const { wishlist, toggleWishlist, isWishlisted } = useWishlist();
 
-  const currentPage = location.pathname.slice(1) || 'home';
+  const isProductRoute = location.pathname.startsWith('/product/');
+  const productId = location.pathname.split('/')[2] || '';
+  const currentPage = isProductRoute ? 'product' : location.pathname.slice(1) || 'home';
 
   const setCurrentPage = function(page) {
     setPageTransition(true);
@@ -187,8 +198,8 @@ function AppContent() {
   };
 
   useEffect(() => {
-    applyPageMetadata(pageMetadata(location.pathname, selectedProduct));
-  }, [location.pathname, selectedProduct]);
+    if (!isProductRoute) applyPageMetadata(pageMetadata(location.pathname, selectedProduct));
+  }, [location.pathname, selectedProduct, isProductRoute]);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -206,16 +217,13 @@ function AppContent() {
     }
 
 
-    var savedProduct = localStorage.getItem('selectedProduct');
-    if (location.pathname === '/product' && savedProduct && !selectedProduct) {
-      try { setSelectedProduct(JSON.parse(savedProduct)); } catch (e) { console.error(e); }
-    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
   useEffect(function() {
     if (selectedProduct) {
-      localStorage.setItem('selectedProduct', JSON.stringify(selectedProduct));
+      // Legacy /product bookmarks can recover the last viewed item.
+      try { localStorage.setItem('selectedProduct', JSON.stringify(selectedProduct)); } catch { /* storage may be unavailable */ }
       addToRecentlyViewed(selectedProduct);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -263,7 +271,7 @@ function AppContent() {
       || (product.priceVariations?.length > 0 && !product.selectedPieces);
     if (requiresOptions) {
       setSelectedProduct(product);
-      setCurrentPage('product');
+      setCurrentPage(productPath(product).slice(1));
       triggerCartFeedback('Please select the product options before adding to cart.');
       return false;
     }
@@ -304,7 +312,7 @@ function AppContent() {
 
   const clearCart = useCallback(() => { setCart([]); }, []);
 
-  if (loading) {
+  if (loading && currentPage !== 'product') {
     return (
       <div>
         <Navigation
@@ -318,7 +326,7 @@ function AppContent() {
     );
   }
 
-  if (error && products.length === 0) {
+  if (error && products.length === 0 && currentPage !== 'product') {
     return (
       <div>
         <Navigation
@@ -382,23 +390,13 @@ function AppContent() {
             }
           />
 
-          <Route
-            path="/product"
-            element={
-              selectedProduct ? (
-                <ProductDetailPage
-                  selectedProduct={selectedProduct} addToCart={addToCart}
-                  user={user} setCurrentPage={setCurrentPage}
-                  toggleWishlist={toggleWishlist} isWishlisted={isWishlisted}
-                  products={products} setSelectedProduct={setSelectedProduct}
-                />
-              ) : (
-                <div style={{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                  <p style={{color: '#666'}}>No product selected</p>
-                </div>
-              )
-            }
-          />
+          <Route path="/product/:id" element={
+            <ProductRoute productId={productId} onResolved={setSelectedProduct}
+              addToCart={addToCart} user={user} setCurrentPage={setCurrentPage}
+              toggleWishlist={toggleWishlist} isWishlisted={isWishlisted}
+              products={products} setSelectedProduct={setSelectedProduct} />
+          } />
+          <Route path="/product" element={<LegacyProductRedirect />} />
 
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/contact" element={<ContactPage />} />

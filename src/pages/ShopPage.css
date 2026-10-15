@@ -29,7 +29,7 @@
 .shop-card-copy { display: flex; flex-direction: column; align-items: stretch; flex: 1; padding-top: 17px; }
 .shop-product-category { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: #856576; margin-bottom: 8px; }
 .shop-card-copy h2 { font-size: 19px; font-weight: 400; line-height: 1.45; margin-bottom: 10px; overflow-wrap: anywhere; }
-.shop-card-copy h2 button { text-align: left; }
+.shop-card-copy h2 a { text-align: left; }
 .shop-price { font-size: 16px; font-weight: 600; color: #482b38; margin-bottom: 8px; }
 .shop-price span { font-size: 12px; font-weight: 400; }
 .shop-price del { font-size: 12px; font-weight: 400; color: #75626a; margin-left: 9px; }
@@ -39,7 +39,7 @@
 .shop-card-action svg { flex-shrink: 0; }
 .shop-card-action:disabled, .shop-card-action.shop-remove { background: #ede3e7; color: #715864; }
 .shop-card-action:disabled { cursor: not-allowed; }
-.anjola-shop button:focus-visible, .anjola-shop select:focus-visible, .shop-quickview-dialog button:focus-visible { outline: 2px solid #9a3caa; outline-offset: 4px; }
+.anjola-shop button:focus-visible, .anjola-shop a:focus-visible, .anjola-shop select:focus-visible, .shop-quickview-dialog button:focus-visible, .shop-quickview-dialog a:focus-visible { outline: 2px solid #9a3caa; outline-offset: 4px; }
 .shop-quickview-overlay { position: fixed; inset: 0; background: #281a2c99; z-index: 10000; padding: 24px; display: grid; place-items: center; overflow-y: auto; overscroll-behavior: contain; }
 .shop-quickview-dialog { position: relative; width: min(850px, 100%); max-height: calc(100dvh - 48px); overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; background: #fffaf6; color: #30212a; border-radius: 8px; box-shadow: 0 20px 80px #20152544; }
 .shop-quickview-close { position: absolute; top: 10px; right: 10px; z-index: 2; background: #fffaf6f5; border: 1px solid #e5d7dc; border-radius: 50%; width: 44px; height: 44px; display: grid; place-items: center; }

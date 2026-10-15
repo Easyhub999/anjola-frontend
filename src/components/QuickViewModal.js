@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ShoppingBag, ChevronLeft, ChevronRight, Heart, ArrowUpRight } from 'lucide-react';
 import { productPresentation, formatPrice } from '../productPresentation';
+import { productPath } from '../productLinks';
 import '../pages/ShopPage.css';
 
 const QuickViewModal = ({ product, onClose, addToCart, setCurrentPage, setSelectedProduct, isWishlisted, toggleWishlist }) => {
@@ -44,9 +45,11 @@ const QuickViewModal = ({ product, onClose, addToCart, setCurrentPage, setSelect
   const images = product.images?.length ? product.images : product.image ? [product.image] : [];
   const imageIndex = Math.min(currentImageIndex, Math.max(0, images.length - 1));
   const wishlisted = isWishlisted?.(product._id) || false;
-  const viewDetails = () => {
+  const viewDetails = event => {
+    if (event && (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return;
+    event?.preventDefault();
     localStorage.setItem('cameFromShop', 'true');
-    setSelectedProduct(product); setCurrentPage('product'); onClose();
+    setSelectedProduct(product); setCurrentPage(productPath(product).slice(1)); onClose();
   };
   const add = () => {
     if (!available) return;
@@ -76,7 +79,7 @@ const QuickViewModal = ({ product, onClose, addToCart, setCurrentPage, setSelect
         <p className="shop-quickview-description">{product.description}</p>
         <p className="shop-availability">{available ? 'Available to order' : 'Currently unavailable'}</p>
         {hasOptions && <p className="shop-options-note">Choose your {['sizes', 'colors', 'priceVariations'].filter(key => product[key]?.length).map(key => ({ sizes: 'size', colors: 'color', priceVariations: 'pack' }[key])).join(', ')} before adding to your bag.</p>}
-        <div className="shop-quickview-actions"><button className="shop-card-action" disabled={!available} onClick={add}>{!available ? 'Currently unavailable' : added ? 'Added to bag' : hasOptions ? 'Choose options' : 'Add to bag'}<ShoppingBag size={18} /></button><span className="sr-only" role="status">{added ? `${product.name} added to bag` : ''}</span><button className="shop-details-link" onClick={viewDetails}>View full details <ArrowUpRight size={17} /></button></div>
+        <div className="shop-quickview-actions"><button className="shop-card-action" disabled={!available} onClick={add}>{!available ? 'Currently unavailable' : added ? 'Added to bag' : hasOptions ? 'Choose options' : 'Add to bag'}<ShoppingBag size={18} /></button><span className="sr-only" role="status">{added ? `${product.name} added to bag` : ''}</span><a className="shop-details-link" href={productPath(product)} onClick={viewDetails}>View full details <ArrowUpRight size={17} /></a></div>
       </div>
     </div>
   </div>, document.body);

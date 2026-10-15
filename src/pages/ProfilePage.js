@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { LogOut, Heart, ShoppingBag, Package, X } from 'lucide-react';
 import { authAPI, ordersAPI } from '../api';
 import { recordedGiftFee } from '../orderCharges';
+import { productPath } from '../productLinks';
 
 const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, setSelectedProduct }) => {
   const [orders, setOrders] = useState([]);
@@ -9,6 +10,13 @@ const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, 
   const [ordersError, setOrdersError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
   const [activeTab, setActiveTab] = useState('orders');
+
+  const openProduct = (product, event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    setSelectedProduct(product);
+    setCurrentPage(productPath(product).slice(1));
+  };
 
   useEffect(() => {
     let active = true;
@@ -185,13 +193,13 @@ const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, 
               <div className="grid grid-cols-2 gap-4">
                 {wishlist.map((product) => (
                   <div key={product._id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-card group">
-                    <div className="relative h-40 overflow-hidden cursor-pointer"
-                      onClick={() => { setSelectedProduct(product); setCurrentPage('product'); }}>
+                    <a className="block relative h-40 overflow-hidden cursor-pointer" href={productPath(product)}
+                      onClick={event => openProduct(product, event)}>
                       <img src={product.images?.[0] || product.image || '/placeholder.png'} alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    </div>
+                    </a>
                     <div className="p-3">
-                      <h3 className="text-sm font-medium text-gray-900 line-clamp-1 mb-1">{product.name}</h3>
+                      <h3 className="text-sm font-medium text-gray-900 line-clamp-1 mb-1"><a href={productPath(product)} onClick={event => openProduct(product, event)}>{product.name}</a></h3>
                       <p className="text-sm font-bold text-[#e84393] mb-2">₦{product.price.toLocaleString()}</p>
                       <button onClick={() => toggleWishlist(product)}
                         className="w-full text-xs text-red-500 hover:bg-red-50 py-2 rounded-lg transition-colors font-medium flex items-center justify-center gap-1">

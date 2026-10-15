@@ -21,5 +21,4 @@ for (const [route,page] of Object.entries(brand.pages)) {
 for (const [route,title] of Object.entries(brand.privatePages)) {
   fs.writeFileSync(path.join(root, `seo${route}.html`), render(route,{title: `${title} | ${brand.name}`},false));
 }
-fs.writeFileSync(path.join(root, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${Object.keys(brand.pages).map(route => `  <url><loc>${brand.url}${route}</loc></url>`).join('\n')}\n</urlset>\n`);
-console.log('Built route-specific metadata and public sitemap.');
+console.log('Built route-specific metadata. The live sitemap is served by api/sitemap.js.');
