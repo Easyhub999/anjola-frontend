@@ -15,6 +15,7 @@ import ContactPage from './pages/ContactPage';
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import CheckoutPage from './pages/CheckoutPage';
+import PaymentReturnPage from './pages/PaymentReturnPage';
 import AdminPage from './pages/AdminPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
 import ProductRoute from './pages/ProductRoute';
@@ -181,9 +182,13 @@ function AppContent() {
   const { recentlyViewed, addToRecentlyViewed } = useRecentlyViewed();
   const { wishlist, toggleWishlist, isWishlisted } = useWishlist();
 
+  const returnParams = new URLSearchParams(location.search);
+  const paymentReference = returnParams.get('reference') || returnParams.get('trxref');
+  const isPaymentReturn = location.pathname === '/payment-return' ||
+    (location.pathname === '/shop' && (returnParams.has('reference') || returnParams.has('trxref')));
   const isProductRoute = location.pathname.startsWith('/product/');
   const productId = location.pathname.split('/')[2] || '';
-  const currentPage = isProductRoute ? 'product' : location.pathname.slice(1) || 'home';
+  const currentPage = isPaymentReturn ? 'payment-return' : isProductRoute ? 'product' : location.pathname.slice(1) || 'home';
 
   const setCurrentPage = function(page) {
     setPageTransition(true);
@@ -198,8 +203,8 @@ function AppContent() {
   };
 
   useEffect(() => {
-    if (!isProductRoute) applyPageMetadata(pageMetadata(location.pathname, selectedProduct));
-  }, [location.pathname, selectedProduct, isProductRoute]);
+    if (!isProductRoute) applyPageMetadata(pageMetadata(isPaymentReturn ? '/payment-return' : location.pathname, selectedProduct));
+  }, [location.pathname, selectedProduct, isProductRoute, isPaymentReturn]);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -312,7 +317,7 @@ function AppContent() {
 
   const clearCart = useCallback(() => { setCart([]); }, []);
 
-  if (loading && currentPage !== 'product') {
+  if (loading && currentPage !== 'product' && !isPaymentReturn) {
     return (
       <div>
         <Navigation
@@ -326,7 +331,7 @@ function AppContent() {
     );
   }
 
-  if (error && products.length === 0 && currentPage !== 'product') {
+  if (error && products.length === 0 && currentPage !== 'product' && !isPaymentReturn) {
     return (
       <div>
         <Navigation
@@ -363,7 +368,7 @@ function AppContent() {
 
       <div className={`anjola-page-content transition-opacity duration-200 ${pageTransition ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'}`}
         style={{ transition: 'opacity 0.2s ease, transform 0.2s ease' }}>
-        <Routes>
+        {isPaymentReturn ? <PaymentReturnPage reference={paymentReference} clearCart={clearCart} /> : <Routes>
           <Route
             path="/"
             element={
@@ -435,7 +440,7 @@ function AppContent() {
             path="/admin"
             element={<AdminPage user={user} products={products} setProducts={setProducts} />}
           />
-        </Routes>
+        </Routes>}
       </div>
 
       {/* Toast */}
@@ -444,7 +449,7 @@ function AppContent() {
       )}
 
       {/* Floating Action Buttons */}
-      <FloatingButtons />
+      {!isPaymentReturn && <FloatingButtons />}
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav

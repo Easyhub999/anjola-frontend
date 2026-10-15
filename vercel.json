@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/payment-return",
+      "destination": "/seo/payment-return.html"
+    },
+    {
       "source": "/product/:id",
       "destination": "/api/product?id=:id"
     },

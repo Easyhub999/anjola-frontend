@@ -3,8 +3,7 @@ import { productPresentation, formatPrice } from '../productPresentation';
 import { productPath } from '../productLinks';
 import { cartLineKey } from '../cart';
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Search, ShoppingCart, X, ArrowLeft, CheckCircle, Mail, Package, Home, ShoppingBag, Heart, Eye } from "lucide-react";
-import { paymentsAPI } from "../api";
+import { Search, ShoppingCart, X, ArrowLeft, ShoppingBag, Heart, Eye } from "lucide-react";
 import QuickViewModal from "../components/QuickViewModal";
 
 const PRODUCTS_PER_PAGE = 20;
@@ -12,38 +11,10 @@ const PRODUCTS_PER_PAGE = 20;
 const ShopPage = ({
   products, cart, addToCart, updateQuantity, removeFromCart,
   searchQuery, setSearchQuery, setCurrentPage, setSelectedProduct,
-  wishlist, toggleWishlist, isWishlisted, recentlyViewed, clearCart
+  wishlist, toggleWishlist, isWishlisted, recentlyViewed
 }) => {
-  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
-  const [paymentData, setPaymentData] = useState(null);
   const userChangedFilters = useRef(false);
   const isInitialLoad = useRef(true);
-
-  // Handle payment return
-  useEffect(() => {
-    const handlePaymentReturn = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const reference = urlParams.get("reference") || urlParams.get("trxref");
-      if (!reference) return;
-      try {
-        const response = await paymentsAPI.verifyPayment(reference);
-        if (response.success) {
-          clearCart();
-          setPaymentData(response.data);
-          setShowPaymentSuccess(true);
-          window.history.replaceState({}, "", "/shop");
-        } else {
-          alert("Payment verification failed. If you were charged, please contact support.");
-          window.history.replaceState({}, "", "/shop");
-        }
-      } catch (error) {
-        console.error("Payment verification error:", error);
-        alert("Could not verify payment. Please contact support if you were charged.");
-        window.history.replaceState({}, "", "/shop");
-      }
-    };
-    handlePaymentReturn();
-  }, [clearCart]);
 
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [currentPageNumber, setCurrentPageNumber] = useState(1);
@@ -192,12 +163,6 @@ const ShopPage = ({
     removeFromCart(cartLineKey({ _id: productId }));
   };
 
-  const handleCloseSuccessModal = () => {
-    setShowPaymentSuccess(false);
-    setPaymentData(null);
-    window.location.reload();
-  };
-
   const getPaginationNumbers = () => {
     const pages = [];
     if (totalPages <= 7) {
@@ -213,66 +178,6 @@ const ShopPage = ({
 
   return (
     <div id="shop-top" className="anjola-shop">
-      {/* Payment Success Modal */}
-      {showPaymentSuccess && (
-        <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 pt-32 overflow-y-auto">
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCloseSuccessModal}></div>
-          <div className="relative bg-white rounded-3xl shadow-luxury-xl max-w-md w-full overflow-hidden animate-fadeInUp">
-            <div className="bg-gradient-to-r from-emerald-400 to-emerald-500 px-8 py-10 text-center">
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <CheckCircle className="w-12 h-12 text-emerald-500" />
-              </div>
-              <h2 className="text-2xl font-serif font-bold text-white mb-2">Payment Successful!</h2>
-              <p className="text-emerald-100">Thank you for your order</p>
-            </div>
-            <div className="px-8 py-6">
-              {paymentData && (
-                <div className="bg-gray-50 rounded-2xl p-4 mb-6">
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="text-gray-500 text-sm">Reference</span>
-                    <span className="font-semibold text-gray-800 text-sm">{paymentData.reference || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-500 text-sm">Amount Paid</span>
-                    <span className="font-bold text-emerald-600 text-lg">₦{((paymentData.amount || 0) / 100).toLocaleString()}</span>
-                  </div>
-                </div>
-              )}
-              <div className="flex items-start gap-3 bg-rose-50 border border-rose-200 rounded-2xl p-4 mb-6">
-                <Mail className="w-5 h-5 text-[#e84393] mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold text-gray-800 text-sm">{paymentData?.needsReview ? 'Order Needs Review' : 'Payment Received'}</p>
-                  <p className="text-gray-500 text-xs mt-1">{paymentData?.needsReview ? 'Your payment is recorded. Please contact us with your reference so we can confirm availability or arrange a refund. Do not pay again.' : 'Your payment is recorded. Keep your reference and check your inbox for order updates.'}</p>
-                </div>
-              </div>
-              <div className="mb-6">
-                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2 text-sm">
-                  <Package className="w-4 h-4 text-[#e84393]" /> What Happens Next?
-                </h3>
-                <div className="space-y-2">
-                  {(paymentData?.needsReview ? ["Contact support with your payment reference", "We will confirm fulfillment or refund options"] : ["We're preparing your order", "You'll receive tracking info via email", "Delivery within 3-7 business days"]).map((step, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <div className="w-6 h-6 bg-[#e84393] rounded-full flex items-center justify-center text-white text-xs font-bold">{i + 1}</div>
-                      <p className="text-gray-600 text-sm">{step}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <button onClick={() => { setShowPaymentSuccess(false); setCurrentPage("home"); window.location.reload(); }}
-                  className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition text-sm">
-                  <Home className="w-4 h-4" /> Home
-                </button>
-                <button onClick={handleCloseSuccessModal}
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-[#e84393] rounded-xl text-white font-semibold hover:bg-[#d63384] transition text-sm">
-                  <ShoppingBag className="w-4 h-4" /> Shop More
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* BACK BUTTON */}
         <button onClick={() => setCurrentPage("home")}

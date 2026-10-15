@@ -376,9 +376,9 @@ export const paymentsAPI = {
 
 
   // Verify Payment
-  verifyPayment: async (reference) => {
+  verifyPayment: async (reference, options = {}) => {
     try {
-      const response = await fetch(`${API_URL}/orders/verify-payment/${reference}`);
+      const response = await fetch(`${API_URL}/orders/verify-payment/${encodeURIComponent(reference)}`, { signal: options.signal });
       return await handleResponse(response);
     } catch (error) {
       console.error("Verify payment error:", error);

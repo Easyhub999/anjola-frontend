@@ -2,17 +2,14 @@ import React, { useState } from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import ShopPage from './ShopPage';
 import { productPresentation } from '../productPresentation';
-import { paymentsAPI } from '../api';
-jest.mock('../api', () => ({ paymentsAPI: { verifyPayment: jest.fn() } }));
 const products = [
   { _id: 'pack', name: 'Gift pack', category: 'gifts', price: 1000, salesPrice: 500, quantity: 6, priceVariations: [{ pieces: 3, price: 2700 }], image: '/gift.jpg', description: 'A gift.' },
   { _id: 'sale', name: 'Rose tumbler', category: 'drinkware', price: 5000, salesPrice: 2000, quantity: 2, image: '/tumbler.jpg' },
   { _id: 'bag', name: 'Tote bag', category: 'bags', price: 2500, quantity: 3, image: '/bag.jpg' },
 ];
-const clearCart = jest.fn();
 function Shop(props) {
   const [query, setQuery] = useState('');
-  return <ShopPage products={products} cart={[]} searchQuery={query} setSearchQuery={setQuery} setCurrentPage={jest.fn()} setSelectedProduct={jest.fn()} addToCart={jest.fn()} removeFromCart={jest.fn()} clearCart={clearCart} {...props} />;
+  return <ShopPage products={products} cart={[]} searchQuery={query} setSearchQuery={setQuery} setCurrentPage={jest.fn()} setSelectedProduct={jest.fn()} addToCart={jest.fn()} removeFromCart={jest.fn()} {...props} />;
 }
 beforeEach(() => { localStorage.clear(); window.history.replaceState({}, '', '/shop'); window.scrollTo = jest.fn(); jest.clearAllMocks(); });
 
@@ -73,15 +70,6 @@ test('pack availability requires enough pieces of one color and respects inStock
   expect(productPresentation({ ...products[0], colors: [{ name: 'Pink', quantity: 2 }, { name: 'White', quantity: 2 }] }).available).toBe(false);
   expect(productPresentation({ ...products[0], colors: [{ name: 'Pink', quantity: 3 }] }).available).toBe(true);
   expect(productPresentation({ ...products[1], inStock: false }).available).toBe(false);
-});
-
-test('verified payment return still clears the cart and opens the confirmation', async () => {
-  window.history.replaceState({}, '', '/shop?reference=test-payment');
-  paymentsAPI.verifyPayment.mockResolvedValue({ success: true, data: { reference: 'test-payment', amount: 2000, currency: 'NGN' } });
-  render(<Shop />);
-  expect(await screen.findByText('Payment Successful!')).toBeInTheDocument();
-  expect(paymentsAPI.verifyPayment).toHaveBeenCalledWith('test-payment');
-  expect(clearCart).toHaveBeenCalledTimes(1);
 });
 
 test('product cards and recently viewed items expose permanent links without intercepting new-tab clicks', () => {
