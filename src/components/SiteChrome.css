@@ -97,3 +97,20 @@
   .anjola-floating-actions { bottom: calc(78px + env(safe-area-inset-bottom, 0px)); }
 }
 @media (prefers-reduced-motion: reduce) { .anjola-site-header *, .anjola-bottom-nav *, .anjola-site-footer * { transition: none !important; animation: none !important; } }
+
+
+/* Two matching groups loop continuously from right to left. */
+.anjola-announcement { position: relative; display: block; overflow: hidden; padding: 0; height: 32px; }
+.anjola-announcement-track { display: flex; width: max-content; animation: anjola-announcement-left 38s linear infinite; }
+.anjola-announcement-group { display: flex; flex-shrink: 0; min-width: 100vw; align-items: center; justify-content: space-around; }
+.anjola-announcement-message { display: inline-flex; flex-shrink: 0; align-items: center; gap: 14px; white-space: nowrap; padding: 7px 32px; }
+.anjola-announcement:hover .anjola-announcement-track, .anjola-announcement:focus-within .anjola-announcement-track, .anjola-announcement.is-paused .anjola-announcement-track { animation-play-state: paused; }
+.anjola-announcement-control { position: absolute; right: 0; top: 0; width: 36px; height: 32px; display: grid; place-items: center; background: #7438b3; color: white; }
+.anjola-announcement-control:focus-visible { outline: 2px solid white !important; outline-offset: -4px !important; }
+@keyframes anjola-announcement-left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+  .anjola-announcement-track { animation: none; transform: none; width: 100%; }
+  .anjola-announcement-group { min-width: 100%; }
+  .anjola-announcement-group + .anjola-announcement-group, .anjola-announcement-message + .anjola-announcement-message, .anjola-announcement-control { display: none; }
+  .anjola-announcement-message { padding: 7px 8px; }
+}

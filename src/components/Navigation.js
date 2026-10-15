@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { ShoppingBag, User, Menu, X, Sparkles, Home, BookOpen, MessageCircle, Package, BarChart3, ClipboardList, LogIn, LogOut, ArrowUpRight } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ShoppingBag, User, Menu, X, Sparkles, Home, BookOpen, MessageCircle, Package, BarChart3, ClipboardList, LogIn, LogOut, ArrowUpRight, Pause, Play } from 'lucide-react';
 import './SiteChrome.css';
 
 const menuItems = [
@@ -16,6 +16,7 @@ const adminItems = [
 
 const Navigation = ({ currentPage, setCurrentPage, cart, showCart, setShowCart, showMobileMenu, setShowMobileMenu, user, cartBump, handleLogout }) => {
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const [announcementPaused, setAnnouncementPaused] = useState(false);
   const drawerRef = useRef(null);
   const toggleRef = useRef(null);
 
@@ -53,7 +54,17 @@ const Navigation = ({ currentPage, setCurrentPage, cart, showCart, setShowCart, 
   });
 
   return <header className="anjola-site-header">
-    <div className="anjola-announcement"><Sparkles size={13} /><span>Beautiful finds. Thoughtful gifts. Little joys.</span><Sparkles size={13} /></div>
+    <div className={`anjola-announcement ${announcementPaused ? 'is-paused' : ''}`}>
+      <span className="sr-only">Beautiful finds. Thoughtful gifts. Little joys.</span>
+      <div className="anjola-announcement-track" aria-hidden="true">
+        {[0, 1].map(group => <div className="anjola-announcement-group" key={group}>
+          {[0, 1, 2].map(item => <span className="anjola-announcement-message" key={item}><Sparkles size={13} /> Beautiful finds. Thoughtful gifts. Little joys.</span>)}
+        </div>)}
+      </div>
+      <button className="anjola-announcement-control" onClick={() => setAnnouncementPaused(paused => !paused)} aria-label={announcementPaused ? 'Resume announcement' : 'Pause announcement'}>
+        {announcementPaused ? <Play size={13} /> : <Pause size={13} />}
+      </button>
+    </div>
     <nav className="anjola-nav-bar" aria-label="Main navigation">
       <button className="anjola-wordmark" onClick={() => go('home')} aria-label="Anjola Aesthetics home">
         <img src="/anjola-favicon-v2.png" alt="" width="40" height="40" />
