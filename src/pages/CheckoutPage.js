@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Loader, CreditCard, Lock, Truck, Gift } from 'lucide-react';
 import { ordersAPI, paymentsAPI } from '../api';
+import { GIFT_PACKAGING_FEE } from '../orderCharges';
 
 const CheckoutPage = ({ cart, getTotalPrice, clearCart, user, setCurrentPage }) => {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -25,7 +26,8 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user, setCurrentPage }) 
 
   const selectedShipping = shippingOptions.find(opt => opt.id === shippingMethod);
   const shippingCost = selectedShipping?.price || 0;
-  const totalAmount = getTotalPrice() + shippingCost;
+  const giftPackagingFee = isGift ? GIFT_PACKAGING_FEE : 0;
+  const totalAmount = getTotalPrice() + shippingCost + giftPackagingFee;
 
   const handleProceedToPayment = async () => {
     if (cart.length === 0) { alert('Your cart is empty'); return; }
@@ -125,15 +127,16 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user, setCurrentPage }) 
               {/* Gift Option */}
               <div className="border-t border-gray-100 pt-5 mt-5">
                 <label className="flex items-center gap-3 cursor-pointer group">
-                  <input type="checkbox" checked={isGift} onChange={(e) => setIsGift(e.target.checked)}
+                  <input type="checkbox" checked={isGift} disabled={checkoutLoading} aria-describedby="gift-packaging-description" onChange={(e) => setIsGift(e.target.checked)}
                     className="w-5 h-5 rounded border-gray-300 text-[#e84393] focus:ring-[#e84393]" />
                   <div className="flex items-center gap-2">
                     <Gift className="w-4 h-4 text-[#e84393]" />
-                    <span className="font-medium text-sm text-gray-700">This is a gift</span>
+                    <span className="font-medium text-sm text-gray-700">This is a gift (+₦{GIFT_PACKAGING_FEE.toLocaleString('en-NG')})</span>
                   </div>
                 </label>
+                <p id="gift-packaging-description" className="text-xs text-gray-500 mt-2">Extra gift packaging costs ₦{GIFT_PACKAGING_FEE.toLocaleString('en-NG')} per order. You can also add a personal message.</p>
                 {isGift && (
-                  <textarea maxLength={500} rows="2" placeholder="Add a personal message for the recipient..." value={giftMessage}
+                  <textarea aria-label="Gift message (optional)" maxLength={500} rows="2" placeholder="Add a personal message for the recipient..." value={giftMessage}
                     onChange={(e) => setGiftMessage(e.target.value)}
                     className="w-full mt-3 px-4 py-3 border border-gray-200 rounded-xl focus:border-[#e84393] focus:outline-none transition text-sm"
                   />
@@ -224,12 +227,12 @@ const CheckoutPage = ({ cart, getTotalPrice, clearCart, user, setCurrentPage }) 
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Shipping</span>
-                  <span className="font-medium text-[#e84393]">{shippingCost > 0 ? `₦${shippingCost.toLocaleString()}` : 'Select method'}</span>
+                  <span className="font-medium text-[#e84393]">{selectedShipping ? `₦${shippingCost.toLocaleString()}` : 'Select method'}</span>
                 </div>
                 {isGift && (
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span className="flex items-center gap-1"><Gift className="w-3 h-3" /> Gift wrapping</span>
-                    <span className="text-emerald-600 font-medium">Free</span>
+                    <span className="flex items-center gap-1"><Gift className="w-3 h-3" /> Gift packaging</span>
+                    <span className="font-medium">₦{giftPackagingFee.toLocaleString('en-NG')}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-xl font-bold border-t border-gray-100 pt-3 mt-2">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Search, Plus, Minus, Trash2, Loader } from 'lucide-react';
 import { ordersAPI } from '../api';
+import { GIFT_PACKAGING_FEE } from '../orderCharges';
 
 const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
   const [customerInfo, setCustomerInfo] = useState({
@@ -11,7 +12,9 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
     city: '',
     state: '',
     shippingMethod: '',
-    shippingCost: 0
+    shippingCost: 0,
+    isGift: false,
+    giftMessage: ''
   });
 
   const [orderItems, setOrderItems] = useState([]);
@@ -65,7 +68,8 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
   };
 
   const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const total = subtotal + customerInfo.shippingCost;
+  const giftPackagingFee = customerInfo.isGift ? GIFT_PACKAGING_FEE : 0;
+  const total = subtotal + customerInfo.shippingCost + giftPackagingFee;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -84,7 +88,7 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
 
     try {
       const orderData = {
-        customerInfo,
+        customerInfo: { ...customerInfo, giftMessage: customerInfo.isGift ? customerInfo.giftMessage : '' },
         items: orderItems,
         totalAmount: total,
         paymentStatus,
@@ -105,7 +109,9 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
         city: '',
         state: '',
         shippingMethod: '',
-        shippingCost: 0
+        shippingCost: 0,
+        isGift: false,
+        giftMessage: ''
       });
       setOrderItems([]);
       setPaymentStatus('pending');
@@ -201,6 +207,18 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
               onChange={(e) => setCustomerInfo({ ...customerInfo, address: e.target.value })}
               className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
             />
+
+            <div className="rounded-lg border border-pink-200 bg-pink-50 p-4">
+              <label className="flex items-center gap-3 text-sm font-medium">
+                <input type="checkbox" checked={customerInfo.isGift} disabled={loading}
+                  onChange={event => setCustomerInfo({ ...customerInfo, isGift: event.target.checked })} />
+                This is a gift (+₦{GIFT_PACKAGING_FEE.toLocaleString('en-NG')})
+              </label>
+              <p className="mt-2 text-xs text-gray-600">Extra packaging is charged once per order.</p>
+              {customerInfo.isGift && <textarea aria-label="Gift message (optional)" maxLength={500} rows={2}
+                value={customerInfo.giftMessage} onChange={event => setCustomerInfo({ ...customerInfo, giftMessage: event.target.value })}
+                placeholder="Add a personal message for the recipient..." className="mt-3 w-full border rounded-lg p-3" />}
+            </div>
 
             {/* Shipping Method */}
             <select
@@ -346,6 +364,9 @@ const ManualOrderModal = ({ isOpen, onClose, products, user }) => {
                 <span>Shipping:</span>
                 <span className="font-semibold">₦{customerInfo.shippingCost.toLocaleString()}</span>
               </div>
+              {customerInfo.isGift && <div className="flex justify-between text-gray-700">
+                <span>Gift packaging:</span><span className="font-semibold">₦{giftPackagingFee.toLocaleString('en-NG')}</span>
+              </div>}
               <div className="flex justify-between text-xl font-bold border-t pt-2">
                 <span>Total:</span>
                 <span className="text-purple-600">₦{total.toLocaleString()}</span>

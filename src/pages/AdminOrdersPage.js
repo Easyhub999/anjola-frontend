@@ -1,331 +1,254 @@
-import React, { useState, useEffect } from 'react';
-import { Package, Truck, CheckCircle, XCircle, Clock, Eye, Loader, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { Package, Truck, CheckCircle, Clock, Search, ArrowUpRight, ArrowRight, RefreshCw, X, Copy, Gift, MapPin, CreditCard, AlertCircle, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ordersAPI } from '../api';
+import { recordedGiftFee } from '../orderCharges';
+import './AdminOrdersPage.css';
 
 const recordedAmount = value => typeof value === 'number' && Number.isFinite(value) && value >= 0;
 const money = value => recordedAmount(value) ? `₦${value.toLocaleString('en-NG')}` : 'Not recorded';
+const orderNumber = order => order.orderNumber || order._id.slice(-8);
+const dateLabel = value => Number.isFinite(Date.parse(value)) ? new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date not recorded';
+const itemsOf = order => Array.isArray(order.items) ? order.items : [];
+const needsReview = order => Boolean(order.inventoryReviewReason || order.paymentReviewReason);
+const toPrepare = order => order.paymentStatus === 'paid' && ['pending', 'processing'].includes(order.status);
+const statusLabels = { pending: 'Pending', processing: 'Processing', shipped: 'Shipped', delivered: 'Delivered', cancelled: 'Cancelled', paid: 'Paid', failed: 'Failed' };
+const nextSteps = { pending: ['processing', 'Start preparing'], processing: ['shipped', 'Mark as shipped'], shipped: ['delivered', 'Mark as delivered'] };
 
-const OrderItems = ({ items }) => {
-  if (!Array.isArray(items) || items.length === 0) {
-    return <p className="text-gray-600">No item details were recorded for this order.</p>;
-  }
+const Badge = ({ value, payment = false }) => <span className={`ao-badge ao-badge--${Object.hasOwn(statusLabels, value) ? value : 'unknown'}`}><span aria-hidden="true" />{payment && value === 'pending' ? 'Awaiting payment' : statusLabels[value] || 'Not recorded'}</span>;
 
-  return items.map((entry, index) => {
+function ItemImage({ item }) {
+  const src = item.product?.images?.[0] || item.product?.image;
+  const [failed, setFailed] = useState(false);
+  return <div className="ao-item-image">{src && !failed ? <img src={src} alt="" loading="lazy" onError={() => setFailed(true)} /> : <ShoppingBag size={24} strokeWidth={1.25} aria-hidden="true" />}</div>;
+}
+
+function OrderItems({ items }) {
+  if (!Array.isArray(items) || !items.length) return <p className="ao-muted">No item details were recorded for this order.</p>;
+  return <ul className="ao-items">{items.map((entry, index) => {
     const item = entry || {};
     const hasQuantity = Number.isInteger(item.quantity) && item.quantity > 0;
     const hasPack = Number.isInteger(item.selectedPieces) && item.selectedPieces > 1;
     const lineTotal = hasQuantity && recordedAmount(item.price) ? item.quantity * item.price : null;
-    return (
-      <div key={item._id || index} className="flex flex-wrap justify-between gap-3 p-3 bg-purple-50 rounded-lg">
-        <div className="min-w-0 flex-1 break-words">
-          <p className="font-medium">{item.name || item.product?.name || 'Product name not recorded'}</p>
-          <p className="text-sm text-gray-700 mt-1">
-            Quantity: {hasQuantity ? item.quantity : 'Not recorded'}{hasPack ? ` ${item.quantity === 1 ? 'pack' : 'packs'} of ${item.selectedPieces} pieces` : ''}
-          </p>
-          {hasPack && hasQuantity && <p className="text-sm text-gray-700">Total pieces: {item.quantity * item.selectedPieces}</p>}
-          <p className="text-sm text-gray-600">{hasPack ? 'Pack price' : 'Unit price'}: {money(item.price)}</p>
-          {hasPack && recordedAmount(item.pricePerPiece) && <p className="text-sm text-gray-600">Price per piece: {money(item.pricePerPiece)}</p>}
-          {(item.selectedSize || item.selectedColor) && (
-            <p className="text-sm text-purple-700 mt-1">
-              {item.selectedSize && <span className="mr-3">Size: <strong>{item.selectedSize}</strong></span>}
-              {item.selectedColor && <span>Color: <strong>{item.selectedColor}</strong></span>}
-            </p>
-          )}
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-gray-600">Item total</p>
-          <p className="font-bold text-purple-700">{money(lineTotal)}</p>
-        </div>
+    return <li key={item._id || index} className="ao-item">
+      <ItemImage item={item} />
+      <div className="ao-item-copy">
+        <h4>{item.name || item.product?.name || 'Product name not recorded'}</h4>
+        {(item.selectedSize || item.selectedColor) && <p className="ao-variants">{item.selectedColor && <span>Color: <strong>{item.selectedColor}</strong></span>}{item.selectedSize && <span>Size: <strong>{item.selectedSize}</strong></span>}</p>}
+        <p>Quantity: {hasQuantity ? item.quantity : 'Not recorded'}{hasPack ? ` ${item.quantity === 1 ? 'pack' : 'packs'} of ${item.selectedPieces} pieces` : ''}</p>
+        {hasPack && hasQuantity && <p className="ao-piece-count">Total pieces: {item.quantity * item.selectedPieces}</p>}
+        <p className="ao-muted">{hasPack ? 'Pack price' : 'Unit price'}: {money(item.price)}</p>
+        {hasPack && recordedAmount(item.pricePerPiece) && <p className="ao-muted">Price per piece: {money(item.pricePerPiece)}</p>}
       </div>
-    );
-  });
-};
+      <div className="ao-item-total"><small>Item total</small><strong>{money(lineTotal)}</strong></div>
+    </li>;
+  })}</ul>;
+}
 
-const AdminOrdersPage = ({ user }) => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
-  const [ordersError, setOrdersError] = useState(null);
-  const [trackingDrafts, setTrackingDrafts] = useState({});
-  const [filterStatus, setFilterStatus] = useState('all');
-
-  const fetchOrders = React.useCallback(async () => {
-    try {
-      setLoading(true);
-      setOrdersError(null);
-      const data = await ordersAPI.getAllOrders(user.token);
-      if (!Array.isArray(data.data)) throw new Error('Invalid orders response');
-      setOrders(data.data);
-    } catch (error) {
-      setOrdersError(error.status === 401 ? 'Your session has expired. Sign in again to manage orders.' : 'Unable to load orders. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
+function OrderDrawer({ order, onClose, onUpdate }) {
+  const dialog = useRef(null);
+  const layer = useRef(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  const busy = useRef(false);
+  const alive = useRef(true);
+  const [updating, setUpdating] = useState(false);
+  const [tracking, setTracking] = useState(order.trackingNumber || '');
+  const [confirmCancel, setConfirmCancel] = useState(false);
+  const [feedback, setFeedback] = useState(null);
+  const [copyMessage, setCopyMessage] = useState('');
+  const wasConfirming = useRef(false);
+  const customer = order.customerInfo || {};
+  const next = nextSteps[order.status];
+  const canFulfil = order.paymentStatus === 'paid' && !needsReview(order);
+  const address = [customer.address, customer.city, customer.state].filter(Boolean).join(', ');
 
   useEffect(() => {
-    if (user?.role === 'admin') fetchOrders();
-  }, [fetchOrders, user?.role]);
+    if (confirmCancel) dialog.current?.querySelector('.ao-cancel-confirm button')?.focus();
+    else if (wasConfirming.current) dialog.current?.querySelector('.ao-cancel-link')?.focus();
+    wasConfirming.current = confirmCancel;
+  }, [confirmCancel]);
 
-  const handleUpdateStatus = async (orderId, newStatus) => {
-    setUpdatingStatus(true);
+  useEffect(() => {
+    alive.current = true;
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    const previousPadding = document.body.style.paddingRight;
+    const scrollBar = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = 'hidden';
+    if (scrollBar > 0) document.body.style.paddingRight = `${scrollBar}px`;
+    const siblings = [...document.body.children].filter(element => element !== layer.current);
+    const previousInert = siblings.map(element => element.hasAttribute('inert'));
+    siblings.forEach(element => element.setAttribute('inert', ''));
+    dialog.current?.querySelector('button')?.focus();
+    const handleKey = event => {
+      if (event.key === 'Escape') { event.preventDefault(); if (!busy.current) closeRef.current(); }
+      if (event.key !== 'Tab') return;
+      const controls = [...dialog.current.querySelectorAll('button:not(:disabled), input:not(:disabled), a[href], [tabindex="0"]')];
+      const first = controls[0]; const last = controls[controls.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !dialog.current.contains(document.activeElement))) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && (document.activeElement === last || !dialog.current.contains(document.activeElement))) { event.preventDefault(); first?.focus(); }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      alive.current = false;
+      document.body.style.overflow = previousOverflow;
+      document.body.style.paddingRight = previousPadding;
+      siblings.forEach((element, index) => { if (!previousInert[index]) element.removeAttribute('inert'); });
+      document.removeEventListener('keydown', handleKey);
+      if (previousFocus?.isConnected) previousFocus.focus();
+    };
+  }, []);
+
+  const copy = async (text, label) => {
     try {
-      const existing = orders.find(order => order._id === orderId);
-      const payload = { status: newStatus };
-      if (newStatus === 'shipped') payload.trackingNumber = (trackingDrafts[orderId] ?? existing?.trackingNumber ?? '').trim();
-      const response = await ordersAPI.updateOrderStatus(orderId, payload, user.token);
-      const updated = response.data;
-      setOrders(orders.map(order => 
-        order._id === orderId ? updated : order
-      ));
-      if (selectedOrder && selectedOrder._id === orderId) {
-        setSelectedOrder(updated);
-      }
-      alert('Order status updated successfully!');
+      if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+      await navigator.clipboard.writeText(text);
+      if (alive.current) setCopyMessage(`${label} copied.`);
+    } catch { if (alive.current) setCopyMessage(`Could not copy ${label.toLowerCase()}. Select and copy the text instead.`); }
+  };
+  const update = async status => {
+    if (busy.current) return;
+    if (status === 'shipped' && /[<>\r\n]/.test(tracking)) { setFeedback({ error: true, text: 'Use a tracking number without angle brackets or line breaks.' }); return; }
+    busy.current = true; setUpdating(true); setFeedback(null);
+    try {
+      const payload = { status };
+      if (status === 'shipped') payload.trackingNumber = tracking.trim();
+      await onUpdate(order._id, payload);
+      if (alive.current) { setConfirmCancel(false); setFeedback({ text: status === order.status ? 'Tracking number saved.' : `Order marked as ${statusLabels[status].toLowerCase()}.` }); }
     } catch (error) {
-      alert('Failed to update status: ' + error.message);
-    } finally {
-      setUpdatingStatus(false);
-    }
+      if (alive.current) setFeedback({ error: true, text: error.status === 401 ? 'Your session has expired. Sign in again to update this order.' : error.message || 'Unable to update this order. Please try again.' });
+    } finally { busy.current = false; if (alive.current) setUpdating(false); }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'pending': return <Clock className="w-5 h-5 text-yellow-500" />;
-      case 'processing': return <Package className="w-5 h-5 text-blue-500" />;
-      case 'shipped': return <Truck className="w-5 h-5 text-purple-500" />;
-      case 'delivered': return <CheckCircle className="w-5 h-5 text-green-500" />;
-      case 'cancelled': return <XCircle className="w-5 h-5 text-red-500" />;
-      default: return <Clock className="w-5 h-5 text-gray-500" />;
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'processing': return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'shipped': return 'bg-purple-100 text-purple-800 border-purple-300';
-      case 'delivered': return 'bg-green-100 text-green-800 border-green-300';
-      case 'cancelled': return 'bg-red-100 text-red-800 border-red-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
-    }
-  };
-
-  const getPaymentStatusBadge = (status) => {
-    if (status === 'paid') {
-      return <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">✓ Paid</span>;
-    } else if (status === 'failed') {
-      return <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">✗ Failed</span>;
-    }
-    return <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">⏳ Pending</span>;
-  };
-
-  const filteredOrders = filterStatus === 'all' 
-    ? orders 
-    : orders.filter(order => order.status === filterStatus);
-
-  if (user?.role !== 'admin') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 pt-24 pb-12 flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
-          <p className="text-gray-600">You need admin privileges to access this page</p>
-        </div>
+  return createPortal(<div ref={layer} className="ao-overlay" onClick={event => { if (event.target === event.currentTarget && !busy.current) onClose(); }}>
+    <section ref={dialog} className="ao-drawer" role="dialog" aria-modal="true" aria-labelledby="ao-order-title">
+      <header className="ao-drawer-header">
+        <div><p className="ao-eyebrow">Order details</p><h2 id="ao-order-title">#{orderNumber(order)}</h2><p className="ao-muted">Placed {dateLabel(order.createdAt)}{order.isManualOrder ? ' · Manual order' : ''}</p></div>
+        <button className="ao-icon-button" aria-label="Close order details" onClick={onClose} disabled={updating}><X size={22} /></button>
+      </header>
+      <div className="ao-drawer-body">
+        <div className="ao-detail-badges"><Badge value={order.paymentStatus} payment /><Badge value={order.status} /></div>
+        {needsReview(order) && <div role="alert" className="ao-notice ao-warning"><AlertCircle size={20} /><div><strong>Review before fulfilment</strong>{order.paymentReviewReason && <p>{order.paymentReviewReason}</p>}{order.inventoryReviewReason && <p>{order.inventoryReviewReason}</p>}</div></div>}
+        <section className="ao-section"><div className="ao-section-heading"><h3><ShoppingBag size={19} />Purchased items</h3><span>{itemsOf(order).length} line {itemsOf(order).length === 1 ? 'item' : 'items'}</span></div><OrderItems items={order.items} /></section>
+        {customer.isGift && <section className="ao-gift"><Gift size={22} /><div><h3>Gift wrapping requested</h3><p>{customer.giftMessage || 'No gift message provided.'}</p></div></section>}
+        <section className="ao-section"><div className="ao-section-heading"><h3><MapPin size={19} />Delivery details</h3>{address && <button className="ao-text-button" onClick={() => copy(address, 'Address')}><Copy size={15} />Copy address</button>}</div>
+          <div className="ao-recipient"><strong>{customer.fullName || 'Name not recorded'}</strong><p>{address || 'Address not recorded'}</p></div>
+          <dl className="ao-facts"><div><dt>Phone</dt><dd>{customer.phone || 'Not recorded'}{customer.phone && <button className="ao-icon-button" aria-label="Copy phone number" onClick={() => copy(customer.phone, 'Phone number')}><Copy size={15} /></button>}</dd></div><div><dt>Email</dt><dd>{customer.email || 'Not recorded'}</dd></div><div><dt>Shipping method</dt><dd>{customer.shippingMethod || 'Not recorded'}</dd></div></dl>
+          <p className="ao-copy-status" role="status">{copyMessage}</p>
+        </section>
+        <section className="ao-section"><div className="ao-section-heading"><h3><CreditCard size={19} />Payment summary</h3></div>
+          <dl className="ao-facts"><div><dt>Payment status</dt><dd><Badge value={order.paymentStatus} payment /></dd></div><div><dt>Payment reference</dt><dd>{order.paymentReference || 'Not recorded'}</dd></div><div><dt>Shipping cost</dt><dd>{money(customer.shippingCost)}</dd></div>{(customer.isGift || recordedGiftFee(customer) > 0) && <div><dt>Gift packaging</dt><dd>{money(recordedGiftFee(customer))}</dd></div>}<div className="ao-total"><dt>Order total</dt><dd>{money(order.totalAmount)}</dd></div></dl>
+        </section>
+        <section className="ao-section ao-fulfilment"><div className="ao-section-heading"><h3><Truck size={19} />Fulfilment</h3></div>
+          {order.status !== 'cancelled' && <ol className="ao-progress" aria-label="Fulfilment progress">{['pending', 'processing', 'shipped', 'delivered'].map((status, index) => {
+            const current = ['pending', 'processing', 'shipped', 'delivered'].indexOf(order.status);
+            return <li key={status} className={index <= current ? 'is-reached' : ''} aria-current={status === order.status ? 'step' : undefined}><span aria-hidden="true">{index < current ? <CheckCircle size={14} /> : index + 1}</span>{statusLabels[status]}</li>;
+          })}</ol>}
+          {['processing', 'shipped'].includes(order.status) ? <div className="ao-tracking"><label htmlFor="ao-tracking">Tracking number <span>(optional)</span></label><input id="ao-tracking" maxLength={200} value={tracking} onChange={event => setTracking(event.target.value)} disabled={updating} placeholder="Enter the courier’s tracking number" /><p className="ao-muted">Use the reference provided by your delivery partner.</p>{order.status === 'shipped' && <button className="ao-secondary" disabled={updating || !tracking.trim() || tracking.trim() === (order.trackingNumber || '')} onClick={() => update('shipped')}>Save tracking number</button>}</div> : order.trackingNumber ? <p className="ao-tracking-readonly">Tracking number: <strong>{order.trackingNumber}</strong></p> : null}
+          {next && !canFulfil && <p className="ao-blocked">{needsReview(order) ? 'Resolve the review flagged above before continuing fulfilment.' : 'Confirm payment before preparing or sending this order.'}</p>}
+          {feedback && <p role={feedback.error ? 'alert' : 'status'} className={`ao-notice ${feedback.error ? 'ao-error' : 'ao-success'}`}>{feedback.text}</p>}
+          {next && <button className="ao-primary ao-next-step" disabled={updating || !canFulfil} onClick={() => update(next[0])}>{updating ? 'Saving…' : next[1]}<ArrowRight size={18} /></button>}
+          {['delivered', 'cancelled'].includes(order.status) && <p className="ao-closed-note">{order.status === 'delivered' ? 'This order is complete. No further fulfilment changes are available.' : 'This order is cancelled. Cancellation does not automatically issue a refund.'}</p>}
+          {next && !confirmCancel && <button className="ao-cancel-link" disabled={updating} onClick={() => { setConfirmCancel(true); setFeedback(null); }}>Cancel order</button>}
+          {next && confirmCancel && <div className="ao-cancel-confirm" role="group" aria-label="Confirm cancellation"><h4>Cancel this order?</h4><p>This cannot be undone here. {order.stockDeducted === true ? 'Recorded deducted stock will be restored if cancellation succeeds.' : order.stockDeducted === undefined && order.paymentStatus === 'paid' ? 'This older order needs a manual inventory check; stock will not be restored automatically.' : 'No recorded stock deduction will be restored.'} Cancellation does not issue a refund.</p>{order.status === 'shipped' && <p>It is already marked as shipped. Confirm the parcel’s return with your delivery partner before cancelling.</p>}<div><button className="ao-secondary" disabled={updating} onClick={() => setConfirmCancel(false)}>Keep order</button><button className="ao-danger" disabled={updating} onClick={() => update('cancelled')}>{updating ? 'Cancelling…' : 'Confirm cancellation'}</button></div></div>}
+        </section>
       </div>
-    );
-  }
+    </section>
+  </div>, document.body);
+}
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 pt-24 pb-12 flex items-center justify-center">
-        <div className="text-center">
-          <Loader className="w-12 h-12 animate-spin text-purple-500 mx-auto mb-4" />
-          <p className="text-gray-600">Loading orders...</p>
-        </div>
-      </div>
-    );
-  }
+export default function AdminOrdersPage({ user }) {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [ordersError, setOrdersError] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
+  const [query, setQuery] = useState('');
+  const [status, setStatus] = useState('all');
+  const [payment, setPayment] = useState('all');
+  const [queue, setQueue] = useState('all');
+  const [page, setPage] = useState(1);
+  const requestId = useRef(0);
+  const token = user?.token;
+  const role = user?.role;
+  useEffect(() => {
+    if (role !== 'admin') return;
+    document.body.classList.add('has-admin-orders');
+    return () => document.body.classList.remove('has-admin-orders');
+  }, [role]);
+  const fetchOrders = useCallback(async () => {
+    const request = ++requestId.current;
+    setLoading(true); setOrdersError(null);
+    try {
+      const response = await ordersAPI.getAllOrders(token);
+      if (!Array.isArray(response.data)) throw new Error('Invalid orders response');
+      if (request === requestId.current) setOrders(response.data);
+    } catch (error) {
+      if (request === requestId.current) setOrdersError(error.status === 401 ? 'Your session has expired. Sign in again to manage orders.' : 'Unable to load orders. Please try again.');
+    } finally { if (request === requestId.current) setLoading(false); }
+  }, [token]);
+  useEffect(() => {
+    setOrders([]); setSelectedId(null);
+    if (role === 'admin') fetchOrders();
+    return () => { requestId.current += 1; };
+  }, [fetchOrders, role]);
+  useEffect(() => { setPage(1); }, [query, status, payment, queue]);
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 pt-24 pb-12">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-serif text-gray-800">Order Management</h1>
-          <div className="flex items-center gap-2">
-            <Package className="w-6 h-6 text-purple-600" />
-            <span className="text-2xl font-bold text-purple-600">{orders.length}</span>
-            <span className="text-gray-600">Total Orders</span>
-          </div>
-        </div>
+  const updateOrder = async (id, payload) => {
+    const request = requestId.current;
+    const response = await ordersAPI.updateOrderStatus(id, payload, token);
+    if (request !== requestId.current) return;
+    if (!response.data || response.data._id !== id) throw new Error('The server did not return the updated order. Refresh orders to check its status.');
+    setOrders(previous => previous.map(existing => {
+      if (existing._id !== id) return existing;
+      const updated = response.data;
+      // Status responses contain product IDs; retain catalog images already loaded for the same item.
+      return { ...updated, items: Array.isArray(updated.items) ? updated.items.map(item => {
+        if (!item || typeof item.product !== 'string') return item;
+        const saved = itemsOf(existing).find(entry => entry?.product?._id === item.product);
+        return saved ? { ...item, product: saved.product } : item;
+      }) : updated.items };
+    }));
+  };
+  const search = query.trim().toLowerCase();
+  const filtered = orders.filter(order =>
+    (queue === 'all' || (queue === 'payment' && order.paymentStatus === 'pending' && order.status !== 'cancelled') || (queue === 'prepare' && toPrepare(order)) || (queue === 'shipped' && order.status === 'shipped')) &&
+    (status === 'all' || order.status === status) && (payment === 'all' || order.paymentStatus === payment) &&
+    (!search || [orderNumber(order), order.customerInfo?.fullName, order.customerInfo?.email].some(value => String(value || '').toLowerCase().includes(search)))
+  ).sort((a, b) => (Date.parse(b.createdAt) || 0) - (Date.parse(a.createdAt) || 0));
+  const pageCount = Math.max(1, Math.ceil(filtered.length / 20));
+  const currentPage = Math.min(page, pageCount);
+  const visible = filtered.slice((currentPage - 1) * 20, currentPage * 20);
+  const selectedOrder = orders.find(order => order._id === selectedId);
+  const hasFilters = query || status !== 'all' || payment !== 'all' || queue !== 'all';
+  const resetFilters = () => { setQuery(''); setStatus('all'); setPayment('all'); setQueue('all'); setPage(1); };
+  const summaries = [
+    ['all', 'All orders', orders.length, Package, 'Your complete order book'],
+    ['payment', 'Awaiting payment', orders.filter(order => order.paymentStatus === 'pending' && order.status !== 'cancelled').length, Clock, 'Payment still pending'],
+    ['prepare', 'To prepare', orders.filter(toPrepare).length, ShoppingBag, 'Paid · not yet shipped'],
+    ['shipped', 'Shipped', orders.filter(order => order.status === 'shipped').length, Truck, 'On the way to customers']
+  ];
 
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-          {['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled'].map(status => (
-            <button
-              key={status}
-              onClick={() => setFilterStatus(status)}
-              className={`px-4 py-2 rounded-lg font-medium capitalize whitespace-nowrap transition ${
-                filterStatus === status
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-purple-50'
-              }`}
-            >
-              {status} ({status === 'all' ? orders.length : orders.filter(o => o.status === status).length})
-            </button>
-          ))}
-        </div>
-
-        {ordersError ? (
-          <div role="alert" className="bg-white rounded-lg p-8 text-center">
-            <p className="text-red-700 mb-4">{ordersError}</p>
-            <button onClick={fetchOrders} className="bg-purple-600 text-white px-5 py-2 rounded-lg">Retry</button>
-          </div>
-        ) : filteredOrders.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-lg p-12 text-center">
-            <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-600 text-lg">No orders found</p>
-          </div>
-        ) : (
-          <div className="grid gap-4">
-            {filteredOrders.map(order => (
-              <div key={order._id} className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
-                <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-3 mb-2">
-                      <h3 className="text-xl font-bold text-gray-800">
-                        Order #{order.orderNumber || order._id.slice(-8)}
-                      </h3>
-                      {getPaymentStatusBadge(order.paymentStatus)}
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      {new Date(order.createdAt).toLocaleDateString('en-GB', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 ${getStatusColor(order.status)}`}>
-                      {getStatusIcon(order.status)}
-                      <span className="font-semibold capitalize">{order.status}</span>
-                    </div>
-                    <button
-                      type="button"
-                      aria-label={`${selectedOrder?._id === order._id ? 'Hide' : 'View'} items for order ${order.orderNumber || order._id.slice(-8)}`}
-                      aria-expanded={selectedOrder?._id === order._id}
-                      aria-controls={`order-details-${order._id}`}
-                      onClick={() => setSelectedOrder(previous => previous?._id === order._id ? null : order)}
-                      className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-800 font-semibold rounded-lg hover:bg-purple-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-600 focus-visible:outline-offset-2 transition"
-                    >
-                      <Eye className="w-5 h-5" aria-hidden="true" />
-                      {selectedOrder?._id === order._id ? 'Hide items' : 'View items'}
-                      {Array.isArray(order.items) && <span> ({order.items.length})</span>}
-                    </button>
-                  </div>
-                </div>
-
-                {order.inventoryReviewReason && (
-                  <p role="alert" className="mb-4 rounded-lg bg-amber-50 border border-amber-300 p-3 text-amber-900">
-                    {order.inventoryReviewReason}
-                  </p>
-                )}
-                {order.paymentReviewReason && (
-                  <p role="alert" className="mb-4 rounded-lg bg-amber-50 border border-amber-300 p-3 text-amber-900">
-                    {order.paymentReviewReason}
-                  </p>
-                )}
-
-                <div className="grid md:grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Customer</p>
-                    <p className="font-semibold text-gray-800">{order.customerInfo.fullName}</p>
-                    <p className="text-sm text-gray-600">{order.customerInfo.email}</p>
-                    <p className="text-sm text-gray-600">{order.customerInfo.phone}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Delivery Address</p>
-                    <p className="text-sm text-gray-800">{order.customerInfo.address}</p>
-                    <p className="text-sm text-gray-800">{order.customerInfo.city}, {order.customerInfo.state}</p>
-                  </div>
-                </div>
-
-                {selectedOrder?._id === order._id && (
-                  <div id={`order-details-${order._id}`} role="region" aria-label={`Details for order ${order.orderNumber || order._id.slice(-8)}`} className="border-t pt-4 mt-4">
-                    {order.customerInfo.isGift && (
-                      <div className="mb-4 p-4 bg-pink-50 rounded-lg">
-                        <h4 className="font-semibold">Gift wrapping requested</h4>
-                        <p className="whitespace-pre-wrap break-words">{order.customerInfo.giftMessage || 'No gift message provided.'}</p>
-                      </div>
-                    )}
-                    <h4 className="font-semibold mb-3">Order Items</h4>
-                    <div className="space-y-2 mb-4">
-                      <OrderItems items={order.items} />
-                    </div>
-
-                    {order.customerInfo.shippingMethod && (
-                      <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-                        <p className="text-sm">
-                          <span className="font-semibold text-blue-800">🚚 Shipping:</span>{' '}
-                          <span className="text-gray-700">{order.customerInfo.shippingMethod}</span>
-                        </p>
-                        {order.customerInfo.shippingCost > 0 && (
-                          <p className="text-sm text-blue-600 font-semibold mt-1">
-                            Shipping Cost: ₦{order.customerInfo.shippingCost.toLocaleString()}
-                          </p>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="flex justify-between items-center text-xl font-bold border-t pt-3">
-                      <span>Total Amount:</span>
-                      <span className="text-purple-600">{money(order.totalAmount)}</span>
-                    </div>
-
-                    <div className="mt-6 pt-6 border-t">
-                      <label htmlFor={`tracking-${order._id}`} className="block font-semibold mb-2">Tracking number</label>
-                      <input id={`tracking-${order._id}`} maxLength={200}
-                        value={trackingDrafts[order._id] ?? order.trackingNumber ?? ''}
-                        onChange={event => setTrackingDrafts(previous => ({ ...previous, [order._id]: event.target.value }))}
-                        disabled={updatingStatus || !['processing', 'shipped'].includes(order.status)}
-                        className="border rounded-lg px-3 py-2 mb-3 w-full" />
-                      {order.status === 'shipped' && (
-                        <button onClick={() => handleUpdateStatus(order._id, 'shipped')} disabled={updatingStatus}
-                          className="bg-purple-600 text-white px-4 py-2 rounded-lg mb-4">Save tracking number</button>
-                      )}
-                      <h4 className="font-semibold mb-3">Update Order Status</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {['pending', 'processing', 'shipped', 'delivered', 'cancelled'].map(status => (
-                          <button
-                            key={status}
-                            onClick={() => handleUpdateStatus(order._id, status)}
-                            disabled={updatingStatus || order.status === status}
-                            className={`px-4 py-2 rounded-lg font-medium capitalize transition flex items-center gap-2 ${
-                              order.status === status
-                                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                                : 'bg-purple-600 text-white hover:bg-purple-700'
-                            }`}
-                          >
-                            {getStatusIcon(status)}
-                            <span>{status}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default AdminOrdersPage;
+  if (role !== 'admin') return <main className="ao-page"><div className="ao-empty"><AlertCircle size={32} /><h1>Access denied</h1><p>Sign in with an admin account to manage orders.</p></div></main>;
+  return <main className="ao-page"><div className="ao-container">
+    <header className="ao-hero"><div><p className="ao-eyebrow">Anjola Aesthetics / Studio</p><h1>Every order, <em>thoughtfully handled.</em></h1><p>From the first purchase to the final delivery. Everything you need, in one place.</p></div><div className="ao-hero-mark" aria-hidden="true"><Package size={44} strokeWidth={1} /><span>PACKED WITH CARE</span></div></header>
+    <div className="ao-workspace-heading"><div><h2>Orders</h2><p>Find a customer’s order, check the details and prepare their parcel.</p></div><button className="ao-secondary" onClick={fetchOrders} disabled={loading}><RefreshCw size={16} className={loading ? 'ao-spin' : ''} />{loading ? 'Refreshing…' : 'Refresh orders'}</button></div>
+    <div className="ao-summary" aria-label="Order queues">{summaries.map(([key, label, count, Icon, note]) => <button key={key} aria-pressed={queue === key} disabled={loading || Boolean(ordersError)} onClick={() => { setQueue(key); setStatus('all'); setPayment('all'); setQuery(''); }}><span className="ao-summary-label"><Icon size={18} />{label}<ArrowUpRight size={16} /></span><strong>{loading || ordersError ? '—' : count}</strong><small>{note}</small></button>)}</div>
+    <section className="ao-order-book" aria-label="Orders list">
+      <div className="ao-toolbar"><div className="ao-search"><Search size={18} aria-hidden="true" /><input aria-label="Search orders" type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search order, customer or email" /></div><div className="ao-filter"><label htmlFor="ao-status">Fulfilment</label><select id="ao-status" value={status} onChange={event => setStatus(event.target.value)}><option value="all">All statuses</option>{['pending', 'processing', 'shipped', 'delivered', 'cancelled'].map(value => <option key={value} value={value}>{statusLabels[value]}</option>)}</select></div><div className="ao-filter"><label htmlFor="ao-payment">Payment</label><select id="ao-payment" value={payment} onChange={event => setPayment(event.target.value)}><option value="all">All payments</option><option value="paid">Paid</option><option value="pending">Awaiting payment</option><option value="failed">Failed</option></select></div></div>
+      <div className="ao-list-meta"><p aria-live="polite">{loading ? 'Loading orders…' : ordersError ? 'Orders unavailable' : `${filtered.length} ${filtered.length === 1 ? 'order' : 'orders'}${queue !== 'all' ? ` · ${summaries.find(summary => summary[0] === queue)[1]}` : ''}`}</p><div>{hasFilters && <button className="ao-text-button" onClick={resetFilters}>Clear filters</button>}<span>Newest first</span></div></div>
+      {ordersError ? <div className="ao-empty" role="alert"><AlertCircle size={30} /><h3>We couldn’t load your orders</h3><p>{ordersError}</p><button className="ao-primary" onClick={fetchOrders}>Retry</button></div> : loading ? <div className="ao-empty" role="status"><RefreshCw className="ao-spin" size={28} /><p>Loading orders...</p></div> : !filtered.length ? <div className="ao-empty"><Package size={34} strokeWidth={1.25} /><h3>{orders.length ? 'No matching orders' : 'No orders found'}</h3><p>{orders.length ? 'Try a different name or adjust your filters.' : 'Customer orders will appear here when they are placed.'}</p>{hasFilters && <button className="ao-secondary" onClick={resetFilters}>Reset filters</button>}</div> : <>
+        <table className="ao-table"><caption className="sr-only">Customer orders, newest first</caption><thead><tr>{['Order', 'Customer', 'Items', 'Amount', 'Payment', 'Fulfilment', 'Details'].map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead><tbody>{visible.map(order => <tr key={order._id}>
+          <td className="ao-order-cell"><strong>#{orderNumber(order)}</strong><small>{dateLabel(order.createdAt)}</small>{needsReview(order) && <span className="ao-review-flag"><AlertCircle size={13} />Needs review</span>}</td>
+          <td className="ao-customer-cell"><strong>{order.customerInfo?.fullName || 'Name not recorded'}</strong><small>{order.customerInfo?.email || 'Email not recorded'}</small>{order.customerInfo?.isGift && <span className="ao-gift-tag"><Gift size={12} />Gift order</span>}</td>
+          <td data-label="Items" className="ao-count-cell">{Array.isArray(order.items) ? <>{order.items.length}<span className="ao-mobile-only"> line {order.items.length === 1 ? 'item' : 'items'}</span></> : 'Not recorded'}</td>
+          <td data-label="Amount" className="ao-amount-cell">{money(order.totalAmount)}</td>
+          <td data-label="Payment"><Badge value={order.paymentStatus} payment /></td><td data-label="Fulfilment"><Badge value={order.status} /></td>
+          <td className="ao-action-cell"><button className="ao-view-button" aria-label={`View order ${orderNumber(order)}`} aria-haspopup="dialog" onClick={() => setSelectedId(order._id)}>View order<ArrowUpRight size={16} /></button></td>
+        </tr>)}</tbody></table>
+        <div className="ao-pagination"><span>Showing {(currentPage - 1) * 20 + 1}–{Math.min(currentPage * 20, filtered.length)} of {filtered.length}</span><div><button className="ao-icon-button" aria-label="Previous page" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}><ChevronLeft size={18} /></button><span>{currentPage} / {pageCount}</span><button className="ao-icon-button" aria-label="Next page" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}><ChevronRight size={18} /></button></div></div>
+      </>}
+    </section><p className="ao-workspace-note"><Package size={15} />A little care in every parcel.</p>
+    {selectedOrder && <OrderDrawer key={selectedOrder._id} order={selectedOrder} onClose={() => setSelectedId(null)} onUpdate={updateOrder} />}
+  </div></main>;
+}

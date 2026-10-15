@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LogOut, Heart, ShoppingBag, Package, X } from 'lucide-react';
 import { authAPI, ordersAPI } from '../api';
+import { recordedGiftFee } from '../orderCharges';
 
 const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, setSelectedProduct }) => {
   const [orders, setOrders] = useState([]);
@@ -151,6 +152,9 @@ const ProfilePage = ({ user, setUser, setCurrentPage, wishlist, toggleWishlist, 
                       ))}
                     </div>
 
+                    {(order.customerInfo?.isGift || recordedGiftFee(order.customerInfo) > 0) && (
+                      <p className="mb-3 text-sm text-gray-600">Gift packaging: {recordedGiftFee(order.customerInfo) === null ? 'Not recorded' : `₦${recordedGiftFee(order.customerInfo).toLocaleString('en-NG')}`}</p>
+                    )}
                     <div className="flex items-center justify-between pt-3 border-t border-gray-50">
                       <p className="text-sm text-gray-500">{order.items?.length || 0} item(s)</p>
                       <p className="text-lg font-bold text-gray-900">₦{(order.totalAmount || 0).toLocaleString()}</p>

@@ -54,11 +54,11 @@ test('admin sees gift instructions and sends the tracking number with shipped st
   ordersAPI.getAllOrders.mockResolvedValueOnce({ data: [order] });
   ordersAPI.updateOrderStatus.mockResolvedValueOnce({ data: { ...order, status: 'shipped', trackingNumber: 'TRACK-123' } });
   render(<AdminOrdersPage user={{ ...user, role: 'admin' }} />);
-  fireEvent.click(await screen.findByRole('button', { name: 'View items for order ANJ-123' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'View order ANJ-123' }));
   expect(screen.getByText('Gift wrapping requested')).toBeInTheDocument();
   expect(screen.getByText('Happy birthday!')).toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText('Tracking number'), { target: { value: 'TRACK-123' } });
-  fireEvent.click(screen.getByRole('button', { name: /^shipped$/i }));
+  fireEvent.change(screen.getByLabelText(/Tracking number/), { target: { value: 'TRACK-123' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Mark as shipped' }));
   await waitFor(() => expect(ordersAPI.updateOrderStatus).toHaveBeenCalledWith('order1', { status: 'shipped', trackingNumber: 'TRACK-123' }, 'token'));
   expect(await screen.findByRole('button', { name: 'Save tracking number' })).toBeInTheDocument();
 });
@@ -78,13 +78,14 @@ test('admin can open purchased items, see pack quantities and historical prices,
     { name: 'Foot care pack', product: null, quantity: 2, selectedPieces: 3, price: 3000, pricePerPiece: 1000 }
   ] }] });
   render(<AdminOrdersPage user={{ ...user, role: 'admin' }} />);
-  const toggle = await screen.findByRole('button', { name: 'View items for order ANJ-123' });
-  expect(toggle).toHaveTextContent('View items (2)');
-  expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  const toggle = await screen.findByRole('button', { name: 'View order ANJ-123' });
+  expect(toggle).toHaveTextContent('View order');
+  expect(toggle).toHaveAttribute('aria-haspopup', 'dialog');
   expect(screen.queryByText('Cosmetic bag')).not.toBeInTheDocument();
   act(() => userEvent.click(toggle));
-  expect(toggle).toHaveAttribute('aria-expanded', 'true');
-  expect(screen.getByRole('region', { name: 'Details for order ANJ-123' }).id).toBe(toggle.getAttribute('aria-controls'));
+  expect(screen.getByRole('dialog', { name: '#ANJ-123' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Close order details' })).toHaveFocus();
+  expect(document.body.style.overflow).toBe('hidden');
   expect(screen.getByText('Cosmetic bag')).toBeInTheDocument();
   expect(screen.getByText('Unit price: ₦1,500')).toBeInTheDocument();
   expect(screen.queryByText(/9,000|Renamed bag/)).not.toBeInTheDocument();
@@ -95,8 +96,10 @@ test('admin can open purchased items, see pack quantities and historical prices,
   expect(screen.getByText('Total pieces: 6')).toBeInTheDocument();
   expect(screen.getByText('Pack price: ₦3,000')).toBeInTheDocument();
   expect(screen.getByText('₦6,000')).toBeInTheDocument();
-  act(() => userEvent.keyboard('{Enter}'));
-  expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  act(() => userEvent.keyboard('{Escape}'));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(toggle).toHaveFocus();
+  expect(document.body.style.overflow).not.toBe('hidden');
   expect(screen.queryByText('Cosmetic bag')).not.toBeInTheDocument();
   expect(ordersAPI.updateOrderStatus).not.toHaveBeenCalled();
 });
@@ -108,7 +111,7 @@ test('incomplete legacy item records still open and do not substitute current pr
     null
   ] }] });
   render(<AdminOrdersPage user={{ ...user, role: 'admin' }} />);
-  fireEvent.click(await screen.findByRole('button', { name: 'View items for order ANJ-123' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'View order ANJ-123' }));
   expect(screen.getByText('Tote bag')).toBeInTheDocument();
   expect(screen.getByText('Deleted product')).toBeInTheDocument();
   expect(screen.getByText('Product name not recorded')).toBeInTheDocument();
@@ -119,7 +122,7 @@ test('incomplete legacy item records still open and do not substitute current pr
 test.each([undefined, null, []])('missing or empty item lists show an explanation (%p)', async items => {
   ordersAPI.getAllOrders.mockResolvedValueOnce({ data: [{ ...order, items }] });
   render(<AdminOrdersPage user={{ ...user, role: 'admin' }} />);
-  fireEvent.click(await screen.findByRole('button', { name: 'View items for order ANJ-123' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'View order ANJ-123' }));
   expect(screen.getByText('No item details were recorded for this order.')).toBeInTheDocument();
 });
 
@@ -129,9 +132,10 @@ test('opening a different order shows only that order’s purchased items', asyn
     { ...order, _id: 'order2', orderNumber: 'ANJ-456', items: [{ name: 'Drinkware', quantity: 1, price: 2000 }] }
   ] });
   render(<AdminOrdersPage user={{ ...user, role: 'admin' }} />);
-  fireEvent.click(await screen.findByRole('button', { name: 'View items for order ANJ-123' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'View order ANJ-123' }));
   expect(screen.getByText('Gift box')).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'View items for order ANJ-456' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Close order details' }));
+  fireEvent.click(screen.getByRole('button', { name: 'View order ANJ-456' }));
   expect(screen.getByText('Drinkware')).toBeInTheDocument();
   expect(screen.queryByText('Gift box')).not.toBeInTheDocument();
 });
@@ -148,4 +152,10 @@ test('checkout with expired credentials stops before payment and sends the custo
   fireEvent.click(screen.getByRole('button', { name: /Pay ₦/ }));
   await waitFor(() => expect(navigate).toHaveBeenCalledWith('auth'));
   expect(paymentsAPI.initializePayment).not.toHaveBeenCalled();
+});
+
+test.each([[2000, '₦2,000'], [1500, '₦1,500'], [0, '₦0'], [undefined, 'Not recorded']])('customer history shows the saved gift fee (%p)', async (fee, expected) => {
+  ordersAPI.getMyOrders.mockResolvedValueOnce([{ ...order, customerInfo: { ...order.customerInfo, giftPackagingFee: fee } }]);
+  render(<ProfilePage user={user} />);
+  expect(await screen.findByText(`Gift packaging: ${expected}`)).toBeInTheDocument();
 });
