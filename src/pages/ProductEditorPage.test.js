@@ -27,7 +27,7 @@ test('cover selection updates the preview and save payload', async () => {
 test('new product uploads a photo and saves sale price, badge and keywords', async () => {
   productsAPI.uploadImage.mockResolvedValue('/uploaded.jpg');
   productsAPI.createProduct.mockResolvedValue({ ...product, _id:'new' });
-  render(<ProductEditorPage user={admin} products={[]} setProducts={jest.fn()} />);
+  render(<ProductEditorPage user={admin} products={[product]} setProducts={jest.fn()} />);
   fireEvent.change(screen.getByLabelText('Drop photos here or choose files'),{ target:{ files:[new File(['image'],'bag.png',{ type:'image/png' })] } });
   await waitFor(() => expect(screen.getByAltText('Product view 1')).toHaveAttribute('src','/uploaded.jpg'));
   for (const [label,value] of [['Product name','Tote'],['Category','Bags'],['Description','Everyday bag'],['Regular price per piece (₦)','1000'],['Sale price per piece (optional)','800'],['Individual pieces in stock','6'],['Additional keywords','gifts, bags']]) fireEvent.change(screen.getByLabelText(label),{ target:{ value } });
@@ -35,4 +35,38 @@ test('new product uploads a photo and saves sale price, badge and keywords', asy
   fireEvent.click(screen.getByRole('button',{ name:'Add product' }));
   await screen.findByText('Tote is ready.');
   expect(productsAPI.createProduct).toHaveBeenCalledWith(expect.objectContaining({ price:1000,salesPrice:800,tag:'new',quantity:6,searchCategories:['gifts','bags'],images:['/uploaded.jpg'] }),'token');
+});
+
+
+test('category dropdown populates from fetched products without typing a category', () => {
+  const view = render(<ProductEditorPage user={admin} products={[]} setProducts={jest.fn()} />);
+  expect(screen.getByRole('combobox', { name: 'Category' })).toHaveValue('');
+  view.rerender(<ProductEditorPage user={admin} products={[
+    product,
+    { ...product, _id: 'p2', category: ' Bags ' },
+    { ...product, _id: 'p3', category: 'Drinkware', visible: false },
+    { ...product, _id: 'p4', category: '' }
+  ]} setProducts={jest.fn()} />);
+  const picker = screen.getByRole('combobox', { name: 'Category' });
+  expect(Array.from(picker.options).map(option => option.text)).toEqual([
+    'Choose an existing category', 'Bags', 'Drinkware', '+ Add a new category'
+  ]);
+  fireEvent.change(picker, { target: { value: 'Drinkware' } });
+  expect(picker).toHaveValue('Drinkware');
+  expect(screen.queryByRole('textbox', { name: 'New category' })).not.toBeInTheDocument();
+});
+
+test('existing edit category remains selected even when absent from the catalog response', () => {
+  render(<ProductEditorPage user={admin} products={[]} product={product} setProducts={jest.fn()} />);
+  expect(screen.getByRole('combobox', { name: 'Category' })).toHaveValue('Bags');
+});
+
+test('new categories remain available through an explicit option and save their actual name', async () => {
+  productsAPI.updateProduct.mockResolvedValue({ ...product, category: 'Gift boxes' });
+  render(<ProductEditorPage user={admin} products={[product]} product={product} setProducts={jest.fn()} />);
+  fireEvent.change(screen.getByRole('combobox', { name: 'Category' }), { target: { value: '__create_category__' } });
+  fireEvent.change(screen.getByRole('textbox', { name: 'New category' }), { target: { value: 'Gift boxes' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+  await screen.findByText('Tote is ready.');
+  expect(productsAPI.updateProduct).toHaveBeenCalledWith('p1', expect.objectContaining({ category: 'Gift boxes' }), 'token');
 });
