@@ -38,3 +38,32 @@ test('paid gift order records payment details and email choice', async () => {
   await screen.findByText('Ready for the next step.');
   await waitFor(() => expect(ordersAPI.createManualOrder).toHaveBeenCalledWith(expect.objectContaining({ totalAmount:4700, paymentStatus:'paid', paymentMethod:'bank_transfer', paymentReference:'bank-123', sendCustomerEmail:true }), 'test-token'));
 });
+
+
+test('category dropdown lists saved categories and shows products without a search term', () => {
+  const catalog = [
+    { ...product, category: 'Bags' },
+    { ...product, _id: 'p2', name: 'Small tote', category: ' Bags ' },
+    { ...product, _id: 'p3', name: 'Mug', category: 'Drinkware' },
+    { ...product, _id: 'p4', name: 'Hidden item', category: 'Hidden', visible: false }
+  ];
+  render(<ManualOrderPage user={admin} products={catalog} />);
+  const categories = screen.getByRole('combobox', { name: 'Category' });
+  expect(Array.from(categories.options).map(option => option.text)).toEqual(['All categories', 'Bags', 'Drinkware']);
+  fireEvent.change(categories, { target: { value: 'Bags' } });
+  expect(screen.getByRole('button', { name: /^Tote/ })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /^Small tote/ })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /^Mug/ })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: /^Tote/ }));
+  expect(screen.getByLabelText('Color')).toBeInTheDocument();
+  expect(categories).toHaveValue('Bags');
+});
+
+test('category selection combines with name search and can be cleared', () => {
+  render(<ManualOrderPage user={admin} products={[{ ...product, category: 'Bags' }, { ...product, _id: 'p2', name: 'Mug', category: 'Drinkware', quantity: 0 }]} />);
+  fireEvent.change(screen.getByLabelText('Category'), { target: { value: 'Bags' } });
+  fireEvent.change(screen.getByLabelText('Find a product'), { target: { value: 'Mug' } });
+  expect(screen.getByRole('status')).toHaveTextContent('No products match');
+  fireEvent.change(screen.getByLabelText('Category'), { target: { value: '' } });
+  expect(screen.getByRole('button', { name: /^Mug/ })).toBeDisabled();
+});
