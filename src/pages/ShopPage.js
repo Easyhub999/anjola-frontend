@@ -2,7 +2,7 @@ import './ShopPage.css';
 import { productPresentation, formatPrice } from '../productPresentation';
 import { productPath } from '../productLinks';
 import { cartLineKey } from '../cart';
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from "react";
 import { Search, ShoppingCart, X, ArrowLeft, ShoppingBag, Heart, Eye } from "lucide-react";
 import QuickViewModal from "../components/QuickViewModal";
 
@@ -15,10 +15,16 @@ const ShopPage = ({
 }) => {
   const userChangedFilters = useRef(false);
   const isInitialLoad = useRef(true);
+  const [returnPosition] = useState(() => {
+    try { return JSON.parse(sessionStorage.getItem('shopReturnPosition')); }
+    catch { return null; }
+  });
+  const restoredPosition = useRef(false);
+  const initialSearch = useRef(localStorage.getItem('shopSearch') || '');
 
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [currentPageNumber, setCurrentPageNumber] = useState(1);
-  const [sortOption, setSortOption] = useState("latest");
+  const [selectedCategory, setSelectedCategory] = useState(() => localStorage.getItem("shopCategory") || "all");
+  const [currentPageNumber, setCurrentPageNumber] = useState(() => Number(localStorage.getItem("shopPage")) || 1);
+  const [sortOption, setSortOption] = useState(() => localStorage.getItem("shopSort") || "latest");
   const [addedToCartAnimation, setAddedToCartAnimation] = useState(null);
   const [quickViewProduct, setQuickViewProduct] = useState(null);
 
@@ -44,10 +50,10 @@ const ShopPage = ({
     setSortOption(savedSort);
     if (savedPage) setCurrentPageNumber(Number(savedPage));
     const returningFromProduct = localStorage.getItem("cameFromShop") === "true";
-    if (!returningFromProduct) window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!returningFromProduct && !returnPosition) window.scrollTo({ top: 0, behavior: 'smooth' });
     localStorage.removeItem("cameFromShop");
     const initialPage = savedPage ? Number(savedPage) : 1;
-    window.history.replaceState({ shopPage: initialPage, category: savedCategory, sort: savedSort }, "", window.location.pathname);
+    window.history.replaceState({ ...window.history.state, shopPage: initialPage, category: savedCategory, sort: savedSort }, "", window.location.pathname);
     isInitialLoad.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -59,7 +65,7 @@ const ShopPage = ({
     setCurrentPageNumber(1);
     localStorage.setItem("shopCategory", cat);
     localStorage.setItem("shopPage", "1");
-    window.history.pushState({ shopPage: 1, category: cat, sort: sortOption }, "", window.location.pathname);
+    window.history.pushState({ ...window.history.state, shopPage: 1, category: cat, sort: sortOption }, "", window.location.pathname);
   };
 
   const handleSortChange = (sort) => {
@@ -67,7 +73,7 @@ const ShopPage = ({
     setCurrentPageNumber(1);
     localStorage.setItem("shopSort", sort);
     localStorage.setItem("shopPage", "1");
-    window.history.pushState({ shopPage: 1, category: selectedCategory, sort: sort }, "", window.location.pathname);
+    window.history.pushState({ ...window.history.state, shopPage: 1, category: selectedCategory, sort: sort }, "", window.location.pathname);
   };
 
   useEffect(() => { localStorage.setItem("shopPage", currentPageNumber.toString()); }, [currentPageNumber]);
@@ -77,7 +83,7 @@ const ShopPage = ({
       setCurrentPageNumber(1);
       localStorage.setItem("shopPage", "1");
     }
-    userChangedFilters.current = true;
+    userChangedFilters.current = false;
   }, [searchQuery]);
 
   const visibleProducts = useMemo(() => products.filter((p) => p.visible !== false), [products]);
@@ -123,9 +129,32 @@ const ShopPage = ({
   const currentProducts = processedProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
   const isInCart = (id) => cart.some((item) => item._id === id);
 
+  useLayoutEffect(() => {
+    if (!returnPosition || restoredPosition.current || !products.length) return;
+    if (searchQuery !== initialSearch.current) return;
+    const card = Array.from(document.querySelectorAll('[data-shop-product]'))
+      .find(element => element.dataset.shopProduct === returnPosition.productId);
+    const top = card && Number.isFinite(returnPosition.cardOffset)
+      ? window.scrollY + card.getBoundingClientRect().top - returnPosition.cardOffset
+      : returnPosition.scrollY;
+    if (Number.isFinite(top)) window.scrollTo({ top: Math.max(0, top), behavior: 'instant' });
+    restoredPosition.current = true;
+    sessionStorage.removeItem('shopReturnPosition');
+  }, [returnPosition, products, searchQuery, currentPageNumber, selectedCategory, sortOption]);
+
+  const rememberPosition = (product) => {
+    const card = Array.from(document.querySelectorAll('[data-shop-product]'))
+      .find(element => element.dataset.shopProduct === product._id);
+    sessionStorage.setItem('shopReturnPosition', JSON.stringify({
+      productId: product._id, scrollY: window.scrollY,
+      cardOffset: card ? card.getBoundingClientRect().top : null
+    }));
+  };
+
   const handleOpenProduct = (product, event) => {
     if (event && (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return;
     event?.preventDefault();
+    rememberPosition(product);
     localStorage.setItem("cameFromShop", "true");
     setSelectedProduct(product);
     setCurrentPage(productPath(product).slice(1));
@@ -134,7 +163,7 @@ const ShopPage = ({
   const handlePageChange = useCallback((page) => {
     setCurrentPageNumber(page);
     localStorage.setItem("shopPage", page.toString());
-    window.history.pushState({ shopPage: page, category: selectedCategory, sort: sortOption }, "", window.location.pathname);
+    window.history.pushState({ ...window.history.state, shopPage: page, category: selectedCategory, sort: sortOption }, "", window.location.pathname);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [selectedCategory, sortOption]);
 
@@ -219,7 +248,7 @@ const ShopPage = ({
                 const { price, hasPacks, onSale, available, hasOptions } = productPresentation(product);
                 const inCart = isInCart(product._id);
                 const wishlisted = isWishlisted?.(product._id) || false;
-                return <article key={product._id} className="shop-product-card" aria-label={product.name}>
+                return <article key={product._id} data-shop-product={product._id} className="shop-product-card" aria-label={product.name}>
                   <div className="shop-card-media">
                     <a className="shop-product-image" href={productPath(product)} onClick={event => handleOpenProduct(product, event)} aria-label={`View ${product.name}`}>
                       {product.images?.[0] || product.image ? <img src={product.images?.[0] || product.image} alt={product.name} loading="lazy" /> : <ShoppingBag size={40} />}
@@ -301,7 +330,7 @@ const ShopPage = ({
           product={quickViewProduct}
           onClose={() => setQuickViewProduct(null)}
           addToCart={addToCart}
-          setCurrentPage={setCurrentPage}
+          setCurrentPage={page => { rememberPosition(quickViewProduct); setCurrentPage(page); }}
           setSelectedProduct={setSelectedProduct}
           isWishlisted={isWishlisted}
           toggleWishlist={toggleWishlist}

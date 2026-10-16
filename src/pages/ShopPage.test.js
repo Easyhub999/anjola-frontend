@@ -11,7 +11,7 @@ function Shop(props) {
   const [query, setQuery] = useState('');
   return <ShopPage products={products} cart={[]} searchQuery={query} setSearchQuery={setQuery} setCurrentPage={jest.fn()} setSelectedProduct={jest.fn()} addToCart={jest.fn()} removeFromCart={jest.fn()} {...props} />;
 }
-beforeEach(() => { localStorage.clear(); window.history.replaceState({}, '', '/shop'); window.scrollTo = jest.fn(); jest.clearAllMocks(); });
+beforeEach(() => { localStorage.clear(); sessionStorage.clear(); window.history.replaceState({}, '', '/shop'); window.scrollTo = jest.fn(); jest.clearAllMocks(); });
 
 test('price sorting follows displayed sale and pack prices', () => {
   render(<Shop />);
@@ -99,4 +99,43 @@ test('quick-view details navigate to the individual product and close the dialog
   fireEvent.click(within(screen.getByRole('dialog')).getByRole('link', { name: 'View full details' }));
   expect(setCurrentPage).toHaveBeenCalledWith('product/bag');
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+});
+
+
+test('returning from a product restores its position on the saved shop page', () => {
+  const manyProducts = Array.from({ length: 25 }, (_, index) => ({ ...products[2], _id: `item-${index}`, name: `Item ${index}` }));
+  const first = render(<Shop products={manyProducts} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Page 2' }));
+  Object.defineProperty(window, 'scrollY', { configurable: true, value: 900 });
+  fireEvent.click(screen.getByRole('link', { name: 'View Item 22' }));
+  expect(JSON.parse(sessionStorage.getItem('shopReturnPosition'))).toMatchObject({ productId: 'item-22', scrollY: 900 });
+  first.unmount();
+  Object.defineProperty(window, 'scrollY', { configurable: true, value: 0 });
+  // Simulate the card's document position once the grid renders again.
+  const bounds = jest.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({ top: 900 });
+  window.scrollTo.mockClear();
+  render(<Shop products={manyProducts} />);
+  expect(screen.getByRole('button', { name: 'Page 2' })).toHaveAttribute('aria-current', 'page');
+  expect(window.scrollTo).toHaveBeenCalledWith({ top: 900, behavior: 'instant' });
+  expect(sessionStorage.getItem('shopReturnPosition')).toBeNull();
+  bounds.mockRestore();
+});
+
+test('quick view saves the shop position before opening full details', () => {
+  render(<Shop />);
+  fireEvent.click(screen.getByRole('button', { name: 'Quick view Tote bag' }));
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('link', { name: 'View full details' }));
+  expect(JSON.parse(sessionStorage.getItem('shopReturnPosition')).productId).toBe('bag');
+});
+
+test('restoration waits for products and restores saved search without resetting pagination', () => {
+  localStorage.setItem('shopPage', '2');
+  localStorage.setItem('shopSearch', 'Item');
+  sessionStorage.setItem('shopReturnPosition', JSON.stringify({ productId: 'missing', scrollY: 700 }));
+  const view = render(<Shop products={[]} />);
+  expect(window.scrollTo).not.toHaveBeenCalled();
+  const manyProducts = Array.from({ length: 25 }, (_, index) => ({ ...products[2], _id: `item-${index}`, name: `Item ${index}` }));
+  view.rerender(<Shop products={manyProducts} />);
+  expect(screen.getByRole('button', { name: 'Page 2' })).toHaveAttribute('aria-current', 'page');
+  expect(window.scrollTo).toHaveBeenCalledWith({ top: 700, behavior: 'instant' });
 });
