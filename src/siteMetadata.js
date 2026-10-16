@@ -5,7 +5,8 @@ export function pageMetadata(pathname, product) {
   const path = pathname.replace(/\/+$/, '') || '/';
   if (product && path === `/product/${encodeURIComponent(product._id)}` && product.visible !== false) return productMetadata(product);
   const page = brand.pages[path];
-  const title = path === '/product' && product?.name ? product.name : brand.privatePages[path] || 'Page';
+  const editorTitle = { '/admin-orders/new': 'Create order', '/admin/products/new': 'Add product' }[path];
+  const title = path === '/product' && product?.name ? product.name : editorTitle || brand.privatePages[path] || 'Page';
   return {
     title: page?.title || `${title} | ${brand.name}`,
     description: page?.description || brand.description,

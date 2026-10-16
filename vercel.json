@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/admin-orders/new",
+      "destination": "/seo/admin-orders.html"
+    },
+    {
+      "source": "/admin/products/new",
+      "destination": "/seo/admin.html"
+    },
+    {
       "source": "/payment-return",
       "destination": "/seo/payment-return.html"
     },

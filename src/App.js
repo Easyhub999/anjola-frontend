@@ -1,3 +1,5 @@
+import ManualOrderPage from './pages/ManualOrderPage';
+import ProductEditorPage from './pages/ProductEditorPage';
 import { applyPageMetadata, pageMetadata } from './siteMetadata';
 import { addCartItem, changeCartQuantity, removeCartItem, restoreCart } from './cart';
 import { useState, useEffect, useCallback } from 'react';
@@ -434,6 +436,8 @@ function AppContent() {
             }
           />
 
+          <Route path="/admin-orders/new" element={<ManualOrderPage user={user} products={products} />} />
+          <Route path="/admin/products/new" element={<ProductEditorPage user={user} products={products} setProducts={setProducts} />} />
           <Route path="/admin-analytics" element={<AdminAnalyticsPage user={user} />} />
           <Route path="/admin-orders" element={<AdminOrdersPage user={user} />} />
           <Route
@@ -449,7 +453,7 @@ function AppContent() {
       )}
 
       {/* Floating Action Buttons */}
-      {!isPaymentReturn && <FloatingButtons />}
+      {!isPaymentReturn && !currentPage.startsWith('admin') && <FloatingButtons />}
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav

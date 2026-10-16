@@ -12,6 +12,7 @@ const dateLabel = value => Number.isFinite(Date.parse(value)) ? new Date(value).
 const itemsOf = order => Array.isArray(order.items) ? order.items : [];
 const needsReview = order => Boolean(order.inventoryReviewReason || order.paymentReviewReason);
 const toPrepare = order => order.paymentStatus === 'paid' && ['pending', 'processing'].includes(order.status);
+const sourceLabels = { whatsapp: 'WhatsApp', instagram: 'Instagram', phone: 'Phone', in_person: 'In person', other: 'Other' };
 const statusLabels = { pending: 'Pending', processing: 'Processing', shipped: 'Shipped', delivered: 'Delivered', cancelled: 'Cancelled', paid: 'Paid', failed: 'Failed' };
 const nextSteps = { pending: ['processing', 'Start preparing'], processing: ['shipped', 'Mark as shipped'], shipped: ['delivered', 'Mark as delivered'] };
 
@@ -45,7 +46,7 @@ function OrderItems({ items }) {
   })}</ul>;
 }
 
-function OrderDrawer({ order, onClose, onUpdate }) {
+function OrderDrawer({ order, onClose, onUpdate, onRecordPayment }) {
   const dialog = useRef(null);
   const layer = useRef(null);
   const closeRef = useRef(onClose);
@@ -58,6 +59,8 @@ function OrderDrawer({ order, onClose, onUpdate }) {
   const [feedback, setFeedback] = useState(null);
   const [copyMessage, setCopyMessage] = useState('');
   const wasConfirming = useRef(false);
+  const [paymentMethod, setPaymentMethod] = useState('bank_transfer');
+  const [paymentReference, setPaymentReference] = useState('');
   const customer = order.customerInfo || {};
   const next = nextSteps[order.status];
   const canFulfil = order.paymentStatus === 'paid' && !needsReview(order);
@@ -121,6 +124,17 @@ function OrderDrawer({ order, onClose, onUpdate }) {
     } finally { busy.current = false; if (alive.current) setUpdating(false); }
   };
 
+  const recordPayment = async event => {
+    event.preventDefault();
+    if (busy.current) return;
+    busy.current = true; setUpdating(true); setFeedback(null);
+    try {
+      await onRecordPayment(order._id, { paymentMethod, paymentReference });
+      if (alive.current) setFeedback({ text: 'Payment recorded. Stock updated and order ready to prepare.' });
+    } catch (error) { if (alive.current) setFeedback({ error: true, text: error.message || 'Unable to record payment.' }); }
+    finally { busy.current = false; if (alive.current) setUpdating(false); }
+  };
+
   return createPortal(<div ref={layer} className="ao-overlay" onClick={event => { if (event.target === event.currentTarget && !busy.current) onClose(); }}>
     <section ref={dialog} className="ao-drawer" role="dialog" aria-modal="true" aria-labelledby="ao-order-title">
       <header className="ao-drawer-header">
@@ -140,6 +154,9 @@ function OrderDrawer({ order, onClose, onUpdate }) {
         <section className="ao-section"><div className="ao-section-heading"><h3><CreditCard size={19} />Payment summary</h3></div>
           <dl className="ao-facts"><div><dt>Payment status</dt><dd><Badge value={order.paymentStatus} payment /></dd></div><div><dt>Payment reference</dt><dd>{order.paymentReference || 'Not recorded'}</dd></div><div><dt>Shipping cost</dt><dd>{money(customer.shippingCost)}</dd></div>{(customer.isGift || recordedGiftFee(customer) > 0) && <div><dt>Gift packaging</dt><dd>{money(recordedGiftFee(customer))}</dd></div>}<div className="ao-total"><dt>Order total</dt><dd>{money(order.totalAmount)}</dd></div></dl>
         </section>
+        {order.isManualOrder && <section className="ao-section"><h3>Outside order</h3><p>Source: {sourceLabels[order.orderSource] || 'Manual order'}</p><p>Payment method: {order.paymentMethod?.replaceAll('_', ' ') || 'Not recorded'}</p>{order.internalNotes && <div><h4>Internal notes</h4><p style={{ whiteSpace: 'pre-wrap' }}>{order.internalNotes}</p></div>}
+          {order.paymentStatus !== 'paid' && order.status === 'pending' && <form onSubmit={recordPayment} className="ao-manual-payment"><h4>Record payment received</h4><p>Confirm the money has arrived. This deducts stock and moves the order to processing.</p><label>Payment method<select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} disabled={updating}><option value="bank_transfer">Bank transfer</option><option value="cash">Cash</option><option value="other">Other</option></select></label><label>Payment reference (optional)<input maxLength={200} value={paymentReference} onChange={e => setPaymentReference(e.target.value)} disabled={updating} /></label><button className="ao-primary" disabled={updating}>{updating ? 'Recording…' : 'Confirm payment received'}</button></form>}
+        </section>}
         <section className="ao-section ao-fulfilment"><div className="ao-section-heading"><h3><Truck size={19} />Fulfilment</h3></div>
           {order.status !== 'cancelled' && <ol className="ao-progress" aria-label="Fulfilment progress">{['pending', 'processing', 'shipped', 'delivered'].map((status, index) => {
             const current = ['pending', 'processing', 'shipped', 'delivered'].indexOf(order.status);
@@ -194,9 +211,9 @@ export default function AdminOrdersPage({ user }) {
   }, [fetchOrders, role]);
   useEffect(() => { setPage(1); }, [query, status, payment, queue]);
 
-  const updateOrder = async (id, payload) => {
+  const updateOrder = async (id, payload, recordPayment = false) => {
     const request = requestId.current;
-    const response = await ordersAPI.updateOrderStatus(id, payload, token);
+    const response = await (recordPayment ? ordersAPI.recordPayment(id, payload, token) : ordersAPI.updateOrderStatus(id, payload, token));
     if (request !== requestId.current) return;
     if (!response.data || response.data._id !== id) throw new Error('The server did not return the updated order. Refresh orders to check its status.');
     setOrders(previous => previous.map(existing => {
@@ -214,7 +231,7 @@ export default function AdminOrdersPage({ user }) {
   const filtered = orders.filter(order =>
     (queue === 'all' || (queue === 'payment' && order.paymentStatus === 'pending' && order.status !== 'cancelled') || (queue === 'prepare' && toPrepare(order)) || (queue === 'shipped' && order.status === 'shipped')) &&
     (status === 'all' || order.status === status) && (payment === 'all' || order.paymentStatus === payment) &&
-    (!search || [orderNumber(order), order.customerInfo?.fullName, order.customerInfo?.email].some(value => String(value || '').toLowerCase().includes(search)))
+    (!search || [orderNumber(order), order.customerInfo?.fullName, order.customerInfo?.email, order.customerInfo?.phone, sourceLabels[order.orderSource]].some(value => String(value || '').toLowerCase().includes(search)))
   ).sort((a, b) => (Date.parse(b.createdAt) || 0) - (Date.parse(a.createdAt) || 0));
   const pageCount = Math.max(1, Math.ceil(filtered.length / 20));
   const currentPage = Math.min(page, pageCount);
@@ -232,14 +249,14 @@ export default function AdminOrdersPage({ user }) {
   if (role !== 'admin') return <main className="ao-page"><div className="ao-empty"><AlertCircle size={32} /><h1>Access denied</h1><p>Sign in with an admin account to manage orders.</p></div></main>;
   return <main className="ao-page"><div className="ao-container">
     <header className="ao-hero"><div><p className="ao-eyebrow">Anjola Aesthetics / Studio</p><h1>Every order, <em>thoughtfully handled.</em></h1><p>From the first purchase to the final delivery. Everything you need, in one place.</p></div><div className="ao-hero-mark" aria-hidden="true"><Package size={44} strokeWidth={1} /><span>PACKED WITH CARE</span></div></header>
-    <div className="ao-workspace-heading"><div><h2>Orders</h2><p>Find a customer’s order, check the details and prepare their parcel.</p></div><button className="ao-secondary" onClick={fetchOrders} disabled={loading}><RefreshCw size={16} className={loading ? 'ao-spin' : ''} />{loading ? 'Refreshing…' : 'Refresh orders'}</button></div>
+    <div className="ao-workspace-heading"><div><h2>Orders</h2><p>Find a customer’s order, check the details and prepare their parcel.</p></div><a className="ao-primary" href="/admin-orders/new">Add order</a><button className="ao-secondary" onClick={fetchOrders} disabled={loading}><RefreshCw size={16} className={loading ? 'ao-spin' : ''} />{loading ? 'Refreshing…' : 'Refresh orders'}</button></div>
     <div className="ao-summary" aria-label="Order queues">{summaries.map(([key, label, count, Icon, note]) => <button key={key} aria-pressed={queue === key} disabled={loading || Boolean(ordersError)} onClick={() => { setQueue(key); setStatus('all'); setPayment('all'); setQuery(''); }}><span className="ao-summary-label"><Icon size={18} />{label}<ArrowUpRight size={16} /></span><strong>{loading || ordersError ? '—' : count}</strong><small>{note}</small></button>)}</div>
     <section className="ao-order-book" aria-label="Orders list">
       <div className="ao-toolbar"><div className="ao-search"><Search size={18} aria-hidden="true" /><input aria-label="Search orders" type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search order, customer or email" /></div><div className="ao-filter"><label htmlFor="ao-status">Fulfilment</label><select id="ao-status" value={status} onChange={event => setStatus(event.target.value)}><option value="all">All statuses</option>{['pending', 'processing', 'shipped', 'delivered', 'cancelled'].map(value => <option key={value} value={value}>{statusLabels[value]}</option>)}</select></div><div className="ao-filter"><label htmlFor="ao-payment">Payment</label><select id="ao-payment" value={payment} onChange={event => setPayment(event.target.value)}><option value="all">All payments</option><option value="paid">Paid</option><option value="pending">Awaiting payment</option><option value="failed">Failed</option></select></div></div>
       <div className="ao-list-meta"><p aria-live="polite">{loading ? 'Loading orders…' : ordersError ? 'Orders unavailable' : `${filtered.length} ${filtered.length === 1 ? 'order' : 'orders'}${queue !== 'all' ? ` · ${summaries.find(summary => summary[0] === queue)[1]}` : ''}`}</p><div>{hasFilters && <button className="ao-text-button" onClick={resetFilters}>Clear filters</button>}<span>Newest first</span></div></div>
       {ordersError ? <div className="ao-empty" role="alert"><AlertCircle size={30} /><h3>We couldn’t load your orders</h3><p>{ordersError}</p><button className="ao-primary" onClick={fetchOrders}>Retry</button></div> : loading ? <div className="ao-empty" role="status"><RefreshCw className="ao-spin" size={28} /><p>Loading orders...</p></div> : !filtered.length ? <div className="ao-empty"><Package size={34} strokeWidth={1.25} /><h3>{orders.length ? 'No matching orders' : 'No orders found'}</h3><p>{orders.length ? 'Try a different name or adjust your filters.' : 'Customer orders will appear here when they are placed.'}</p>{hasFilters && <button className="ao-secondary" onClick={resetFilters}>Reset filters</button>}</div> : <>
         <table className="ao-table"><caption className="sr-only">Customer orders, newest first</caption><thead><tr>{['Order', 'Customer', 'Items', 'Amount', 'Payment', 'Fulfilment', 'Details'].map(label => <th scope="col" key={label}>{label}</th>)}</tr></thead><tbody>{visible.map(order => <tr key={order._id}>
-          <td className="ao-order-cell"><strong>#{orderNumber(order)}</strong><small>{dateLabel(order.createdAt)}</small>{needsReview(order) && <span className="ao-review-flag"><AlertCircle size={13} />Needs review</span>}</td>
+          <td className="ao-order-cell"><strong>#{orderNumber(order)}</strong><small>{dateLabel(order.createdAt)}</small>{order.isManualOrder && <span className="ao-gift-tag">{sourceLabels[order.orderSource] || 'Manual order'}</span>}{needsReview(order) && <span className="ao-review-flag"><AlertCircle size={13} />Needs review</span>}</td>
           <td className="ao-customer-cell"><strong>{order.customerInfo?.fullName || 'Name not recorded'}</strong><small>{order.customerInfo?.email || 'Email not recorded'}</small>{order.customerInfo?.isGift && <span className="ao-gift-tag"><Gift size={12} />Gift order</span>}</td>
           <td data-label="Items" className="ao-count-cell">{Array.isArray(order.items) ? <>{order.items.length}<span className="ao-mobile-only"> line {order.items.length === 1 ? 'item' : 'items'}</span></> : 'Not recorded'}</td>
           <td data-label="Amount" className="ao-amount-cell">{money(order.totalAmount)}</td>
@@ -249,6 +266,6 @@ export default function AdminOrdersPage({ user }) {
         <div className="ao-pagination"><span>Showing {(currentPage - 1) * 20 + 1}–{Math.min(currentPage * 20, filtered.length)} of {filtered.length}</span><div><button className="ao-icon-button" aria-label="Previous page" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}><ChevronLeft size={18} /></button><span>{currentPage} / {pageCount}</span><button className="ao-icon-button" aria-label="Next page" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}><ChevronRight size={18} /></button></div></div>
       </>}
     </section><p className="ao-workspace-note"><Package size={15} />A little care in every parcel.</p>
-    {selectedOrder && <OrderDrawer key={selectedOrder._id} order={selectedOrder} onClose={() => setSelectedId(null)} onUpdate={updateOrder} />}
+    {selectedOrder && <OrderDrawer key={selectedOrder._id} order={selectedOrder} onClose={() => setSelectedId(null)} onUpdate={updateOrder} onRecordPayment={(id, payload) => updateOrder(id, payload, true)} />}
   </div></main>;
 }

@@ -137,6 +137,13 @@ export const authAPI = {
 // ==========================================
 
 export const productsAPI = {
+  uploadImage: async (file, token) => {
+    const body = new FormData(); body.append('image', file);
+    const response = await fetch(`${API_URL}/products/upload-image`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body });
+    const data = await handleResponse(response);
+    if (!data.imageUrl) throw new Error('Upload did not return an image. Please try again.');
+    return data.imageUrl;
+  },
   getProduct: async (id, options = {}) => {
     const response = await fetch(`${API_URL}/products/${encodeURIComponent(id)}`, { signal: options.signal });
     const result = await handleResponse(response);
@@ -263,6 +270,10 @@ export const productsAPI = {
 // ==========================================
 
 export const ordersAPI = {
+  recordPayment: async (id, payment, token) => {
+    const response = await fetch(`${API_URL}/orders/${id}/record-payment`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payment) });
+    return handleResponse(response);
+  },
 
   // Create Order (customer)
   createOrder: async (orderData, token) => {
@@ -296,7 +307,7 @@ export const ordersAPI = {
     });
     const data = await res.json();
     if (!data.success) throw new Error(data.message);
-    return data.data;
+    return { ...data.data, emailConfirmation: data.emailConfirmation };
   },
 
   // ADMIN: Get all orders

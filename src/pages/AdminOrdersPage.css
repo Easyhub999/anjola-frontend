@@ -239,3 +239,5 @@
   .ao-facts > div { gap: 16px; font-size: 11px; }
 }
 @media (prefers-reduced-motion: reduce) { .ao-drawer, .ao-spin { animation: none; } .ao-page button, .ao-overlay button { transition: none; } }
+
+.ao-manual-payment{background:#faf7f2;padding:18px;border-radius:12px;margin-top:18px}.ao-manual-payment label{display:block;font-size:13px;margin:12px 0}.ao-manual-payment select,.ao-manual-payment input{display:block;width:100%;border:1px solid #ddd;padding:10px;border-radius:8px;margin-top:6px}.ao-manual-payment p{font-size:13px;line-height:1.5}.ao-workspace-heading{gap:12px;flex-wrap:wrap}.ao-workspace-heading>div{margin-right:auto}

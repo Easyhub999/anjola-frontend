@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import AdminOrdersPage from './AdminOrdersPage';
 import { ordersAPI } from '../api';
 
-jest.mock('../api', () => ({ ordersAPI: { getAllOrders: jest.fn(), updateOrderStatus: jest.fn() } }));
+jest.mock('../api', () => ({ ordersAPI: { getAllOrders: jest.fn(), updateOrderStatus: jest.fn(), recordPayment: jest.fn() } }));
 const admin = { role: 'admin', token: 'test-token' };
 const order = { _id: 'order1', orderNumber: 'ANJ-101', status: 'processing', paymentStatus: 'paid', totalAmount: 12000,
   stockDeducted: true, createdAt: '2026-10-14T12:00:00Z', customerInfo: { fullName: 'Ada Williams', email: 'ada@example.test', address: '12 Example Street', city: 'Lagos', state: 'Lagos', phone: '08000000000' },
@@ -151,4 +151,17 @@ test('non-admins never fetch orders', () => {
 test.each([[2000, '₦2,000'], [1500, '₦1,500'], [0, '₦0'], [undefined, 'Not recorded']])('admin displays the saved packaging charge without repricing old orders (%p)', async (fee, expected) => {
   const dialog = await openOrder({ customerInfo: { ...order.customerInfo, isGift: true, giftPackagingFee: fee } });
   expect(within(dialog).getByText('Gift packaging').parentElement).toHaveTextContent(expected);
+});
+
+
+test('outside orders show source and record payment through the admin payment endpoint', async () => {
+  const initial = { ...order, isManualOrder: true, orderSource: 'whatsapp', internalNotes: 'Call first', paymentStatus: 'pending', status: 'pending', stockDeducted: false };
+  ordersAPI.recordPayment.mockResolvedValue({ data: { ...initial, paymentStatus: 'paid', status: 'processing', stockDeducted: true } });
+  await openOrder(initial);
+  expect(screen.getByText('Source: WhatsApp')).toBeInTheDocument();
+  expect(screen.getByText('Call first')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Confirm payment received' }));
+  await screen.findByText('Payment recorded. Stock updated and order ready to prepare.');
+  expect(ordersAPI.recordPayment).toHaveBeenCalledWith('order1', { paymentMethod: 'bank_transfer', paymentReference: '' }, 'test-token');
+  expect(screen.queryByRole('button', { name: 'Confirm payment received' })).not.toBeInTheDocument();
 });
