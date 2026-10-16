@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, ChevronDown, CreditCard, Gift, Loader, Lock, MapPin, Package, ShoppingBag, Truck, User, AlertCircle } from 'lucide-react';
 import { ordersAPI, paymentsAPI } from '../api';
 import { GIFT_PACKAGING_FEE } from '../orderCharges';
+import policies from '../policies.json';
 import './CheckoutPage.css';
 
 const money = value => `₦${value.toLocaleString('en-NG')}`;
 const shippingOptions = [
   { id: 'abeokuta', title: 'Within Abeokuta', label: 'Delivery Within Abeokuta', price: 0, subtitle: 'Local delivery', description: 'Current checkout delivery charge: ₦0.' },
-  { id: 'park', title: 'Park delivery', label: 'Park Delivery (Lagos, Ogun, Ilorin, Oyo, Osun, Ondo, Ekiti)', price: 0, subtitle: 'Pay the driver separately', locations: 'Lagos, Ogun, Ilorin, Oyo, Osun, Ondo, Ekiti', description: 'No delivery fee is collected at checkout. Agree and pay the transport fare directly with the driver when they contact you.' },
+  { id: 'park', title: 'Park delivery', label: 'Park Delivery (Lagos, Ogun, Ilorin, Oyo, Osun, Ondo, Ekiti)', price: 0, subtitle: 'Pay the driver separately', locations: 'Lagos, Ogun, Ilorin, Oyo, Osun, Ondo, Ekiti', description: 'No transport fare is collected at checkout. Confirm the fare and collection arrangements with us before ordering, then pay the driver separately.' },
   { id: 'zone1', title: 'Doorstep delivery · Zone 1', label: 'Lagos, Akure, Ado-Ekiti, Ibadan, Ogbomosho, Oshogbo, Ota, Ilorin', price: 5600, subtitle: 'Lagos, Ibadan, Ilorin and more', locations: 'Lagos, Akure, Ado-Ekiti, Ibadan, Ogbomosho, Oshogbo, Ota, Ilorin', description: 'Doorstep delivery. Check the locations above before choosing this option.' },
   { id: 'zone2', title: 'Doorstep delivery · Zone 2', label: 'Aba, Asaba, Enugu, Onitsha, Owerri, Umuahia, Abuja, Benin, Calabar, Port-Harcourt, Uyo, Warri, Yenagoa', price: 7000, subtitle: 'Abuja, Port Harcourt, Enugu and more', locations: 'Aba, Asaba, Enugu, Onitsha, Owerri, Umuahia, Abuja, Benin, Calabar, Port-Harcourt, Uyo, Warri, Yenagoa', description: 'Doorstep delivery. Check the locations above before choosing this option.' },
   { id: 'zone3', title: 'Doorstep delivery · Zone 3', label: 'Lafia, Lokoja, Makurdi, Minna, Bauchi, Jalingo, Jos, Gombe, Maiduguri, Damaturu, Yola, Kaduna, Katsina, Dutse, Birnin Kebbi, Sokoto, Kano', price: 8500, subtitle: 'Kano, Kaduna, Jos and more', locations: 'Lafia, Lokoja, Makurdi, Minna, Bauchi, Jalingo, Jos, Gombe, Maiduguri, Damaturu, Yola, Kaduna, Katsina, Dutse, Birnin Kebbi, Sokoto, Kano', description: 'Doorstep delivery. Check the locations above before choosing this option.' }
@@ -171,6 +172,11 @@ export default function CheckoutPage({ cart = [], getTotalPrice, user, setCurren
         {selectedShipping?.id === 'park' && <p className="ck-price-note">Your driver’s transport fare is separate and is not included in this total.</p>}
         {!selectedShipping && <p className="ck-price-note">Choose delivery to confirm your payment total.</p>}
         <div className="ck-payment-method"><CreditCard size={21} /><div><strong>Pay with Paystack</strong><p>You’ll continue to Paystack to complete your payment.</p></div><Lock size={16} /></div>
+        <section className="ck-policies" aria-labelledby="ck-policy-heading">
+          <h3 id="ck-policy-heading">Before you place your order</h3>
+          <p>{policies.returns.summary.text}</p>
+          <nav aria-label="Checkout policies"><a href="/shipping-policy" target="_blank" rel="noopener noreferrer">Shipping policy<span className="sr-only"> (opens in a new tab)</span></a><a href="/returns-policy" target="_blank" rel="noopener noreferrer">Returns policy<span className="sr-only"> (opens in a new tab)</span></a></nav>
+        </section>
         {submitError && <div ref={errorRef} tabIndex={-1} className="ck-submit-error" role="alert"><AlertCircle size={19} /><div><p>{submitError.message}</p>{submitError.status === 401 && <button type="button" onClick={() => setCurrentPage('auth')}>Sign in</button>}{submitError.status === 409 && <button type="button" onClick={() => setCurrentPage('shop')}>Review your items</button>}</div></div>}
         <button className="ck-primary ck-pay" type="submit" disabled={checkoutLoading || submitError?.status === 401}>{checkoutLoading ? <><Loader size={18} className="ck-spin" />{redirecting ? 'Opening Paystack…' : 'Preparing payment…'}</> : <><Lock size={17} />{selectedShipping ? `Pay ${money(totalAmount)}` : 'Continue to payment'}<ArrowRight size={18} /></>}</button>
         <p className="ck-payment-status" role="status">{checkoutLoading ? 'Please wait while we open your payment page.' : ''}</p>

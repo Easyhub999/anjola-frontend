@@ -51,7 +51,11 @@
 .pd-details { border-bottom: 1px solid #e5d7dc; padding: 0 0 16px; margin-bottom: 12px; }
 .pd-details summary { cursor: pointer; min-height: 44px; padding: 12px 0; font-size: 13px; font-weight: 600; }
 .pd-details p { white-space: pre-line; font-size: 13px; line-height: 1.9; color: #75626a; overflow-wrap: anywhere; }
-.pd-details > button { min-height: 44px; margin-top: 10px; text-decoration: underline; font-size: 12px; color: #8c3657; }
+.pd-details > button, .pd-details > a { display: inline-flex; align-items: center; min-height: 44px; margin: 10px 18px 0 0; text-decoration: underline; text-underline-offset: 3px; font-size: 12px; color: #8c3657; }
+.pd-return-note { margin: 18px 0; border: 1px solid #e5d7dc; padding: 18px; background: #fffaf7; border-radius: 8px; }
+.pd-return-note h2 { font-size: 13px; font-weight: 600; margin: 0 0 7px; }
+.pd-return-note p { font-size: 12px; line-height: 1.8; color: #66505e; margin: 0; }
+.pd-return-note a { display: inline-flex; align-items: center; min-height: 44px; margin-top: 5px; font-size: 12px; color: #8c3657; text-decoration: underline; text-underline-offset: 3px; }
 .pd-reviews-panel { padding: 16px; background: #fffdf9; }
 .pd-reviews form input, .pd-reviews form select, .pd-reviews form textarea { font-size: 16px; }
 .pd-reviews form button[type="submit"] { background: var(--anjola-brand-gradient); min-height: 44px; }

@@ -69,4 +69,19 @@ test('footer navigation and contact links have working destinations', () => {
   expect(navigate).toHaveBeenCalledWith('shop');
   expect(screen.getByRole('link', { name: 'anjolaaestheticsng@gmail.com' })).toHaveAttribute('href', 'mailto:anjolaaestheticsng@gmail.com');
   expect(screen.getByRole('link', { name: '+234 706 594 3625' })).toHaveAttribute('href', 'tel:+2347065943625');
+  expect(screen.getByRole('link', { name: 'Shipping policy' })).toHaveAttribute('href', '/shipping-policy');
+  fireEvent.click(screen.getByRole('link', { name: 'Returns policy' }));
+  expect(navigate).toHaveBeenLastCalledWith('returns-policy');
+});
+
+test('footer policy links open separately while the customer is checking out', () => {
+  const navigate = jest.fn();
+  render(<Footer setCurrentPage={navigate} preserveCheckout />);
+  for (const label of ['Shipping policy', 'Returns policy']) {
+    const link = screen.getByRole('link', { name: `${label} (opens in a new tab)` });
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    fireEvent.click(link);
+  }
+  expect(navigate).not.toHaveBeenCalled();
 });

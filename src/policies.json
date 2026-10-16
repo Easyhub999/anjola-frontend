@@ -1,0 +1,156 @@
+{
+  "support": {
+    "email": "anjolaaestheticsng@gmail.com",
+    "phone": "+234 706 594 3625",
+    "whatsapp": "https://wa.me/2347065943625"
+  },
+  "shipping": {
+    "eyebrow": "A little clarity, every step of the way",
+    "title": "Shipping & Delivery",
+    "intro": "From choosing your delivery option to receiving your parcel, here is what to expect when you order from Anjola Aesthetics NG.",
+    "summary": {
+      "title": "Before you place your order",
+      "text": "Choose a delivery option that covers your location and review the charges before paying. Park delivery has a separate transport fare payable to the driver; it is not free shipping. If your order is for a particular date, contact us to confirm the arrangements before ordering."
+    },
+    "sections": [
+      {
+        "id": "processing",
+        "title": "Preparing your order",
+        "paragraphs": [
+          "Order processing begins after payment has been confirmed. Keep your order number or payment reference so we can help with any questions.",
+          "Preparation time depends on the items and any agreed gift or personalisation requirements. Payment confirmation is not a dispatch notice. We will share a shipment update when your order is dispatched, with tracking details where available."
+        ]
+      },
+      {
+        "id": "delivery-options",
+        "title": "Delivery options & charges",
+        "paragraphs": [
+          "Available delivery options and the locations they cover are listed at checkout. Select the option for your actual destination. If your location is not listed, contact us before paying so availability and cost can be confirmed.",
+          "For local and doorstep delivery, review the delivery charge shown for your selected option before payment. For an order arranged through WhatsApp, confirm the delivery method, destination and charges with us before paying."
+        ],
+        "items": [
+          "Park delivery: no transport fare is collected at checkout. You pay that fare separately to the driver. Confirm the fare and collection arrangements with us before ordering so you understand the total cost.",
+          "Doorstep delivery: select the zone that lists your city and check that the address and contact number are complete.",
+          "An amount of ₦0 collected online for park transport does not mean the transport is free."
+        ]
+      },
+      {
+        "id": "timing",
+        "title": "Delivery timing & delays",
+        "paragraphs": [
+          "Delivery estimates depend on the destination, selected service and order preparation. Contact us for an estimate before ordering if timing is important. An estimate is not a guaranteed arrival date unless we expressly agree otherwise.",
+          "Traffic, weather, public holidays and transport disruptions can affect delivery. We will communicate known delays affecting your order and help you follow up. If your parcel has not arrived as expected, contact us with your order reference."
+        ]
+      },
+      {
+        "id": "gifting",
+        "title": "Gift packaging & special requests",
+        "paragraphs": [
+          "Gift packaging is an optional charge shown at checkout before payment. You can add a gift message when selecting that option.",
+          "Please confirm any custom gift box, personalised wording, special packaging or occasion-specific delivery request with us before ordering. Review names, messages and agreed product selections carefully before confirming them."
+        ]
+      },
+      {
+        "id": "address",
+        "title": "Addresses & missed deliveries",
+        "paragraphs": [
+          "Provide an accurate delivery address, city, state and reachable phone number. Contact us promptly if you notice an error. Changes after dispatch depend on what the delivery partner can arrange.",
+          "If delivery or collection is missed, contact us to arrange the next step. Reasonable additional transport costs caused by an incorrect address or a missed agreed delivery may be payable by you; any proposed charge will be explained before redelivery is arranged. This does not transfer responsibility for a mistake made by us to you."
+        ]
+      },
+      {
+        "id": "delivery-problems",
+        "title": "Missing, damaged or incorrect deliveries",
+        "paragraphs": [
+          "Please check your parcel when it arrives and contact us promptly if anything is missing, damaged or different from your order. Keep the packaging and take relevant photos if you can; we can still review your concern if a photo, original packaging or an unboxing video is unavailable.",
+          "If tracking says delivered but you have not received your parcel, let us know so we can investigate with the delivery partner. We will help resolve delivery problems; handing a parcel to a courier does not by itself end our responsibilities.",
+          "Our Returns, Refunds & Exchanges policy explains the next steps for product issues. Nothing in this delivery policy removes your applicable consumer rights."
+        ]
+      }
+    ],
+    "related": { "href": "/returns-policy", "label": "Read our Returns, Refunds & Exchanges policy" }
+  },
+  "returns": {
+    "eyebrow": "Clear expectations. Thoughtful support.",
+    "title": "Returns, Refunds & Exchanges",
+    "intro": "Please choose your items carefully. If something is wrong with your order, we are here to help you find the appropriate resolution.",
+    "summary": {
+      "title": "No voluntary change-of-mind returns",
+      "text": "We do not offer voluntary returns, refunds or exchanges for a change of mind when goods are correctly supplied, match their description and are free from defects. Your statutory consumer rights remain protected."
+    },
+    "sections": [
+      {
+        "id": "change-of-mind",
+        "title": "Changing your mind after delivery",
+        "paragraphs": [
+          "Our change-of-mind restriction covers personal preferences after a correctly fulfilled purchase: no longer needing the item, finding it cheaper elsewhere, choosing a different colour after receiving the colour ordered, or a gift recipient changing their preference.",
+          "Please review the product description, dimensions and available options before ordering. Ask us if you need help deciding. A problem with the product or its description is assessed separately from a change of preference."
+        ]
+      },
+      {
+        "id": "order-problems",
+        "title": "When something is wrong",
+        "paragraphs": [
+          "Contact us about damaged, defective, unsafe, incorrect or missing items, goods that do not match their description, or goods unsuitable for a qualifying purpose you communicated to us. We will assess the circumstances and provide the remedy required by applicable law.",
+          "Please report a concern as soon as you reasonably can. A request to contact us promptly is not a 24-hour or 48-hour cutoff and does not remove rights relating to a fault discovered later. Stop using an item if you believe it may be unsafe."
+        ]
+      },
+      {
+        "id": "request-help",
+        "title": "How to request help",
+        "paragraphs": [
+          "Contact us by email or WhatsApp using the details below. The same approach applies to purchases made on our website and orders arranged directly with us.",
+          "Please contact us before sending an item back so we can confirm the appropriate return address and arrangements. This helps coordinate the return and does not give us a right to refuse a valid statutory claim."
+        ],
+        "items": [
+          "Share your order number or reasonable proof of purchase, such as a receipt, payment reference or WhatsApp purchase record.",
+          "Tell us which item is affected and describe the problem, including when you noticed it.",
+          "Include relevant photos if available. An unboxing video or original packaging is not an absolute requirement for reviewing a genuine issue.",
+          "Keep the item and relevant accessories available for reasonable inspection. Share only the information needed to identify the purchase; never send passwords, payment PINs or full card details."
+        ]
+      },
+      {
+        "id": "condition",
+        "title": "Product condition & care",
+        "paragraphs": [
+          "We may inspect the item and compare it with the order information to understand the issue. Please keep it safe and avoid further use that could worsen damage.",
+          "Damage caused by misuse, alteration or improper care after delivery is assessed separately from a defect present when supplied. We will consider the evidence before attributing damage to a customer; ordinary inspection or opening packaging to discover a fault does not automatically invalidate a claim."
+        ]
+      },
+      {
+        "id": "special-items",
+        "title": "Hygiene-sensitive & personalised items",
+        "paragraphs": [
+          "Opened cosmetics, personal-care products, customised gift boxes and personalised items are not eligible for voluntary change-of-mind returns, refunds or exchanges. Check personalisation details carefully before confirming your order.",
+          "These restrictions do not remove applicable remedies for defective, unsafe, incorrect or misdescribed goods. Contact us if there is a problem with a hygiene-sensitive or personalised product."
+        ]
+      },
+      {
+        "id": "cancellations",
+        "title": "Cancellation requests",
+        "paragraphs": [
+          "Contact us as soon as possible if you need to cancel an order. Cancellation before delivery is considered separately from a change-of-mind return after delivery. If a parcel is already in transit, we will check what can be arranged and explain the next steps.",
+          "Any cancellation charge must be reasonable, explained and permitted by applicable law. We will not impose a charge where the law prohibits it. A cancellation confirmation and a payment refund are separate steps; we will explain any refund due."
+        ]
+      },
+      {
+        "id": "resolution",
+        "title": "Refunds, replacements & return costs",
+        "paragraphs": [
+          "The appropriate resolution depends on the problem and your applicable rights. Where a remedy is due, this may involve a repair, replacement or refund. We will explain the proposed resolution and any return arrangements.",
+          "We will meet return-transport costs where the law requires us to do so. We will not impose a restocking penalty on a qualifying statutory return or require store credit instead of a monetary refund where a refund is legally due.",
+          "If a refund is due, we will confirm the amount, payment method and expected processing time with you. Bank or payment-provider processing may affect when the funds reach your account. We do not promise an instant refund."
+        ]
+      },
+      {
+        "id": "consumer-rights",
+        "title": "Your consumer rights",
+        "paragraphs": [
+          "This policy operates alongside applicable Nigerian consumer protection law, including the Federal Competition and Consumer Protection Act. It does not exclude or limit rights or remedies that cannot lawfully be excluded.",
+          "Our change-of-mind restriction does not override those rights. Contact us if you would like a decision explained or reviewed; you remain free to use any complaint or legal remedy available to you."
+        ]
+      }
+    ],
+    "related": { "href": "/shipping-policy", "label": "Read our Shipping & Delivery policy" }
+  }
+}

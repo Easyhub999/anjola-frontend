@@ -33,6 +33,14 @@
       "destination": "/seo/contact.html"
     },
     {
+      "source": "/shipping-policy",
+      "destination": "/seo/shipping-policy.html"
+    },
+    {
+      "source": "/returns-policy",
+      "destination": "/seo/returns-policy.html"
+    },
+    {
       "source": "/auth",
       "destination": "/seo/auth.html"
     },

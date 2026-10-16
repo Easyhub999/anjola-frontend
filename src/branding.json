@@ -21,6 +21,14 @@
     "/contact": {
       "title": "Contact Anjola Aesthetics Ng | Gifting & Order Help",
       "description": "Contact Anjola Aesthetics Ng in Abeokuta, Nigeria for help with gifts, products, packaging, delivery and orders. Reach us by email or WhatsApp."
+    },
+    "/shipping-policy": {
+      "title": "Shipping & Delivery Policy | Anjola Aesthetics Ng",
+      "description": "Understand order processing, delivery arrangements, shipping charges and help with delayed or damaged deliveries at Anjola Aesthetics Ng."
+    },
+    "/returns-policy": {
+      "title": "Returns & Refunds Policy | Anjola Aesthetics Ng",
+      "description": "Read our change-of-mind policy, how to report an incorrect or faulty product, and how we handle eligible returns and refunds at Anjola Aesthetics Ng."
     }
   },
   "privatePages": {

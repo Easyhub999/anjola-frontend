@@ -101,6 +101,43 @@ test('order summary shows pack count, total pieces and line price', () => {
   expect(screen.getByRole('heading', { name: 'Gift pack' }).parentElement).toHaveTextContent('₦9,000');
 });
 
+test('policy links preserve delivery and gift details before starting payment', async () => {
+  ordersAPI.createOrder.mockResolvedValueOnce({ _id: 'order1' });
+  paymentsAPI.initializePayment.mockRejectedValueOnce(new Error('Test stops before payment navigation'));
+  const navigate = jest.fn();
+  render(<CheckoutPage user={user} cart={cart} getTotalPrice={() => 9000} setCurrentPage={navigate} />);
+  fillDelivery();
+  fireEvent.click(screen.getByRole('radio', { name: /Park delivery/ }));
+  fireEvent.click(screen.getByRole('checkbox', { name: /This is a gift/ }));
+  fireEvent.change(screen.getByLabelText('Gift message (optional)'), { target: { value: 'A little thank you' } });
+
+  const notice = screen.getByText(/We do not offer voluntary returns, refunds or exchanges/);
+  expect(notice).toHaveTextContent('Your statutory consumer rights remain protected.');
+  const paymentButton = screen.getByRole('button', { name: 'Pay ₦11,000' });
+  expect(notice.compareDocumentPosition(paymentButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  for (const [label, path] of [['Shipping policy', '/shipping-policy'], ['Returns policy', '/returns-policy']]) {
+    const link = screen.getByRole('link', { name: `${label} (opens in a new tab)` });
+    expect(link).toHaveAttribute('href', path);
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    fireEvent.click(link);
+  }
+  expect(navigate).not.toHaveBeenCalled();
+  expect(ordersAPI.createOrder).not.toHaveBeenCalled();
+  expect(screen.getByLabelText(/Phone number/)).toHaveValue('08000000000');
+  expect(screen.getByPlaceholderText('Enter your complete delivery address')).toHaveValue('12 Example Street');
+  expect(screen.getByRole('radio', { name: /Park delivery/ })).toBeChecked();
+  expect(screen.getByLabelText('Gift message (optional)')).toHaveValue('A little thank you');
+
+  fireEvent.click(paymentButton);
+  await waitFor(() => expect(ordersAPI.createOrder).toHaveBeenCalledWith(expect.objectContaining({
+    totalAmount: 11000,
+    customerInfo: expect.objectContaining({ shippingMethodId: 'park', shippingCost: 0, isGift: true, giftMessage: 'A little thank you' })
+  }), 'token'));
+  await waitFor(() => expect(paymentsAPI.initializePayment).toHaveBeenCalledWith({ orderId: 'order1' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('Test stops before payment navigation');
+});
+
 test('retrying a failed payment opening reuses the order; changed gift details create a new snapshot', async () => {
   ordersAPI.createOrder.mockResolvedValueOnce({ _id: 'order1' }).mockResolvedValueOnce({ _id: 'order2' });
   paymentsAPI.initializePayment.mockRejectedValue(new Error('Payment service temporarily unavailable'));

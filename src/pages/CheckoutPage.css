@@ -4,7 +4,7 @@
 .ck-page :is(h1,h2,h3,p) { margin: 0; }
 .ck-page button { cursor: pointer; }
 .ck-page button:disabled { opacity: .55; cursor: not-allowed; }
-.ck-page :is(button, input, textarea, summary):focus-visible { outline: 2px solid #9a4b9f; outline-offset: 4px; }
+.ck-page :is(a, button, input, textarea, summary):focus-visible { outline: 2px solid #9a4b9f; outline-offset: 4px; }
 .ck-page :is(input, textarea) { accent-color: #914697; }
 .ck-page :is(input, textarea):disabled { background: #f6f0f3; color: #8f7c88; cursor: wait; }
 .ck-back { min-height: 44px; display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: #7e5a73; }
@@ -94,6 +94,11 @@
 .ck-payment-method > svg:last-child { margin-left: auto; }
 .ck-payment-method strong { font-size: 12px; color: #704967; font-weight: 600; }
 .ck-payment-method p { font-size: 10px; color: #8c7083; margin-top: 4px; }
+.ck-policies { margin: 0 0 18px; padding: 16px; border: 1px solid var(--ck-line); border-radius: 8px; background: #faf5f7; }
+.ck-policies h3 { font-size: 13px; font-weight: 600; color: #57374c; margin-bottom: 7px; }
+.ck-policies p { font-size: 12px; line-height: 1.7; color: #66505e; }
+.ck-policies nav { display: flex; flex-wrap: wrap; gap: 0 18px; margin-top: 5px; }
+.ck-policies a { display: inline-flex; align-items: center; min-height: 44px; font-size: 12px; color: #78366a; text-decoration: underline; text-underline-offset: 3px; }
 .ck-primary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 15px 18px; min-height: 50px; border-radius: 8px; font-size: 13px; font-weight: 600; background: var(--ck-gradient); color: white; }
 .ck-primary:hover:not(:disabled) { background: #873f91; }
 .ck-primary > svg { flex-shrink: 0; }

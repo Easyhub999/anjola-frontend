@@ -6,6 +6,7 @@ import { Heart, Share2, ShoppingBag, Truck, Gift, Star, ChevronDown, ChevronLeft
 import { productPresentation, formatPrice } from '../productPresentation';
 import { canSelectPack, selectionPrice } from '../productSelection';
 import { productPath, productUrl } from '../productLinks';
+import policies from '../policies.json';
 import './ProductDetailPage.css';
 
 const ProductDetailPage = ({ selectedProduct: product, setCurrentPage, user, addToCart, toggleWishlist, isWishlisted, products = [], setSelectedProduct }) => {
@@ -149,7 +150,8 @@ const ProductDetailPage = ({ selectedProduct: product, setCurrentPage, user, add
           <div className="pd-inline-buy"><button className="pd-buy" disabled={!presentation.available || !selectionAvailable} onClick={add}>{addLabel}<ShoppingBag size={18} /></button><p role="status">{added ? `${product.name} added to your bag.` : complete && packs.length ? `One pack contains ${pricing.pieces} pieces.` : missing.length ? `Select ${missing.join(', ')} to continue.` : 'Ready when you are.'}</p></div>
           <div className="pd-help-notes"><p><Gift size={17} /> Add a gift message at checkout.</p><p><Truck size={17} /> Select delivery for your location at checkout.</p></div>
           <details className="pd-details" open><summary>Description</summary><p>{product.description || 'Contact Anjola for more information about this product.'}</p></details>
-          <details className="pd-details"><summary>Delivery & gifting</summary><p>Available delivery options and charges are shown at checkout. Contact Anjola to confirm timing for your location or a special occasion before ordering.</p><button onClick={() => setCurrentPage('contact')}>Ask about this product</button></details>
+          <details className="pd-details"><summary>Delivery & gifting</summary><p>Available delivery options and charges are shown at checkout. For park delivery, the driver’s transport fare is paid separately. Contact Anjola to confirm timing for your location or a special occasion before ordering.</p><a href="/shipping-policy" target="_blank" rel="noopener noreferrer">Read our shipping policy<span className="sr-only"> (opens in a new tab)</span></a><button onClick={() => setCurrentPage('contact')}>Ask about this product</button></details>
+          <section className="pd-return-note" aria-labelledby="pd-return-heading"><h2 id="pd-return-heading">Returns & order support</h2><p>{policies.returns.summary.text}</p><a href="/returns-policy" target="_blank" rel="noopener noreferrer">Read our returns policy<span className="sr-only"> (opens in a new tab)</span></a></section>
           <div className="pd-reviews">
               {/* Reviews */}
               <div className="border border-gray-100 rounded-xl overflow-hidden">

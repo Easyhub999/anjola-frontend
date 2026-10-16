@@ -17,6 +17,7 @@ import ContactPage from './pages/ContactPage';
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import CheckoutPage from './pages/CheckoutPage';
+import PolicyPage from './pages/PolicyPage';
 import PaymentReturnPage from './pages/PaymentReturnPage';
 import AdminPage from './pages/AdminPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
@@ -189,6 +190,7 @@ function AppContent() {
   const isPaymentReturn = location.pathname === '/payment-return' ||
     (location.pathname === '/shop' && (returnParams.has('reference') || returnParams.has('trxref')));
   const isProductRoute = location.pathname.startsWith('/product/');
+  const isPolicyRoute = /^\/(shipping-policy|returns-policy)\/?$/.test(location.pathname);
   const productId = location.pathname.split('/')[2] || '';
   const currentPage = isPaymentReturn ? 'payment-return' : isProductRoute ? 'product' : location.pathname.slice(1) || 'home';
 
@@ -319,7 +321,7 @@ function AppContent() {
 
   const clearCart = useCallback(() => { setCart([]); }, []);
 
-  if (loading && currentPage !== 'product' && !isPaymentReturn) {
+  if (loading && currentPage !== 'product' && !isPaymentReturn && !isPolicyRoute) {
     return (
       <div>
         <Navigation
@@ -333,7 +335,7 @@ function AppContent() {
     );
   }
 
-  if (error && products.length === 0 && currentPage !== 'product' && !isPaymentReturn) {
+  if (error && products.length === 0 && currentPage !== 'product' && !isPaymentReturn && !isPolicyRoute) {
     return (
       <div>
         <Navigation
@@ -407,6 +409,8 @@ function AppContent() {
 
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/shipping-policy" element={<PolicyPage policyKey="shipping" />} />
+          <Route path="/returns-policy" element={<PolicyPage policyKey="returns" />} />
           <Route path="/auth" element={<AuthPage setUser={setUser} setCurrentPage={setCurrentPage} />} />
 
           <Route
@@ -437,7 +441,7 @@ function AppContent() {
           />
 
           <Route path="/admin-orders/new" element={<ManualOrderPage user={user} products={products} />} />
-          <Route path="/admin/products/new" element={<ProductEditorPage user={user} products={products} setProducts={setProducts} />} />
+          <Route path="/admin/products/new" element={<ProductEditorPage user={user} products={products} setProducts={setProducts} onCancel={() => { navigate('/admin'); window.scrollTo({ top: 0, behavior: 'instant' }); }} />} />
           <Route path="/admin-analytics" element={<AdminAnalyticsPage user={user} />} />
           <Route path="/admin-orders" element={<AdminOrdersPage user={user} />} />
           <Route
@@ -461,7 +465,7 @@ function AppContent() {
         cart={cart} setShowCart={setShowCart} user={user}
       />
 
-      <Footer setCurrentPage={setCurrentPage} />
+      <Footer setCurrentPage={setCurrentPage} preserveCheckout={/^\/checkout\/?$/.test(location.pathname)} />
     </div>
   );
 }
