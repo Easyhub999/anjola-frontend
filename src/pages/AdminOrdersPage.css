@@ -241,3 +241,34 @@
 @media (prefers-reduced-motion: reduce) { .ao-drawer, .ao-spin { animation: none; } .ao-page button, .ao-overlay button { transition: none; } }
 
 .ao-manual-payment{background:#faf7f2;padding:18px;border-radius:12px;margin-top:18px}.ao-manual-payment label{display:block;font-size:13px;margin:12px 0}.ao-manual-payment select,.ao-manual-payment input{display:block;width:100%;border:1px solid #ddd;padding:10px;border-radius:8px;margin-top:6px}.ao-manual-payment p{font-size:13px;line-height:1.5}.ao-workspace-heading{gap:12px;flex-wrap:wrap}.ao-workspace-heading>div{margin-right:auto}
+
+.ao-email-alert { display: flex; align-items: center; gap: 14px; margin: 0 0 20px; padding: 18px 20px; border: 1px solid #e8cfac; border-radius: 12px; background: #fff8ec; color: #714d25; }
+.ao-email-alert > svg { flex-shrink: 0; }
+.ao-email-alert p { flex: 1; margin: 0; font-size: 13px; line-height: 1.5; }
+.ao-email-alert p span { display: block; font-size: 12px; }
+.ao-email-intro { font-size: 12px; line-height: 1.6; }
+.ao-email-history { list-style: none; padding: 0; margin: 18px 0; }
+.ao-email-history > li { border-bottom: 1px solid #eee8e0; padding: 14px 0; }
+.ao-email-history > li:last-child { border-bottom: 0; }
+.ao-email-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.ao-email-row > strong { font-size: 13px; }
+.ao-email-status { display: inline-flex; border-radius: 16px; padding: 4px 9px; font-size: 11px; background: #f0ede7; color: #5a564d; }
+.ao-email-status--delivered { background: #eaf2e8; color: #2f642c; }
+.ao-email-status--sent, .ao-email-status--pending, .ao-email-status--sending, .ao-email-status--retry { background: #eaf0f6; color: #365675; }
+.ao-email-status--failed, .ao-email-status--bounced, .ao-email-status--complained, .ao-email-status--suppressed { background: #faeae6; color: #9b3c2a; }
+.ao-email-status--uncertain, .ao-email-status--delayed { background: #fff2d8; color: #785515; }
+.ao-email-history p { margin: 6px 0; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.ao-email-history .ao-secondary { margin-top: 6px; }
+.ao-email-overdue { color: #785515; font-weight: 600; }
+.ao-email-recovery, .ao-email-confirm, .ao-email-preference { padding: 15px; margin-top: 14px; background: #faf7f2; border: 1px solid #eee5da; border-radius: 10px; }
+.ao-emails h4 { font-size: 13px; margin: 0 0 6px; }
+.ao-email-recovery p, .ao-email-confirm p, .ao-email-preference p { font-size: 12px; margin: 6px 0 12px; line-height: 1.6; }
+.ao-email-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ao-email-preference label { display: flex; gap: 9px; align-items: center; font-size: 13px; }
+.ao-email-preference input { accent-color: #714d25; }
+@media (max-width: 600px) {
+  .ao-email-alert { align-items: flex-start; flex-wrap: wrap; gap: 10px; }
+  .ao-email-alert > button { margin-left: 30px; }
+  .ao-emails .ao-section-heading { flex-wrap: wrap; }
+  .ao-email-actions > button { width: 100%; }
+}

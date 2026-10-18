@@ -270,6 +270,36 @@ export const productsAPI = {
 // ==========================================
 
 export const ordersAPI = {
+  getOrderNotifications: async (id, token, options = {}) => {
+    const response = await fetch(`${API_URL}/orders/${id}/notifications`, {
+      headers: { Authorization: `Bearer ${token}` }, signal: options.signal
+    });
+    return handleResponse(response);
+  },
+
+  retryNotification: async (id, notificationId, token) => {
+    const response = await fetch(`${API_URL}/orders/${id}/notifications/${notificationId}/retry`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` }
+    });
+    return handleResponse(response);
+  },
+
+  sendOrderNotification: async (id, type, token) => {
+    const response = await fetch(`${API_URL}/orders/${id}/notifications`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ type })
+    });
+    return handleResponse(response);
+  },
+
+  updateNotificationPreferences: async (id, enabled, token) => {
+    const response = await fetch(`${API_URL}/orders/${id}/notifications/preferences`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ enabled })
+    });
+    return handleResponse(response);
+  },
+
   recordPayment: async (id, payment, token) => {
     const response = await fetch(`${API_URL}/orders/${id}/record-payment`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payment) });
     return handleResponse(response);

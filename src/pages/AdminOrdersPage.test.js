@@ -3,18 +3,20 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import AdminOrdersPage from './AdminOrdersPage';
 import { ordersAPI } from '../api';
 
-jest.mock('../api', () => ({ ordersAPI: { getAllOrders: jest.fn(), updateOrderStatus: jest.fn(), recordPayment: jest.fn() } }));
+jest.mock('../api', () => ({ ordersAPI: { getAllOrders: jest.fn(), updateOrderStatus: jest.fn(), recordPayment: jest.fn(), getOrderNotifications: jest.fn(), retryNotification: jest.fn(), sendOrderNotification: jest.fn(), updateNotificationPreferences: jest.fn() } }));
 const admin = { role: 'admin', token: 'test-token' };
 const order = { _id: 'order1', orderNumber: 'ANJ-101', status: 'processing', paymentStatus: 'paid', totalAmount: 12000,
   stockDeducted: true, createdAt: '2026-10-14T12:00:00Z', customerInfo: { fullName: 'Ada Williams', email: 'ada@example.test', address: '12 Example Street', city: 'Lagos', state: 'Lagos', phone: '08000000000' },
   items: [{ name: 'Tote bag', price: 6000, quantity: 2 }] };
 async function openOrder(overrides = {}) {
   ordersAPI.getAllOrders.mockResolvedValueOnce({ data: [{ ...order, ...overrides }] });
+  ordersAPI.getOrderNotifications.mockResolvedValue({ data: overrides.notifications || [] });
   render(<AdminOrdersPage user={admin} />);
-  fireEvent.click(await screen.findByRole('button', { name: 'View order ANJ-101' }));
+  const view = await screen.findByRole('button', { name: 'View order ANJ-101' });
+  await act(async () => { fireEvent.click(view); });
   return screen.getByRole('dialog');
 }
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => { jest.resetAllMocks(); ordersAPI.getOrderNotifications.mockResolvedValue({ data: [] }); });
 afterEach(() => jest.restoreAllMocks());
 
 test('search combines with payment and fulfilment filters, and clear restores newest-first results', async () => {
@@ -69,7 +71,7 @@ test('drawer traps keyboard focus, makes background inert and restores it on clo
   expect(close).toHaveFocus();
   expect(screen.getByRole('main').parentElement).toHaveAttribute('inert');
   fireEvent.keyDown(document, { key: 'Tab', shiftKey: true });
-  expect(within(dialog).getByRole('button', { name: 'Cancel order' })).toHaveFocus();
+  expect(within(dialog).getByRole('button', { name: 'Send payment receipt email' })).toHaveFocus();
   fireEvent.keyDown(document, { key: 'Tab' });
   expect(close).toHaveFocus();
   fireEvent.keyDown(document, { key: 'Escape' });
@@ -164,4 +166,112 @@ test('outside orders show source and record payment through the admin payment en
   await screen.findByText('Payment recorded. Stock updated and order ready to prepare.');
   expect(ordersAPI.recordPayment).toHaveBeenCalledWith('order1', { paymentMethod: 'bank_transfer', paymentReference: '' }, 'test-token');
   expect(screen.queryByRole('button', { name: 'Confirm payment received' })).not.toBeInTheDocument();
+});
+
+test('failed shipping emails are visible and retry without changing fulfilment', async () => {
+  const failed = { id: 'email1', type: 'shipped', status: 'failed', attempts: 2, canRetry: true, lastError: 'Email service temporarily unavailable.' };
+  const initial = { ...order, status: 'shipped', notifications: [failed] };
+  const queued = { ...initial, notifications: [{ ...failed, status: 'pending', canRetry: false }] };
+  ordersAPI.retryNotification.mockResolvedValue({ data: queued });
+  await openOrder(initial);
+  expect(screen.getByText('1 order has emails that need attention.')).toBeInTheDocument();
+  expect(screen.getByText('Email service temporarily unavailable.')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Retry shipping update email' }));
+  expect(await screen.findByText('Email queued. Delivery updates will appear here.')).toBeInTheDocument();
+  expect(ordersAPI.retryNotification).toHaveBeenCalledWith('order1', 'email1', 'test-token');
+  expect(ordersAPI.updateOrderStatus).not.toHaveBeenCalled();
+  expect(screen.getByRole('button', { name: 'Mark as delivered' })).toBeEnabled();
+  expect(screen.queryByRole('button', { name: 'Retry shipping update email' })).not.toBeInTheDocument();
+  expect(screen.queryByText('1 order has emails that need attention.')).not.toBeInTheDocument();
+});
+
+test('provider acceptance is distinct from delivery and accepted emails cannot be resent', async () => {
+  await openOrder({ status: 'shipped', notifications: [
+    { id: 'email1', type: 'shipped', status: 'sent', canRetry: false },
+    { id: 'email2', type: 'payment_confirmation', status: 'delivered', canRetry: false }
+  ] });
+  expect(screen.getByText('Sent · awaiting delivery')).toBeInTheDocument();
+  expect(screen.getByText(/Delivered confirms the customer’s mail server accepted it/)).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /Retry .* email/ })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Send shipping email' })).not.toBeInTheDocument();
+  expect(ordersAPI.sendOrderNotification).not.toHaveBeenCalled();
+});
+
+test('legacy shipping email requires explicit confirmation and prevents duplicate submissions', async () => {
+  let resolve;
+  ordersAPI.sendOrderNotification.mockImplementationOnce(() => new Promise(done => { resolve = done; }));
+  await openOrder({ status: 'shipped' });
+  fireEvent.click(screen.getByRole('button', { name: 'Send shipping email' }));
+  expect(screen.getByText(/An earlier email may already have arrived/)).toBeInTheDocument();
+  expect(ordersAPI.sendOrderNotification).not.toHaveBeenCalled();
+  const submit = screen.getByRole('button', { name: 'Confirm send' });
+  fireEvent.click(submit); fireEvent.click(submit);
+  fireEvent.keyDown(document, { key: 'Escape' });
+  expect(screen.getByRole('dialog')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Close order details' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Mark as delivered' })).toBeDisabled();
+  expect(ordersAPI.sendOrderNotification).toHaveBeenCalledTimes(1);
+  expect(ordersAPI.sendOrderNotification).toHaveBeenCalledWith('order1', 'shipped', 'test-token');
+  await act(async () => resolve({ data: { ...order, status: 'shipped', notifications: [{ id: 'email1', type: 'shipped', status: 'pending', canRetry: false }] } }));
+  expect(screen.getByText('Email queued. Delivery updates will appear here.')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Send shipping email' })).not.toBeInTheDocument();
+});
+
+test('marking shipped truthfully reports an email queued for delivery', async () => {
+  await openOrder();
+  const notifications = [{ id: 'email1', type: 'shipped', status: 'pending', canRetry: false }];
+  ordersAPI.updateOrderStatus.mockResolvedValueOnce({ data: { ...order, status: 'shipped', notifications } });
+  ordersAPI.getOrderNotifications.mockResolvedValue({ data: notifications });
+  fireEvent.click(screen.getByRole('button', { name: 'Mark as shipped' }));
+  expect(await screen.findByText('Order marked as shipped. Customer email queued. Check Customer emails for delivery updates.')).toBeInTheDocument();
+  expect(screen.queryByText('Customer email delivered.')).not.toBeInTheDocument();
+});
+
+test('email attention summary filters orders and includes delayed delivery', async () => {
+  ordersAPI.getAllOrders.mockResolvedValueOnce({ data: [order, { ...order, _id: 'order2', orderNumber: 'ANJ-102', notifications: [{ id: 'email2', type: 'shipped', status: 'delayed', canRetry: false }] }] });
+  render(<AdminOrdersPage user={admin} />);
+  fireEvent.click(await screen.findByRole('button', { name: 'Review emails' }));
+  expect(screen.getByRole('button', { name: 'View order ANJ-102' })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'View order ANJ-101' })).not.toBeInTheDocument();
+  expect(screen.getByText('1 order · Emails needing attention')).toBeInTheDocument();
+});
+
+test('manual email preference is explicitly saved without sending old notifications', async () => {
+  const initial = { ...order, isManualOrder: true, sendCustomerEmail: false, notifications: [{ id: 'email1', type: 'payment_confirmation', status: 'skipped', skipReason: 'Customer emails were turned off.', canRetry: false }] };
+  ordersAPI.updateNotificationPreferences.mockResolvedValue({ data: { ...initial, sendCustomerEmail: true, notifications: [{ ...initial.notifications[0], canRetry: true }] } });
+  await openOrder(initial);
+  expect(screen.getByText('Customer emails were turned off.')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Send payment receipt email' })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByLabelText('Send order updates to the customer'));
+  expect(ordersAPI.updateNotificationPreferences).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button', { name: 'Save email preference' }));
+  expect(await screen.findByText('Email preference saved. Earlier emails have not been sent.')).toBeInTheDocument();
+  expect(ordersAPI.updateNotificationPreferences).toHaveBeenCalledWith('order1', true, 'test-token');
+  expect(ordersAPI.sendOrderNotification).not.toHaveBeenCalled();
+  expect(ordersAPI.retryNotification).not.toHaveBeenCalled();
+  expect(screen.getByRole('button', { name: 'Retry payment receipt email' })).toBeInTheDocument();
+});
+
+test('missing sending and delivery configuration are visible to the admin', async () => {
+  ordersAPI.getAllOrders.mockResolvedValueOnce({ data: [order], notificationHealth: { sendingConfigured: false, deliveryTrackingConfigured: false } });
+  render(<AdminOrdersPage user={admin} />);
+  expect(await screen.findByRole('alert')).toHaveTextContent('Customer email sending needs setup.');
+  expect(screen.getByRole('alert')).toHaveTextContent('Saved emails will stay queued until it is ready.');
+  expect(screen.getByRole('alert')).toHaveTextContent('Delivery tracking needs setup.');
+});
+
+test('the visible order list raises attention when delivery confirmation becomes overdue', async () => {
+  jest.useFakeTimers();
+  jest.setSystemTime(new Date('2026-10-18T12:00:00Z'));
+  ordersAPI.getAllOrders.mockResolvedValueOnce({ data: [{ ...order, notifications: [{ id: 'email1', type: 'shipped', status: 'sent', sentAt: '2026-10-18T11:30:30Z', canRetry: false }] }] });
+  const view = render(<AdminOrdersPage user={admin} />);
+  try {
+    await act(async () => {});
+    expect(screen.queryByRole('button', { name: 'Review emails' })).not.toBeInTheDocument();
+    await act(async () => { jest.advanceTimersByTime(60000); });
+    expect(screen.getByText('1 order has emails that need attention.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Review emails' }));
+    expect(screen.getByRole('button', { name: 'View order ANJ-101' })).toBeInTheDocument();
+    expect(ordersAPI.getAllOrders).toHaveBeenCalledTimes(1);
+  } finally { view.unmount(); jest.useRealTimers(); }
 });

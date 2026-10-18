@@ -30,13 +30,23 @@ test('paid gift order records payment details and email choice', async () => {
   ordersAPI.createManualOrder.mockResolvedValue({ orderNumber: 'MAN-2' });
   render(<ManualOrderPage user={admin} products={[product]} />); fill();
   fireEvent.change(screen.getByLabelText('Email (optional)'),{ target:{ value:'ada@example.com' } });
-  fireEvent.click(screen.getByLabelText('Email confirmation to the customer'));
+  expect(screen.getByLabelText('Send order updates to the customer')).toBeChecked();
   fireEvent.click(screen.getByLabelText(/Gift packaging/));
   fireEvent.change(screen.getByLabelText('Payment status'),{ target:{ value:'paid' } });
   fireEvent.change(screen.getByLabelText('Payment reference (optional)'),{ target:{ value:'bank-123' } });
   fireEvent.click(screen.getByRole('button',{ name:'Create order' }));
   await screen.findByText('Ready for the next step.');
   await waitFor(() => expect(ordersAPI.createManualOrder).toHaveBeenCalledWith(expect.objectContaining({ totalAmount:4700, paymentStatus:'paid', paymentMethod:'bank_transfer', paymentReference:'bank-123', sendCustomerEmail:true }), 'test-token'));
+});
+
+test('customer can be explicitly excluded from all manual order email updates', async () => {
+  ordersAPI.createManualOrder.mockResolvedValue({ orderNumber: 'MAN-3' });
+  render(<ManualOrderPage user={admin} products={[product]} />); fill();
+  fireEvent.change(screen.getByLabelText('Email (optional)'), { target: { value: 'ada@example.com' } });
+  fireEvent.click(screen.getByLabelText('Send order updates to the customer'));
+  fireEvent.click(screen.getByRole('button', { name: 'Create order' }));
+  await screen.findByText('Ready for the next step.');
+  expect(ordersAPI.createManualOrder).toHaveBeenCalledWith(expect.objectContaining({ sendCustomerEmail: false }), 'test-token');
 });
 
 
