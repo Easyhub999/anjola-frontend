@@ -39,7 +39,7 @@ test('direct product responses contain matching metadata, prices, photo and the 
   const res = response();
   await handler(request(), res);
   assert.equal(res.statusCode, 200);
-  assert.equal(calledUrl, `https://anjola-backend.onrender.com/api/products/${id}`);
+  assert.equal(calledUrl, `https://anjola-backend-1.onrender.com/api/products/${id}`);
   assert.ok(calledOptions.signal instanceof AbortSignal);
   assert.equal(calledOptions.headers.Accept, 'application/json');
   assert.match(res.body, /<title>Rose travel cup \| Anjola Aesthetics Ng<\/title>/);
@@ -109,7 +109,7 @@ test('public product paths override incoming query IDs while literal API request
     const res = response();
     await handler({ method: 'GET', url, query: { id: anotherId } }, res);
     assert.equal(res.statusCode, 200);
-    assert.equal(fetched, `https://anjola-backend.onrender.com/api/products/${id}`);
+    assert.equal(fetched, `https://anjola-backend-1.onrender.com/api/products/${id}`);
     assert.equal(jsonLd(res.body).sku, id);
   }
   for (const url of ['/product/bad-id', '/product/%ZZ', '/product/bad/extra', '/unrelated']) {

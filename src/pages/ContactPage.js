@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Mail, MapPin, Phone, Instagram, Facebook, Check, Send } from "lucide-react";
+import backendConfig from "../backendConfig.json";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
@@ -10,7 +11,7 @@ const ContactPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch("https://anjola-backend-1.onrender.com/api/contact", {
+      const response = await fetch(`${backendConfig.apiUrl}/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

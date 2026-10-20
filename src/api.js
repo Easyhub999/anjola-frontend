@@ -1,8 +1,10 @@
+import backendConfig from './backendConfig.json';
+
 // ==========================================
 // API BASE URL
 // ==========================================
 
-const API_URL = "https://anjola-backend.onrender.com/api";
+const API_URL = backendConfig.apiUrl;
 
 // ==========================================
 // Helper: Handle API Responses
